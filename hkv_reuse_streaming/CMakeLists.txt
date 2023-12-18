@@ -1,4 +1,30 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR) #< This version is bundled with MSVC 2019.
+
+set(open_source_root "${CMAKE_SOURCE_DIR}")
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+include(cmake/find_python.cmake)
+find_package(PythonInterp)
+
+include(cmake/open_source/defaults.cmake)
+include(cmake/customization_package.cmake)
+include(cmake/default_target.cmake)
+
+set(targetDevice ${default_target_device} CACHE STRING
+    "Target device. For the list see cmake/toolchains.")
+if(NOT clangDir STREQUAL "")
+    set(ENV{CLANG_DIR} ${clangDir})
+endif()
+include(cmake/open_source/toolchain_detection.cmake)
+include(cmake/option.cmake)
+nx_option(developerBuild
+    "Disable this option for production builds"
+    ON)
+
+include(cmake/dependencies.cmake)
+find_package(OpenSSL REQUIRED)
+include(cmake/qt_utils.cmake)
 
 project(hkv_reuse_streaming VERSION 0.1 LANGUAGES CXX)
 
@@ -16,6 +42,7 @@ qt_add_qml_module(hkv_reuse_streaming
     URI hkv_reuse_streaming
     VERSION 1.0
     QML_FILES Main.qml
+    SOURCES mainwindow.cpp mainwindow.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -30,8 +57,10 @@ set_target_properties(hkv_reuse_streaming PROPERTIES
 )
 
 target_link_libraries(hkv_reuse_streaming
-    PRIVATE Qt6::Quick
+    PRIVATE
+        Qt6::Quick
 )
+
 
 include(GNUInstallDirs)
 install(TARGETS hkv_reuse_streaming
