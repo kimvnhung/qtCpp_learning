@@ -43,19 +43,19 @@ include(cmake/ninja_tool.cmake)
 # "AUTO" is used to autodetect the build number from git.
 set(buildNumber "AUTO" CACHE STRING "Build number")
 include(cmake/vcs_helpers.cmake)
-if(buildNumber STREQUAL "AUTO")
-    nx_vcs_get_info(
-        CHANGESET changeSet BRANCH branch CURRENT_REFS currentRefs BUILD_NUMBER buildNumber
-    )
-    if(buildNumber STREQUAL "0")
-        message(WARNING "ATTENTION: No compatible Server version found. Setting buildNumber to 0.")
-    endif()
-else()
-    nx_vcs_get_info(CHANGESET changeSet BRANCH branch CURRENT_REFS currentRefs)
-endif()
-if(NOT changeSet OR NOT branch OR NOT currentRefs)
-    message(FATAL_ERROR "VCS info cannot be read.")
-endif()
+# if(buildNumber STREQUAL "AUTO")
+#     nx_vcs_get_info(
+#         CHANGESET changeSet BRANCH branch CURRENT_REFS currentRefs BUILD_NUMBER buildNumber
+#     )
+#     if(buildNumber STREQUAL "0")
+#         message(WARNING "ATTENTION: No compatible Server version found. Setting buildNumber to 0.")
+#     endif()
+# else()
+#     nx_vcs_get_info(CHANGESET changeSet BRANCH branch CURRENT_REFS currentRefs)
+# endif()
+# if(NOT changeSet OR NOT branch OR NOT currentRefs)
+#     message(FATAL_ERROR "VCS info cannot be read.")
+# endif()
 
 include(cmake/versions/release_version.cmake)
 
@@ -64,11 +64,15 @@ set(conanNxRemote http://artifactory.nxvms.dev/artifactory/api/conan/conan
 )
 include(cmake/conan_dependencies.cmake)
 
-project(vms_opensource VERSION ${releaseVersion})
+project(nxopen_env VERSION "5.1.1")
 
 include(cmake/versions/meta_version.cmake)
 include(cmake/versions/nx_sdk_version.cmake)
 include(cmake/versions/vms_protocol_version.cmake)
+
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+
+message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_BINARY_DIR}
@@ -98,12 +102,16 @@ include(generate_open_source_config)
 include(project_utils)
 include(test_utils)
 
-add_subdirectory(cloud)
-add_subdirectory(dependencies)
-add_subdirectory(libs)
+# add_subdirectory(cloud)
+# add_subdirectory(dependencies)
+# add_subdirectory(libs)
 
 include(cmake/distribution/common.cmake)
-add_subdirectory(vms)
+
+## Add project here
+# add_subdirectory(vms)
+
+add_subdirectory(hkv_reuse_streaming)
 
 if(WINDOWS)
     include(windows_utils)
