@@ -44,7 +44,7 @@ set(
         resourcecontainer.h
 )
 
-add_executable(${PROJECT_NAME} ${COMMON_SOURCE})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Include the necessary directories
 target_include_directories(${PROJECT_NAME} PRIVATE
