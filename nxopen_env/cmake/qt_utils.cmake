@@ -25,6 +25,9 @@ find_package(QT NAMES Qt6 Qt5
         Concurrent
         Multimedia
         Qml
+        Quick
+        QuickWidgets
+        Widgets
 )
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
@@ -37,4 +40,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
         Concurrent
         Multimedia
         Qml
+        Quick
+        QuickWidgets
+        Widgets
 )

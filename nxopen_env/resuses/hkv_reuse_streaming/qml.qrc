@@ -2,8 +2,8 @@
 
 <!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource>
-        <file>main.qml</file>
+    <qresource prefix="">
         <!-- Add more QML files as needed -->
+        <file>qml/main.qml</file>
     </qresource>
 </RCC>

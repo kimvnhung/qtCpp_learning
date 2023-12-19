@@ -2,20 +2,24 @@
 #define MAINWINDOW_H
 
 #include <QtCore/QScopedPointer>
-
+#include <QtGui>
+#include <QtWidgets/QMainWindow>
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QGraphicsScene>
 
-#include <QBoxLayout>
-#include <QGraphicsView>
+#include <QtWidgets/QBoxLayout>
+#include <QtWidgets/QGraphicsView>
+#include <QtWidgets/QGraphicsScene>
 
 class MainWindow : public QWidget
 {
     Q_OBJECT
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
-    virtual ~MainWindow() override;
+    ~MainWindow();
+signals:
+    void testSignal();
 private:
     QScopedPointer<QGraphicsScene> m_scene;
     QScopedPointer<QGraphicsView> m_view;
