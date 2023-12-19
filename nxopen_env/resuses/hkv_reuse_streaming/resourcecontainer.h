@@ -3,8 +3,6 @@
 
 #include <QGraphicsItem>
 #include <QRandomGenerator>
-#include <QObject>
-
 class ResourceContainer : public QGraphicsItem
 {
 public:

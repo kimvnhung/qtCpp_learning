@@ -10,6 +10,8 @@ find_package(Qt5
         Widgets
         Qml
         Quick
+        Gui
+        Core
     REQUIRED
 )
 
@@ -27,24 +29,29 @@ set(
         resourcecontainer.h
 )
 
-set(QML_FILES
+set(
+    QML_FILES
     main.qml
 )
 
 # Create an executable target
-add_executable(hkv_reuse_streaming ${SOURCES} ${HEADERS})
+add_executable(hkv_reuse_streaming ${SOURCES} ${HEADERS} ${QML_FILES})
 
 # Link the target with the Qt5 libraries
 target_link_libraries(hkv_reuse_streaming 
-    PRIVATE 
-        Qt5::Quick
+    PRIVATE
         Qt5::Widgets
         Qt5::Qml
+        Qt5::Quick
+        Qt5::Gui
+        Qt5::Core
 )
 
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR : " ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Include directories for headers
-target_include_directories(YourQt5Project PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+# target_include_directories(hkv_reuse_streaming PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Set the QML files as resources
 # qt5_add_resources(QML_RESOURCES qml.qrc)
-target_sources(YourQt5Project PRIVATE ${QML_RESOURCES})
+# target_sources(hkv_reuse_streaming PRIVATE ${QML_RESOURCES})

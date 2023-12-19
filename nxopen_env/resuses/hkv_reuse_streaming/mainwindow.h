@@ -16,7 +16,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     virtual ~MainWindow() override;
-signals:
 private:
     QScopedPointer<QGraphicsScene> m_scene;
     QScopedPointer<QGraphicsView> m_view;
