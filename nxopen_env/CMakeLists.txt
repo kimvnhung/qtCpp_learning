@@ -111,7 +111,7 @@ include(cmake/distribution/common.cmake)
 ## Add project here
 # add_subdirectory(vms)
 
-add_subdirectory(hkv_reuse_streaming)
+add_subdirectory(resuses)
 
 if(WINDOWS)
     include(windows_utils)

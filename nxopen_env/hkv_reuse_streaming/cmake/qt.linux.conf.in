@@ -1,3 +1,0 @@
-[Paths]
-Prefix = ${qt_prefix}
-LibraryExecutables = ${qt_libexec}

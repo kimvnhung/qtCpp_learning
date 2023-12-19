@@ -26,3 +26,4 @@ find_package(Qt5
         Multimedia
         Qml
 )
+
