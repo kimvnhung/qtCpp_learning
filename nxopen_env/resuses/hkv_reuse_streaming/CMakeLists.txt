@@ -1,57 +1,75 @@
-# Set the minimum required CMake version
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR) #< This version is bundled with MSVC 2019.
 
-# Set the project name
-project(hkv_reuse_streaming)
+project(hkv_reuse_streaming VERSION 0.1 LANGUAGES CXX)
 
-# Find the Qt5 package
-find_package(Qt5
-    COMPONENTS
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(QT_DEFAULT_MAJOR_VERSION 6)
+
+message(STATUS "QT_DEFAULT_MAJOR_VERSION : " ${QT_DEFAULT_MAJOR_VERSION})
+message(STATUS "QT_VERSION_MAJOR : " ${QT_VERSION_MAJOR})
+
+find_package(Qt6 COMPONENTS
+        Core
+        Gui
         Widgets
         Qml
         Quick
-        Gui
-        Core
-    REQUIRED
+        QuickWidgets
 )
 
-# Add your source files
-set(
-    SOURCES
-        main.cpp
-        mainwindow.cpp
-        resourcecontainer.cpp
+
+
+qt_standard_project_setup()
+
+qt_add_executable(hkv_reuse_streaming
+    main.cpp
 )
 
-set(
-    HEADERS
-        mainwindow.h
-        resourcecontainer.h
+qt6_policy(
+    SET QTP0001 NEW
 )
 
-set(
+qt_add_qml_module(hkv_reuse_streaming
+    URI
+        hkv_reuse_streaming
+    VERSION
+        1.0
     QML_FILES
-    main.qml
+        main.qml
+    SOURCES
+        mainwindow.cpp mainwindow.h
+        resourcecontainer.h resourcecontainer.cpp
 )
 
-# Create an executable target
-add_executable(hkv_reuse_streaming ${SOURCES} ${HEADERS} ${QML_FILES})
+# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+# If you are developing for iOS or macOS you should consider setting an
+# explicit, fixed bundle identifier manually though.
+set_target_properties(hkv_reuse_streaming PROPERTIES
+#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.hkv_reuse_streaming
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
 
-# Link the target with the Qt5 libraries
-target_link_libraries(hkv_reuse_streaming 
+target_link_libraries(hkv_reuse_streaming
     PRIVATE
-        Qt5::Widgets
-        Qt5::Qml
-        Qt5::Quick
-        Qt5::Gui
-        Qt5::Core
+        Qt6::Quick
+    PUBLIC
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
+        Qt6::Qml
+        Qt6::Quick
+        Qt6::QuickWidgets
+
 )
 
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR : " ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Include directories for headers
-# target_include_directories(hkv_reuse_streaming PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Set the QML files as resources
-# qt5_add_resources(QML_RESOURCES qml.qrc)
-# target_sources(hkv_reuse_streaming PRIVATE ${QML_RESOURCES})
+include(GNUInstallDirs)
+install(TARGETS hkv_reuse_streaming
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

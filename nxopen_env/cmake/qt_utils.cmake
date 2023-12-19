@@ -14,7 +14,7 @@ endif()
 
 find_package(OpenSSL REQUIRED)
 
-find_package(Qt5
+find_package(QT NAMES Qt6 Qt5
     COMPONENTS
         LinguistTools
         Core
@@ -27,3 +27,14 @@ find_package(Qt5
         Qml
 )
 
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
+        LinguistTools
+        Core
+        Gui
+        Network
+        Xml
+        Sql
+        Concurrent
+        Multimedia
+        Qml
+)
