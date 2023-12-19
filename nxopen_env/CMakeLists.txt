@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR) #< This version is bundled wi
 
 set(open_source_root "${CMAKE_SOURCE_DIR}")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER AutoMoc)
 
 include(cmake/find_python.cmake)
 find_package(PythonInterp)
