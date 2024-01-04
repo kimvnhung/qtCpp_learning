@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "rtspclient.h"
+
+#include <QLabel>
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QMutex>
@@ -19,14 +22,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+public slots:
+    void onFrameAvailable(uint8_t *frame);
 private:
     Ui::MainWindow *ui;
     static int NUM_PLAYER;
-    QMutex mutex;
-
-    QList<QVideoWidget*> videoWidgets;
-    QList<QMediaPlayer*> mediaPlayers;
+    QLabel *showImage = nullptr;
+    RtspClient *rtspClient = nullptr;
     QThread *backgroundThread = nullptr;
 };
 #endif // MAINWINDOW_H

@@ -14,76 +14,39 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     backgroundThread = new QThread;
+
     ui->setupUi(this);
 
     // Alterando o titulo do QMainWindow
     setWindowTitle("Test RTSP with QMediaPlayer");
 
-    // Criando 4 QVideoWidget
-    for (int i = 0; i < NUM_PLAYER; i++) {
-        QVideoWidget *videoWidget = new QVideoWidget(this);
-        mutex.lock();
-        videoWidgets.append(videoWidget);
-        mutex.unlock();
-    }
-
-    // Criando 4 QMediaPlayer
-    for (int i = 0; i < NUM_PLAYER; i++) {
-        QMediaPlayer *player = new QMediaPlayer(this);
-        mutex.lock();
-        mediaPlayers.append(player);
-        mutex.unlock();
-    }
-
-    // Criando um QGridLayout de 4x4
     QGridLayout *layout = new QGridLayout;
-    int maxColumnCount = qSqrt(NUM_PLAYER);
-    for (int row = 0; row < maxColumnCount; row++) {
-        for(int column = 0; column < maxColumnCount;column++){
-            mutex.lock();
-            layout->addWidget(videoWidgets.at(row*maxColumnCount+column),row,column,1,1);
-            mutex.unlock();
-        }
-    }
 
-    int count = layout->count();
+    QLabel *titleLable = new QLabel(this);
+    titleLable->setText("Demonstrate add QLabel OK");
+    showImage = new QLabel(this);
+    showImage->setText("Initialized");
+    layout->addWidget(titleLable,0,3);
+    layout->addWidget(showImage,1,0,5,6);
 
     // Cria um QWudget que irá receber o layout com os VideoWidgets
     QWidget *win = new QWidget();
     win->setLayout(layout);
     setCentralWidget(win);
 
-    const QUrl url1 = QUrl("rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
-    // QMediaPlayer -> QVideoWidget
-    for (int row = 0; row < maxColumnCount; row++) {
-        for(int column = 0; column < maxColumnCount;column++){
-            mutex.lock();
-            mediaPlayers.at(row*maxColumnCount+column)->setVideoOutput(videoWidgets.at(row*maxColumnCount+column));
-            mediaPlayers.at(row*maxColumnCount+column)->setSource(url1);
-            mutex.unlock();
-        }
-    }
-
-
-    // Links de RTSP e Videos
-
-    // const QUrl url2 = QUrl("rtsp://admin:admin@192.168.1.1/22");
-    // const QUrl url3 = QUrl("rtsp://192.168.1.2/1/stream1");
-    // const QUrl url4 = QUrl("rtsp://192.168.1.3/1/stream");
-
-    // O NetworkRequest para os links
-    // Adicionandos os links para o conteudo
-
-    for (int i = 0; i < NUM_PLAYER; i++) {
-        mutex.lock();
-        connect(backgroundThread,&QThread::started,mediaPlayers.at(i),&QMediaPlayer::play,Qt::QueuedConnection);
-        connect(backgroundThread,&QThread::finished,mediaPlayers.at(i),&QMediaPlayer::stop);
-        mediaPlayers.at(i)->moveToThread(backgroundThread);
-        mutex.unlock();
-    }
-
+    // const QUrl url1 = QUrl("rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
+    rtspClient = new RtspClient(nullptr,"rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
+    connect(backgroundThread, &QThread::started, rtspClient, &RtspClient::startOpenRtsp);
+    connect(backgroundThread, &QThread::finished, rtspClient, &RtspClient::stopStream);
 
     backgroundThread->start();
+}
+
+void MainWindow::onFrameAvailable(uint8_t *frame)
+{
+    qDebug()<<__FUNCTION__<<__LINE__;
+    QImage image((uchar*)frame,100,100);
+    showImage->setPixmap(QPixmap::fromImage(image));
 }
 
 MainWindow::~MainWindow()

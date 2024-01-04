@@ -34,10 +34,12 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # Find all .cpp files in the source directory
 set(
     PROJECT_SOURCES
-        "main.cpp"
-        "mainwindow.cpp"
-        "mainwindow.h"
-        "mainwindow.ui"
+        main.cpp
+        mainwindow.cpp
+        mainwindow.h
+        mainwindow.ui
+        rtspclient.h
+        rtspclient.cpp
 )
 
 # Print the list of source files (optional)
@@ -52,7 +54,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(rtsp_client_demo
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET rtsp_client_demo APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
