@@ -26,15 +26,27 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
         MultimediaWidgets
 )
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        videowidgetgenerator.h
-        videowidgetgenerator.cpp
+# Set the source directory to the root directory containing CMakeLists.txt
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Set the include directory
+
+# Find all .cpp files in the source directory
+set(
+    PROJECT_SOURCES
+        "main.cpp"
+        "mainwindow.cpp"
+        "mainwindow.h"
+        "mainwindow.ui"
 )
+
+# Print the list of source files (optional)
+# message("Source Files: ${SOURCE_FILES}")
+message("Include Dir: ${INCLUDE_DIRS}")
+
+# Add the include directory
+
+add_subdirectory(live555)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(rtsp_client_demo
@@ -60,7 +72,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(rtsp_client_demo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::MultimediaWidgets)
+target_link_libraries(rtsp_client_demo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::MultimediaWidgets live555)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
