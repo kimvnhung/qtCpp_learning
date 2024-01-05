@@ -45,8 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::onFrameAvailable(uint8_t *frame)
 {
     qDebug()<<__FUNCTION__<<__LINE__;
-    QImage image((uchar*)frame,100,100);
-    showImage->setPixmap(QPixmap::fromImage(image));
+    // QImage image((uchar*)frame,100,100,QImage::Format::);
+    // showImage->setPixmap(QPixmap::fromImage(image));
 }
 
 MainWindow::~MainWindow()

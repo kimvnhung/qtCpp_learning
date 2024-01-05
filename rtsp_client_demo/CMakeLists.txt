@@ -49,6 +49,7 @@ message("Include Dir: ${INCLUDE_DIRS}")
 # Add the include directory
 
 add_subdirectory(live555)
+add_subdirectory(libde265)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(rtsp_client_demo
