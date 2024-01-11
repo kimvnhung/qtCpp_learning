@@ -10,9 +10,9 @@ class ImageWindow : public QOpenGLWidget
 public:
     explicit ImageWindow(QWidget *parent = nullptr);
 
-    // virtual void initializeGL();
-    // virtual void paintGL();
-    // virtual void resizeGL( int width, int heigh);
+    virtual void initializeGL();
+    virtual void paintGL();
+    virtual void resizeGL( int width, int heigh);
 };
 
 #endif // IMAGEWINDOW_H
