@@ -40,6 +40,16 @@ set(
         mainwindow.ui
         rtspclient.h
         rtspclient.cpp
+        streamclientstate.h
+        streamclientstate.cpp
+        dummysink.h
+        dummysink.cpp
+        ourrtspclient.h
+        ourrtspclient.cpp
+        videodecoder.h
+        videodecoder.cpp
+        videowidget.h
+        videowidget.cpp
 )
 
 # Print the list of source files (optional)
@@ -74,7 +84,20 @@ else()
     endif()
 endif()
 
-target_link_libraries(rtsp_client_demo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::MultimediaWidgets live555)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libde265)
+
+target_link_libraries(rtsp_client_demo
+    PRIVATE
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+        live555
+        de265
+)
+
+include_directories(${libde265_BINARY_DIR})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
