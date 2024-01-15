@@ -1,3 +1,4 @@
+#include "framedecoder.h"
 #include "rtspclientmanager.h"
 #include "rtspconsumefunction.h"
 
@@ -27,7 +28,12 @@ RtspClientManager::RtspClientManager(QObject *parent) :
     m_decoderPool = new QThreadPool;
     m_decoderPool->setMaxThreadCount(8);
 
-    m_frameQueue = new FrameQueue(this,20);
+    m_frameQueue = new FrameQueue(this,2);
+
+    FrameDecoder *decoder = new FrameDecoder(NULL,m_frameQueue);
+    connect(decoder, &FrameDecoder::decodeDone,this,&RtspClientManager::frameAvailable);
+
+    m_decoderPool->start(decoder);
 }
 
 RtspClientManager::~RtspClientManager()
@@ -49,6 +55,7 @@ Handle RtspClientManager::addClient(const QString &url)
 char eventLoopWatchVariable = 0;
 void RtspClientManager::run()
 {
+
     while (true) {
         if(d->mUrl.size() != 0){
             break;
@@ -58,9 +65,16 @@ void RtspClientManager::run()
     d->env->taskScheduler().doEventLoop(&eventLoopWatchVariable);
 }
 
-void RtspClientManager::onFrameAvailable(const char* frame)
+void RtspClientManager::onFrameAvailable(const char* frame,int dataSize)
 {
-    qDebug()<<"onFrameAvailable";
+    qDebug()<<"onFrameAvailable dataSize : "<<dataSize;
+    if(m_frameQueue->isFull()){
+        // m_frameQueue->waitForNotFull();
+        return;
+    }
+    m_frameQueue->addFrame(Frame{
+        frame,dataSize,0
+    });
 }
 
 // RtspClient* RtspClientManager::getClient(Handle handleId)

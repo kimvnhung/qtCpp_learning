@@ -8,6 +8,7 @@ typedef qint32 Handle;
 struct Frame
 {
     const char* data;
+    int dataSize;
     Handle m_handle;
 };
 

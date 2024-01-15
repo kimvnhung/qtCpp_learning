@@ -24,7 +24,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 public slots:
-    void onFrameAvailable(Handle handleId,QImage frame);
+    void onFrameAvailable(Handle handleId,QImage *frame);
 private:
     Ui::MainWindow *ui;
     static int NUM_PLAYER;

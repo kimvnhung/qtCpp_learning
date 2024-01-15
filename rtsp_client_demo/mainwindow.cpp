@@ -42,12 +42,12 @@ MainWindow::MainWindow(QWidget *parent) :
     m_rtspClientManager->start();
 }
 
-void MainWindow::onFrameAvailable(Handle handleId,QImage frame)
+void MainWindow::onFrameAvailable(Handle handleId,QImage *frame)
 {
     qDebug()<<__FUNCTION__<<__LINE__;
     VideoWidget *label = m_players.value(handleId,nullptr);
     if(label != nullptr){
-        label->setImage(&frame);
+        label->setImage(frame);
     }
 }
 

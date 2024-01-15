@@ -1,6 +1,7 @@
 #include "dummysink.h"
 
 #include <QDateTime>
+#include <QFile>
 #include <QSaveFile>
 
 // Implementation of "DummySink":
@@ -39,9 +40,16 @@ void DummySink::afterGettingFrame(void* clientData, unsigned frameSize, unsigned
 void DummySink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
                                   struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
     if(listener != NULL){
-        listener->onFrameAvailable(reinterpret_cast<const char*>(fReceiveBuffer));
+        listener->onFrameAvailable(reinterpret_cast<const char*>(fReceiveBuffer),frameSize);
     }
 
+    if(QString(fSubsession.mediumName()) == "video"){
+        QString randomName = "videoFrame_1.bin";
+        QFile file(randomName);
+        file.open(QIODevice::WriteOnly|QIODevice::Append);
+        file.write(QByteArray(reinterpret_cast<const char*>(fReceiveBuffer)));
+        file.close();
+    }
 
     // We've just received a frame of data.  (Optionally) print out information about it:
 #ifdef DEBUG_PRINT_EACH_RECEIVED_FRAME

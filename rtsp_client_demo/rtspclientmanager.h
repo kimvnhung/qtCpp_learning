@@ -18,12 +18,12 @@ public:
     ~RtspClientManager();
 
     void run() override;
-    void onFrameAvailable(const char* frame) override;
+    void onFrameAvailable(const char* frame,int dataSize) override;
 
     Handle addClient(const QString &url);
     // RtspClient* getClient(Handle handleId);
 signals:
-    void frameAvailable(Handle handleId, QImage image);
+    void frameAvailable(Handle handleId, QImage *image);
 private:
     class Private;
     QScopedPointer<Private> d;

@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "videoplayer.h"
 
 #include <iostream>
 
@@ -23,4 +24,19 @@ int main(int argc, char *argv[])
     else { w.show(); }
 
     return a.exec();
+
+    // if (argc != 2) {
+    //     fprintf(stderr,"usage: sherlock265 videofile.bin\n");
+    //     fprintf(stderr,"The video file must be a raw h.265 bitstream (e.g. HM-10.0 output)\n");
+    //     exit(5);
+    // }
+
+
+    // QApplication app(argc, argv);
+
+    // VideoPlayer videoPlayer("D:\\Codes\\qtCpp_learning\\rtsp_client_demo\\libde265\\testdata\\girlshy.h265");
+    // videoPlayer.show();
+
+    // return app.exec();
+
 }

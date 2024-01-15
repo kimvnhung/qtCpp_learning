@@ -1,6 +1,0 @@
-# CMake generation dependency list for this directory.
-C:/Users/HUNGKV/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.24/Modules/BasicConfigVersion-ExactVersion.cmake.in
-C:/Users/HUNGKV/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.24/Modules/CMakePackageConfigHelpers.cmake
-C:/Users/HUNGKV/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.24/Modules/WriteBasicConfigVersionFile.cmake
-D:/Codes/libde265/libde265.pc.in
-D:/Codes/libde265/libde265/CMakeLists.txt

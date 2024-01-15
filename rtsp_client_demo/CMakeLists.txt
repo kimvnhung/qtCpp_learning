@@ -54,6 +54,13 @@ set(
         rtspclientimpl.h
         rtspclientimpl.cpp
         framelistener.h
+        framedecoder.h
+        framedecoder.cpp
+
+        videodecoder.h
+        videodecoder.cpp
+        videoplayer.h
+        videoplayer.cpp
 )
 
 # Print the list of source files (optional)
