@@ -9,12 +9,14 @@
 #include <QThreadPool>
 #include "common.h"
 
-class RtspClientManager : public QObject
+class RtspClientManager : public QThread
 {
     Q_OBJECT
 public:
     explicit RtspClientManager(QObject *parent = nullptr);
     ~RtspClientManager();
+
+    void run() override;
 
     Handle addClient(const QString &url);
     // RtspClient* getClient(Handle handleId);
@@ -29,7 +31,6 @@ private:
     QThreadPool *m_clientPool;
     QThreadPool *m_decoderPool;
     FrameQueue *m_frameQueue;
-
 
     Handle generateHandle();
 };

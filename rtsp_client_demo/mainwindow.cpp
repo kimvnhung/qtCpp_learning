@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     win->setLayout(layout);
     setCentralWidget(win);
 
+    m_rtspClientManager->start();
 }
 
 void MainWindow::onFrameAvailable(Handle handleId,QImage frame)

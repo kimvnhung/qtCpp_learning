@@ -15,11 +15,13 @@ public:
     }
 
     UsageEnvironment* env;
+    QString mUrl;
 };
 
 
 RtspClientManager::RtspClientManager(QObject *parent) :
-    QObject{parent}
+    QThread{parent},
+    d(new Private())
 {
     m_decoderPool = new QThreadPool;
     m_decoderPool->setMaxThreadCount(8);
@@ -35,12 +37,24 @@ RtspClientManager::~RtspClientManager()
     }
 }
 
+char eventLoopWatchVariable = 0;
 Handle RtspClientManager::addClient(const QString &url)
 {
 
     Handle handleId = generateHandle();
-    openURL(*d->env,QString("RtspClient_%1").arg(handleId).toStdString().c_str(),url.toStdString().c_str());
+    d->mUrl = url;
     return handleId;
+}
+
+void RtspClientManager::run()
+{
+    while (true) {
+        if(d->mUrl.size() != 0){
+            break;
+        }
+    }
+    openURL(*d->env,QString("RtspClient_%1").arg(1).toStdString().c_str(),d->mUrl.toStdString().c_str());
+    d->env->taskScheduler().doEventLoop(&eventLoopWatchVariable);
 }
 
 // RtspClient* RtspClientManager::getClient(Handle handleId)
