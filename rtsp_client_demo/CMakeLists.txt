@@ -38,18 +38,21 @@ set(
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        rtspclient.h
-        rtspclient.cpp
         streamclientstate.h
         streamclientstate.cpp
         dummysink.h
         dummysink.cpp
-        ourrtspclient.h
-        ourrtspclient.cpp
-        videodecoder.h
-        videodecoder.cpp
         videowidget.h
         videowidget.cpp
+        rtspclientmanager.h
+        rtspclientmanager.cpp
+        framequeue.h
+        framequeue.cpp
+        common.h
+        rtspconsumefunction.h
+        rtspconsumefunction.cpp
+        rtspclientimpl.h
+        rtspclientimpl.cpp
 )
 
 # Print the list of source files (optional)

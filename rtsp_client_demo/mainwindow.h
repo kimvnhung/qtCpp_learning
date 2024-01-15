@@ -1,7 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "rtspclient.h"
+#include "rtspclientmanager.h"
+#include "videowidget.h"
 
 #include <QLabel>
 #include <QMainWindow>
@@ -23,12 +24,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 public slots:
-    void onFrameAvailable(uint8_t *frame);
+    void onFrameAvailable(Handle handleId,QImage frame);
 private:
     Ui::MainWindow *ui;
     static int NUM_PLAYER;
-    QLabel *showImage = nullptr;
-    RtspClient *rtspClient = nullptr;
-    QThread *backgroundThread = nullptr;
+    RtspClientManager *m_rtspClientManager;
+    QMap<Handle,VideoWidget*> m_players;
 };
 #endif // MAINWINDOW_H

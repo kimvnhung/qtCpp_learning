@@ -1,16 +1,18 @@
-#include "ourrtspclient.h"
+#include "rtspclientimpl.h"
+
+#include <UsageEnvironment.hh>
 
 // Implementation of "ourRTSPClient":
 
-ourRTSPClient* ourRTSPClient::createNew(UsageEnvironment& env, char const* rtspURL,
+RTSPClientImpl* RTSPClientImpl::createNew(UsageEnvironment& env, char const* rtspURL,
                                         int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum) {
-    return new ourRTSPClient(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
+    return new RTSPClientImpl(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
 }
 
-ourRTSPClient::ourRTSPClient(UsageEnvironment& env, char const* rtspURL,
+RTSPClientImpl::RTSPClientImpl(UsageEnvironment& env, char const* rtspURL,
                              int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum)
     : RTSPClient(env,rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum, -1) {
 }
 
-ourRTSPClient::~ourRTSPClient() {
+RTSPClientImpl::~RTSPClientImpl() {
 }

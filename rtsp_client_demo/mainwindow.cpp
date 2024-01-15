@@ -7,13 +7,16 @@
 #include <QNetworkRequest>
 #include <QThread>
 
+
 int MainWindow::NUM_PLAYER = 16;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    backgroundThread = new QThread;
+
+    m_rtspClientManager = new RtspClientManager;
+    connect(m_rtspClientManager,&RtspClientManager::frameAvailable,this, &MainWindow::onFrameAvailable);
 
     ui->setupUi(this);
 
@@ -24,39 +27,31 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QLabel *titleLable = new QLabel(this);
     titleLable->setText("Demonstrate add QLabel OK");
-    showImage = new QLabel(this);
-    showImage->setText("Initialized");
-    layout->addWidget(titleLable,0,3);
-    layout->addWidget(showImage,1,0,5,6);
+    VideoWidget *videoWidget = new VideoWidget(this);
+    layout->addWidget(videoWidget);
+
+    Handle handleID = m_rtspClientManager->addClient("rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
+
+    m_players.insert(handleID,videoWidget);
 
     // Cria um QWudget que irá receber o layout com os VideoWidgets
     QWidget *win = new QWidget();
     win->setLayout(layout);
     setCentralWidget(win);
 
-    // const QUrl url1 = QUrl("rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
-    rtspClient = new RtspClient(nullptr,"rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
-    connect(backgroundThread, &QThread::started, rtspClient, &RtspClient::startOpenRtsp);
-    connect(backgroundThread, &QThread::finished, rtspClient, &RtspClient::stopStream);
-
-    backgroundThread->start();
 }
 
-void MainWindow::onFrameAvailable(uint8_t *frame)
+void MainWindow::onFrameAvailable(Handle handleId,QImage frame)
 {
     qDebug()<<__FUNCTION__<<__LINE__;
-    // QImage image((uchar*)frame,100,100,QImage::Format::);
-    // showImage->setPixmap(QPixmap::fromImage(image));
+    VideoWidget *label = m_players.value(handleId,nullptr);
+    if(label != nullptr){
+        label->setImage(&frame);
+    }
 }
 
 MainWindow::~MainWindow()
 {
-    if(backgroundThread != nullptr){
-        if(backgroundThread->isRunning()){
-            backgroundThread->quit();
-        }
-        backgroundThread->deleteLater();
-        backgroundThread = nullptr;
-    }
+
     delete ui;
 }
