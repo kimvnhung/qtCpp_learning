@@ -1,6 +1,7 @@
 #ifndef RTSPCLIENTIMPL_H
 #define RTSPCLIENTIMPL_H
 
+#include "framelistener.h"
 #include "streamclientstate.h"
 
 #include <RTSPClient.hh>
@@ -16,15 +17,17 @@ public:
     static RTSPClientImpl* createNew(UsageEnvironment& env, char const* rtspURL,
                                     int verbosityLevel = 0,
                                     char const* applicationName = NULL,
-                                    portNumBits tunnelOverHTTPPortNum = 0);
+                                    portNumBits tunnelOverHTTPPortNum = 0,
+                                    FrameListener *listener = NULL);
 
 protected:
     RTSPClientImpl(UsageEnvironment& env, char const* rtspURL,
-                  int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum);
+                  int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum,FrameListener *listener);
     // called only by createNew();
     virtual ~RTSPClientImpl();
 
 public:
     StreamClientState scs;
+    FrameListener *listener;
 };
 #endif // RTSPCLIENTIMPL_H

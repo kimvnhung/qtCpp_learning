@@ -19,14 +19,14 @@ void usage(UsageEnvironment& env, char const* progName) {
     env << "\t(where each <rtsp-url-i> is a \"rtsp://\" URL)\n";
 }
 
-#define RTSP_CLIENT_VERBOSITY_LEVEL 1 // by default, print verbose output from each "RTSPClient"
+#define RTSP_CLIENT_VERBOSITY_LEVEL 0 // by default, print verbose output from each "RTSPClient"
 
 static unsigned rtspClientCount = 0; // Counts how many streams (i.e., "RTSPClient"s) are currently in use.
 
-void openURL(UsageEnvironment& env, char const* progName, char const* rtspURL) {
+void openURL(UsageEnvironment& env, char const* progName, char const* rtspURL, FrameListener *listener) {
     // Begin by creating a "RTSPClient" object.  Note that there is a separate "RTSPClient" object for each stream that we wish
     // to receive (even if more than stream uses the same "rtsp://" URL).
-    RTSPClient* rtspClient = RTSPClientImpl::createNew(env, rtspURL, RTSP_CLIENT_VERBOSITY_LEVEL, progName);
+    RTSPClient* rtspClient = RTSPClientImpl::createNew(env, rtspURL, RTSP_CLIENT_VERBOSITY_LEVEL, progName,0,listener);
     if (rtspClient == NULL) {
         env << "Failed to create a RTSP client for URL \"" << rtspURL << "\": " << env.getResultMsg() << "\n";
         return;
@@ -140,7 +140,7 @@ void continueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* resultStri
         // (This will prepare the data sink to receive data; the actual flow of data from the client won't start happening until later,
         // after we've sent a RTSP "PLAY" command.)
 
-        scs.subsession->sink = DummySink::createNew(env, *scs.subsession, rtspClient->url());
+        scs.subsession->sink = DummySink::createNew(env, *scs.subsession, rtspClient->url(),((RTSPClientImpl*)rtspClient)->listener);
             // perhaps use your own custom "MediaSink" subclass instead
         if (scs.subsession->sink == NULL) {
             env << *rtspClient << "Failed to create a data sink for the \"" << *scs.subsession

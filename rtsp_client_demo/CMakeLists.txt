@@ -53,6 +53,7 @@ set(
         rtspconsumefunction.cpp
         rtspclientimpl.h
         rtspclientimpl.cpp
+        framelistener.h
 )
 
 # Print the list of source files (optional)

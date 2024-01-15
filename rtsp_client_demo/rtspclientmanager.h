@@ -1,6 +1,7 @@
 #ifndef RTSPCLIENTMANAGER_H
 #define RTSPCLIENTMANAGER_H
 
+#include "framelistener.h"
 #include "framequeue.h"
 
 #include <QMap>
@@ -9,7 +10,7 @@
 #include <QThreadPool>
 #include "common.h"
 
-class RtspClientManager : public QThread
+class RtspClientManager : public QThread, protected FrameListener
 {
     Q_OBJECT
 public:
@@ -17,6 +18,7 @@ public:
     ~RtspClientManager();
 
     void run() override;
+    void onFrameAvailable(const char* frame) override;
 
     Handle addClient(const QString &url);
     // RtspClient* getClient(Handle handleId);

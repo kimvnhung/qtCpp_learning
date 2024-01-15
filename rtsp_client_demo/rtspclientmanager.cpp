@@ -4,6 +4,7 @@
 #include <BasicUsageEnvironment.hh>
 #include <QImage>
 #include <QUrl>
+#include <QDebug>
 #include <UsageEnvironment.hh>
 
 class RtspClientManager::Private{
@@ -37,7 +38,6 @@ RtspClientManager::~RtspClientManager()
     }
 }
 
-char eventLoopWatchVariable = 0;
 Handle RtspClientManager::addClient(const QString &url)
 {
 
@@ -46,6 +46,7 @@ Handle RtspClientManager::addClient(const QString &url)
     return handleId;
 }
 
+char eventLoopWatchVariable = 0;
 void RtspClientManager::run()
 {
     while (true) {
@@ -53,8 +54,13 @@ void RtspClientManager::run()
             break;
         }
     }
-    openURL(*d->env,QString("RtspClient_%1").arg(1).toStdString().c_str(),d->mUrl.toStdString().c_str());
+    openURL(*d->env,QString("RtspClient_%1").arg(1).toStdString().c_str(),d->mUrl.toStdString().c_str(),this);
     d->env->taskScheduler().doEventLoop(&eventLoopWatchVariable);
+}
+
+void RtspClientManager::onFrameAvailable(const char* frame)
+{
+    qDebug()<<"onFrameAvailable";
 }
 
 // RtspClient* RtspClientManager::getClient(Handle handleId)

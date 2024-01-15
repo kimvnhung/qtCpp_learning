@@ -9,13 +9,15 @@
 // Define the size of the buffer that we'll use:
 #define DUMMY_SINK_RECEIVE_BUFFER_SIZE 100000
 
-DummySink* DummySink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId) {
-    return new DummySink(env, subsession, streamId);
+DummySink* DummySink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, FrameListener *listener) {
+    return new DummySink(env, subsession, streamId,listener);
 }
 
-DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId)
+DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, FrameListener *listener)
     : MediaSink(env),
-    fSubsession(subsession) {
+    fSubsession(subsession),
+    listener(listener)
+{
     fStreamId = strDup(streamId);
     fReceiveBuffer = new u_int8_t[DUMMY_SINK_RECEIVE_BUFFER_SIZE];
 }
@@ -36,11 +38,9 @@ void DummySink::afterGettingFrame(void* clientData, unsigned frameSize, unsigned
 
 void DummySink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
                                   struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
-    QString randomName = "videoFrame_"+QString::number(QDateTime::currentMSecsSinceEpoch())+".bin";
-    QSaveFile file(randomName);
-    file.open(QIODevice::WriteOnly);
-    file.write(QByteArray(reinterpret_cast<const char*>(fReceiveBuffer)));
-    file.commit();
+    if(listener != NULL){
+        listener->onFrameAvailable(reinterpret_cast<const char*>(fReceiveBuffer));
+    }
 
 
     // We've just received a frame of data.  (Optionally) print out information about it:
