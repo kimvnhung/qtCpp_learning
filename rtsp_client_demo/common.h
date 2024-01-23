@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+
 typedef qint32 Handle;
 
 struct Frame

@@ -163,6 +163,10 @@ set(headers
     include/ourMD5.hh
     include/uLawAudioFilter.hh
 )
+
+# set_property(SOURCE ${headers} PROPERTY SKIP_AUTOMOC ON)
+# set_property(SOURCE ${headers} PROPERTY SKIP_AUTOUIC ON)
+
 add_library(liveMedia ${live555_library_type}
     ${headers}
     AC3AudioFileServerMediaSubsession.cpp

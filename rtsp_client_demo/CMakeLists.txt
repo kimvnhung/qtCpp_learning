@@ -26,6 +26,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
         MultimediaWidgets
 )
 
+if (LINUX)
+    find_library(AVCODEC_LIBRARY avcodec)
+else()
+    set(
+        LIB_AVCODEC_INCLUDE_DIR
+            ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/include
+    )
+endif()
+
 # Set the source directory to the root directory containing CMakeLists.txt
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -61,6 +70,7 @@ set(
         videodecoder.cpp
         videoplayer.h
         videoplayer.cpp
+
 )
 
 # Print the list of source files (optional)
@@ -97,16 +107,44 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libde265)
 
-target_link_libraries(rtsp_client_demo
-    PRIVATE
-        Qt${QT_VERSION_MAJOR}::Widgets
-        Qt${QT_VERSION_MAJOR}::Core
-        Qt${QT_VERSION_MAJOR}::Gui
-        Qt${QT_VERSION_MAJOR}::Network
-        Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-        live555
-        de265
-)
+if(LINUX)
+    target_link_libraries(rtsp_client_demo
+        PRIVATE
+            Qt${QT_VERSION_MAJOR}::Widgets
+            Qt${QT_VERSION_MAJOR}::Core
+            Qt${QT_VERSION_MAJOR}::Gui
+            Qt${QT_VERSION_MAJOR}::Network
+            Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+            live555
+            de265
+            AVCODEC_LIBRARY
+    )
+else()
+    # Include the include directory
+    target_include_directories(rtsp_client_demo PRIVATE ${LIB_AVCODEC_INCLUDE_DIR})
+
+
+    # Copy all DLL files to the build directory during the build process
+    file(GLOB DLL_FILES "${DLL_DIR}/*.dll")
+    foreach(DLL_FILE ${DLL_FILES})
+        configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
+    endforeach()
+
+    # Link against the DLL (assuming Windows)
+    target_link_libraries(rtsp_client_demo
+        PRIVATE
+            Qt${QT_VERSION_MAJOR}::Widgets
+            Qt${QT_VERSION_MAJOR}::Core
+            Qt${QT_VERSION_MAJOR}::Gui
+            Qt${QT_VERSION_MAJOR}::Network
+            Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+            live555
+            de265
+            DLL_FILES
+    )
+endif()
+
+
 
 include_directories(${libde265_BINARY_DIR})
 
