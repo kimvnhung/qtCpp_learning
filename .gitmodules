@@ -1,0 +1,6 @@
+[submodule "rtsp-client-ffmpeg-opencv/fmt"]
+	path = rtsp-client-ffmpeg-opencv/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "rtsp-client-ffmpeg-opencv/glog"]
+	path = rtsp-client-ffmpeg-opencv/glog
+	url = https://github.com/google/glog.git

@@ -5,7 +5,12 @@
 #include <QPainter>
 #include <QImage>
 #include "mediadecoder.h"
-#include "fmt/format.h"
+#include <fmt/format.h>
+#include <mutex>
+
+extern "C" {
+#include <libavcodec/avcodec.h>
+}
 
 class VideoPlayer : public QWidget {
     Q_OBJECT
