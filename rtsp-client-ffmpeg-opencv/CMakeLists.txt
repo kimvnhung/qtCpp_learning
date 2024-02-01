@@ -21,8 +21,8 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 add_executable(rtsp-client-ffmpeg-opencv
   main.cpp
-  mediadecoder.h mediadecoder.cpp
-  videoplayer.h videoplayer.cpp
+
+
   defer.h
   # logger.h
 )
