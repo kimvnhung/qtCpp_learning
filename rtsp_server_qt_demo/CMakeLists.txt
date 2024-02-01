@@ -16,10 +16,13 @@ add_executable(rtsp_server_qt_demo
   main.cpp
 )
 if(WIN32)
-    set(LIB_AVCODEC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/include)
+    set(FFMPEG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg)
+    set(FFMPEG_INCLUDE ${FFMPEG_DIR}/include)
+    set(FFMPEG_DLL ${FFMPEG_DIR}/bin)
+    set(FFMPEG_LIB ${FFMPEG_DIR}/lib)
 
     # Include the include directory
-    target_include_directories(rtsp_server_qt_demo PRIVATE ${LIB_AVCODEC_INCLUDE_DIR})
+    target_include_directories(rtsp_server_qt_demo PRIVATE ${FFMPEG_INCLUDE})
 
 
     # Copy all DLL files to the build directory during the build process
@@ -28,11 +31,13 @@ if(WIN32)
         configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
     endforeach()
 
+    file(GLOB FFMPEG_LIBS "${FFMPEG_LIB}/*.lib")
+
     # Link against the DLL (assuming Windows)
     target_link_libraries(rtsp_server_qt_demo
         PRIVATE
             Qt${QT_VERSION_MAJOR}::Core
-            DLL_FILES
+            ${FFMPEG_LIBS}
     )
 endif()
 
