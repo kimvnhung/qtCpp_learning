@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(rtsp_server_qt_demo LANGUAGES CXX)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+
+add_executable(rtsp_server_qt_demo
+  main.cpp
+)
+if(WIN32)
+    set(LIB_AVCODEC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/include)
+
+    # Include the include directory
+    target_include_directories(rtsp_server_qt_demo PRIVATE ${LIB_AVCODEC_INCLUDE_DIR})
+
+
+    # Copy all DLL files to the build directory during the build process
+    file(GLOB DLL_FILES "${DLL_DIR}/*.dll")
+    foreach(DLL_FILE ${DLL_FILES})
+        configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
+    endforeach()
+
+    # Link against the DLL (assuming Windows)
+    target_link_libraries(rtsp_server_qt_demo
+        PRIVATE
+            Qt${QT_VERSION_MAJOR}::Core
+            DLL_FILES
+    )
+endif()
+
+
+include(GNUInstallDirs)
+install(TARGETS rtsp_server_qt_demo
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
