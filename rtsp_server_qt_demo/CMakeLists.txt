@@ -14,7 +14,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 add_executable(rtsp_server_qt_demo
   main.cpp
+  announceURL.hh
+  announceURL.cpp
 )
+add_subdirectory(live555)
+
 if(WIN32)
     set(FFMPEG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg)
     set(FFMPEG_INCLUDE ${FFMPEG_DIR}/include)
@@ -37,9 +41,11 @@ if(WIN32)
     target_link_libraries(rtsp_server_qt_demo
         PRIVATE
             Qt${QT_VERSION_MAJOR}::Core
+            live555
             ${FFMPEG_LIBS}
     )
 endif()
+
 
 
 include(GNUInstallDirs)
