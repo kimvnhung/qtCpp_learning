@@ -71,6 +71,9 @@ set(
         videoplayer.h
         videoplayer.cpp
 
+        customModule/module_function.h
+        customModule/rtspclient.h
+        customModule/rtspclient.cpp
 )
 
 # Print the list of source files (optional)
@@ -81,7 +84,11 @@ message("Include Dir: ${INCLUDE_DIRS}")
 
 add_subdirectory(live555)
 add_subdirectory(libde265)
-add_subdirectory(customModule)
+# add_subdirectory(customModule)
+
+# set(
+#     CUSTOM_MODULE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR/customModule/include}"
+# )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(rtsp_client_demo
@@ -141,6 +148,8 @@ else()
             Qt${QT_VERSION_MAJOR}::MultimediaWidgets
             live555
             de265
+        # PUBLIC
+        #     rtsp_module
             # DLL_FILES
     )
 endif()
@@ -148,6 +157,7 @@ endif()
 
 
 include_directories(${libde265_BINARY_DIR})
+# include_directories(${CUSTOM_MODULE_INCLUDE})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
