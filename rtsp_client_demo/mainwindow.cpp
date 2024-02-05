@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     VideoWidget *videoWidget = new VideoWidget(this);
     layout->addWidget(videoWidget);
 
-    Handle handleID = m_rtspClientManager->addClient("rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&profile=vaom");
+    Handle handleID = m_rtspClientManager->addClient("rtsp://192.168.1.42:8554/h264ESVideoTest");
 
     m_players.insert(handleID,videoWidget);
 

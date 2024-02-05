@@ -81,6 +81,7 @@ message("Include Dir: ${INCLUDE_DIRS}")
 
 add_subdirectory(live555)
 add_subdirectory(libde265)
+add_subdirectory(customModule)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(rtsp_client_demo
@@ -140,7 +141,7 @@ else()
             Qt${QT_VERSION_MAJOR}::MultimediaWidgets
             live555
             de265
-            DLL_FILES
+            # DLL_FILES
     )
 endif()
 
