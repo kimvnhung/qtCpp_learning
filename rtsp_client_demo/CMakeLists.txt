@@ -26,14 +26,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
         MultimediaWidgets
 )
 
-if (LINUX)
-    find_library(AVCODEC_LIBRARY avcodec)
-else()
-    set(
-        LIB_AVCODEC_INCLUDE_DIR
-            ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/include
-    )
-endif()
+
+set(
+    LIB_AVCODEC_INCLUDE_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/include
+)
 
 # Set the source directory to the root directory containing CMakeLists.txt
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -71,9 +68,9 @@ set(
         videoplayer.h
         videoplayer.cpp
 
-        customModule/module_function.h
-        customModule/rtspclient.h
-        customModule/rtspclient.cpp
+        # customModule/module_function.h
+        # customModule/rtspclient.h
+        # customModule/rtspclient.cpp
 )
 
 # Print the list of source files (optional)
@@ -84,11 +81,15 @@ message("Include Dir: ${INCLUDE_DIRS}")
 
 add_subdirectory(live555)
 add_subdirectory(libde265)
-# add_subdirectory(customModule)
+set(
+    LIB_DE265_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/libde265
+)
 
-# set(
-#     CUSTOM_MODULE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR/customModule/include}"
-# )
+add_subdirectory(rtsp_module)
+
+set(
+    CUSTOM_MODULE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(rtsp_client_demo
@@ -113,51 +114,31 @@ else()
     endif()
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libde265)
-
-if(LINUX)
-    target_link_libraries(rtsp_client_demo
-        PRIVATE
-            Qt${QT_VERSION_MAJOR}::Widgets
-            Qt${QT_VERSION_MAJOR}::Core
-            Qt${QT_VERSION_MAJOR}::Gui
-            Qt${QT_VERSION_MAJOR}::Network
-            Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-            live555
-            de265
-            AVCODEC_LIBRARY
-    )
-else()
-    # Include the include directory
-    target_include_directories(rtsp_client_demo PRIVATE ${LIB_AVCODEC_INCLUDE_DIR})
-
-
-    # Copy all DLL files to the build directory during the build process
-    file(GLOB DLL_FILES "${DLL_DIR}/*.dll")
-    foreach(DLL_FILE ${DLL_FILES})
-        configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
-    endforeach()
-
-    # Link against the DLL (assuming Windows)
-    target_link_libraries(rtsp_client_demo
-        PRIVATE
-            Qt${QT_VERSION_MAJOR}::Widgets
-            Qt${QT_VERSION_MAJOR}::Core
-            Qt${QT_VERSION_MAJOR}::Gui
-            Qt${QT_VERSION_MAJOR}::Network
-            Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-            live555
-            de265
-        # PUBLIC
-        #     rtsp_module
-            # DLL_FILES
-    )
-endif()
 
 
 
-include_directories(${libde265_BINARY_DIR})
-# include_directories(${CUSTOM_MODULE_INCLUDE})
+# Copy all DLL files to the build directory during the build process
+file(GLOB DLL_FILES "${DLL_DIR}/*.dll")
+foreach(DLL_FILE ${DLL_FILES})
+    configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
+endforeach()
+
+# Include the include directory
+target_include_directories(rtsp_client_demo PRIVATE ${LIB_AVCODEC_INCLUDE_DIR} ${CUSTOM_MODULE_INCLUDE} ${LIB_DE265_INCLUDE} ${libde265_BINARY_DIR})
+
+
+# Link against the DLL (assuming Windows)
+target_link_libraries(rtsp_client_demo
+    PRIVATE
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+        live555
+        de265
+        rtsp_module
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

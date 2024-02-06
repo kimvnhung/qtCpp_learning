@@ -17,7 +17,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <iostream>
 
-#include "customModule/module_function.h"
+#include "module_function.h"
 
 int main(int argc, char *argv[])
 {
