@@ -3,6 +3,7 @@
 
 #include <QString>
 
+
 class RtspCommand
 {
 public:
@@ -18,21 +19,25 @@ public:
         SET_PARAMETER = 9
     };
 
-    enum Result {
-        OK = 200,
-        NOT_FOUND = 404,
-        UNKNOWN = -1
-    };
+    struct Result
+    {
+        enum ResultCode {
+            OK = 200,
+            NOT_FOUND = 404,
+            SESSION_NOT_FOUND = 454,
+            UNKNOWN = 0
+        };
 
-    static RtspCommand
-    createNew(Command cmd,QString url, int CSeq);
+        ResultCode code;
+        QString data;
+    };
 
     static Result
     extractResult(QString response);
 
-    QString getEntireMessage();
-private:
-    RtspCommand(Command &cmd,QString url, int CSeq);
+    virtual QString getEntireMessage();
+protected:
+    RtspCommand(Command cmd,QString url, int CSeq);
     Command m_cmd;
     QString m_url;
     int m_CSeq;

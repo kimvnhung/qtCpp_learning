@@ -2,6 +2,7 @@
 #define RTSPCLIENT_H
 
 #include "rtspcommand.h"
+#include "sdpparser.h"
 
 #include <QObject>
 #include <QTcpSocket>
@@ -21,8 +22,9 @@ private:
     QUrl m_url;
     QTcpSocket *m_sessionSocket = NULL;
     int m_CSeq = 1;
+    Sdp m_sdp;
 
-    void sendCommand(RtspCommand::Command cmd);
+    void sendCommand(RtspCommand cmd);
     bool reopen();
 
 private slots:

@@ -14,13 +14,16 @@ RtspCommand::Result RtspCommand::extractResult(QString response)
 {
     qDebug()<<__FUNCTION__<<__LINE__<<response;
     QStringList lines = response.split("\r\n");
-    if(lines.length() > 0 && lines[0] == "RTSP/1.0 200 OK"){
-        return OK;
+    if(lines.length() > 0){
+        QStringList codeExtracts = lines[0].split(" ");
+        if(codeExtracts.length() >= 3){
+            return Result{(Result::ResultCode)codeExtracts[1].toInt(),response};
+        }
     }
-    return UNKNOWN;
+    return Result{Result::UNKNOWN,response};
 }
 
-RtspCommand::RtspCommand(Command &cmd, QString url,int Cseq) :
+RtspCommand::RtspCommand(Command cmd, QString url,int Cseq) :
     m_cmd(cmd),
     m_url(url),
     m_CSeq(Cseq)
@@ -28,22 +31,5 @@ RtspCommand::RtspCommand(Command &cmd, QString url,int Cseq) :
 
 }
 
-QString RtspCommand::getEntireMessage()
-{
-    switch (m_cmd) {
-    case OPTIONS:
-        return QString("OPTIONS %1 RTSP/1.0\r\nCSeq: %2\r\nUser-Agent: %3\r\n\r\n").arg(m_url).arg(m_CSeq).arg(USER_AGENT);
-    case DESCRIBE:
-        return QString("DESCRIBE %1 RTSP/1.0\r\nCSeq: %2\r\nUser-Agent: %3\r\nAccept: application/sdp\r\n\r\n").arg(m_url).arg(m_CSeq).arg(USER_AGENT);
-    case SETUP:
-        return QString("SETUP %1/track1 RTSP/1.0\r\nCSeq: %2\r\nUser-Agent: %3\r\nTransport: RTP/AVP;unicast;client_port=62176-62177\r\n\r\n").arg(m_url).arg(m_CSeq).arg(USER_AGENT);
-    case PLAY:
-        return QString("PLAY %1 RTSP/1.0\r\nCSeq: %2\r\nUser-Agent: %3\r\nSession: E899678F\r\nRange: npt=0.000-\r\n\r\n").arg(m_url).arg(m_CSeq).arg(USER_AGENT);
-    case TEARDOWN:
-        return QString("TEARDOWN %1 RTSP/1.0\r\nCSeq: %2\r\nUser-Agent: %3\r\nSession: E899678F").arg(m_url).arg(m_CSeq).arg(USER_AGENT);
-    default:
-        return "";
-    }
-}
 
 
