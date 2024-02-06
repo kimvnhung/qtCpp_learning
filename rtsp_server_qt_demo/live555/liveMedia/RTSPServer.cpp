@@ -356,6 +356,7 @@ RTSPServer::RTSPClientConnection::~RTSPClientConnection() {
 // Handler routines for specific RTSP commands:
 
 void RTSPServer::RTSPClientConnection::handleCmd_OPTIONS() {
+    envir()<<"handleCmd_OPTIONS\n";
   snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
 	   "RTSP/1.0 200 OK\r\nCSeq: %s\r\n%sPublic: %s\r\n\r\n",
 	   fCurrentCSeq, dateHeader(), fOurRTSPServer.allowedCommandNames());
@@ -363,6 +364,7 @@ void RTSPServer::RTSPClientConnection::handleCmd_OPTIONS() {
 
 void RTSPServer::RTSPClientConnection
 ::handleCmd_GET_PARAMETER(char const* /*fullRequestStr*/) {
+    envir()<<"handleCmd_GET_PARAMETER\n";
   // By default, we implement "GET_PARAMETER" (on the entire server) just as a 'no op', and send back a dummy response.
   // (If you want to handle this type of "GET_PARAMETER" differently, you can do so by defining a subclass of "RTSPServer"
   // and "RTSPServer::RTSPClientConnection", and then reimplement this virtual function in your subclass.)
@@ -371,6 +373,7 @@ void RTSPServer::RTSPClientConnection
 
 void RTSPServer::RTSPClientConnection
 ::handleCmd_SET_PARAMETER(char const* /*fullRequestStr*/) {
+    envir()<<"handleCmd_SET_PARAMETER\n";
   // By default, we implement "SET_PARAMETER" (on the entire server) just as a 'no op', and send back an empty response.
   // (If you want to handle this type of "SET_PARAMETER" differently, you can do so by defining a subclass of "RTSPServer"
   // and "RTSPServer::RTSPClientConnection", and then reimplement this virtual function in your subclass.)
@@ -379,7 +382,8 @@ void RTSPServer::RTSPClientConnection
 
 void RTSPServer::RTSPClientConnection
 ::handleCmd_DESCRIBE(char const* urlPreSuffix, char const* urlSuffix, char const* fullRequestStr) {
-  char urlTotalSuffix[2*RTSP_PARAM_STRING_MAX];
+    envir()<<"handleCmd_DESCRIBE\n";
+    char urlTotalSuffix[2*RTSP_PARAM_STRING_MAX];
       // enough space for urlPreSuffix/urlSuffix'\0'
   urlTotalSuffix[0] = '\0';
   if (urlPreSuffix[0] != '\0') {
@@ -506,6 +510,7 @@ void RTSPServer::RTSPClientConnection::handleCmd_redirect(char const* urlSuffix)
 }
 
 void RTSPServer::RTSPClientConnection::handleCmd_notFound() {
+
   setRTSPResponse("404 Stream Not Found");
 }
 
@@ -697,6 +702,8 @@ void RTSPServer::RTSPClientConnection::handleAlternativeRequestByte1(u_int8_t re
 }
 
 void RTSPServer::RTSPClientConnection::handleRequestBytes(int newBytesRead) {
+    envir()<<"handleRequestBytes : "<<newBytesRead<<"\n";
+
   int numBytesRemaining = 0;
   ++fRecursionCount;
   
@@ -810,6 +817,8 @@ void RTSPServer::RTSPClientConnection::handleRequestBytes(int newBytesRead) {
       contentLength = 0;
       parseSucceeded = False;
     }
+    envir()<<"parseSucceeded : "<<parseSucceeded<<"\n";
+    envir()<<"cmdName: "<< cmdName<<"\n";
     if (parseSucceeded) {
 #ifdef DEBUG
       fprintf(stderr, "parseRTSPRequestString() succeeded, returning cmdName \"%s\", urlPreSuffix \"%s\", urlSuffix \"%s\", CSeq \"%s\", Content-Length %u, with %d bytes following the message.\n", cmdName, urlPreSuffix, urlSuffix, cseq, contentLength, ptr + newBytesRead - (tmpPtr + 2));
@@ -1163,6 +1172,7 @@ Boolean RTSPServer::RTSPClientConnection
 
 void RTSPServer::RTSPClientConnection
 ::setRTSPResponse(char const* responseStr) {
+    envir()<<"setRTSPResponse: "<<responseStr<<"\n";
   snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
 	   "RTSP/1.0 %s\r\n"
 	   "CSeq: %s\r\n"
@@ -1174,6 +1184,7 @@ void RTSPServer::RTSPClientConnection
 
 void RTSPServer::RTSPClientConnection
 ::setRTSPResponse(char const* responseStr, u_int32_t sessionId) {
+    envir()<<"setRTSPResponse: "<<responseStr<<sessionId<<"\n";
   snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
 	   "RTSP/1.0 %s\r\n"
 	   "CSeq: %s\r\n"
@@ -1190,6 +1201,7 @@ void RTSPServer::RTSPClientConnection
   if (contentStr == NULL) contentStr = "";
   unsigned const contentLen = strlen(contentStr);
   
+  envir()<<"setRTSPResponse: "<<responseStr<<contentStr<<"\n";
   snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
 	   "RTSP/1.0 %s\r\n"
 	   "CSeq: %s\r\n"
@@ -1207,7 +1219,7 @@ void RTSPServer::RTSPClientConnection
 ::setRTSPResponse(char const* responseStr, u_int32_t sessionId, char const* contentStr) {
   if (contentStr == NULL) contentStr = "";
   unsigned const contentLen = strlen(contentStr);
-  
+  envir()<<"setRTSPResponse: "<<responseStr<<sessionId<<contentStr<<"\n";
   snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
 	   "RTSP/1.0 %s\r\n"
 	   "CSeq: %s\r\n"
@@ -1373,7 +1385,8 @@ static Boolean parsePlayNowHeader(char const* buf) {
 void RTSPServer::RTSPClientSession
 ::handleCmd_SETUP(RTSPServer::RTSPClientConnection* ourClientConnection,
 		  char const* urlPreSuffix, char const* urlSuffix, char const* fullRequestStr) {
-  // Normally, "urlPreSuffix" should be the session (stream) name, and "urlSuffix" should be the subsession (track) name.
+    envir()<<"handleCmd_SETUP\n";
+    // Normally, "urlPreSuffix" should be the session (stream) name, and "urlSuffix" should be the subsession (track) name.
   // However (being "liberal in what we accept"), we also handle 'aggregate' SETUP requests (i.e., without a track name),
   // in the special case where we have only a single track.  I.e., in this case, we also handle:
   //    "urlPreSuffix" is empty and "urlSuffix" is the session (stream) name, or
@@ -1749,6 +1762,7 @@ void RTSPServer::RTSPClientSession
 void RTSPServer::RTSPClientSession
 ::handleCmd_TEARDOWN(RTSPServer::RTSPClientConnection* ourClientConnection,
 		     ServerMediaSubsession* subsession) {
+    envir()<<"handleCmd_TEARDOWN\n";
   unsigned i;
   for (i = 0; i < fNumStreamStates; ++i) {
     if (subsession == NULL /* means: aggregated operation */
@@ -1778,6 +1792,7 @@ void RTSPServer::RTSPClientSession
 void RTSPServer::RTSPClientSession
 ::handleCmd_PLAY(RTSPServer::RTSPClientConnection* ourClientConnection,
 		 ServerMediaSubsession* subsession, char const* fullRequestStr) {
+    envir()<<"handleCmd_PLAY\n";
   char* rtspURL
     = fOurRTSPServer.rtspURL(fOurServerMediaSession, ourClientConnection->fClientInputSocket);
   unsigned rtspURLSize = strlen(rtspURL);

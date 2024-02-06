@@ -21,5 +21,9 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
+    QCoreApplication a(argc, argv);
+
     startRtspClient();
+
+    return a.exec();
 }
