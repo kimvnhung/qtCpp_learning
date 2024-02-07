@@ -24,7 +24,7 @@ private:
     int m_CSeq = 1;
     Sdp m_sdp;
 
-    void sendCommand(RtspCommand cmd);
+    void sendCommand(RtspCommand *cmd);
     bool reopen();
 
 private slots:

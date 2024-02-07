@@ -7,8 +7,11 @@
 class StartupCommand : protected RtspCommand
 {
 public:
-    static RtspCommand
-    createNew()
+    static RtspCommand*
+    createNew(Command cmd,QString url, int CSeq);
+    QString getEntireMessage() override;
+private:
+    StartupCommand(Command cmd, QString url,int CSeq);
 };
 
 #endif // STARTUPCOMMAND_H

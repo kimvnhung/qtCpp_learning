@@ -7,7 +7,7 @@
 class PlayCommand : protected RtspCommand
 {
 public:
-    static RtspCommand
+    static RtspCommand*
     createNew(QString url,int CSeq,QString sessionID);
 
     QString getEntireMessage() override;

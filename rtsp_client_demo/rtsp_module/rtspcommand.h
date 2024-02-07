@@ -35,12 +35,15 @@ public:
     static Result
     extractResult(QString response);
 
-    virtual QString getEntireMessage();
-protected:
     RtspCommand(Command cmd,QString url, int CSeq);
+    virtual ~RtspCommand();
+
+    virtual QString getEntireMessage() = 0;
+protected:
     Command m_cmd;
     QString m_url;
     int m_CSeq;
+    const char* USER_AGENT = "rtsp_client_demo";
 };
 
 #endif // RTSPCOMMAND_H

@@ -1,8 +1,8 @@
 #include "setupcommand.h"
 
-RtspCommand SetupCommand::createNew(QString url,int CSeq, Sdp sdp)
+RtspCommand* SetupCommand::createNew(QString url,int CSeq, Sdp sdp)
 {
-    return SetupCommand(url,CSeq,sdp);
+    return new SetupCommand(url,CSeq,sdp);
 }
 
 SetupCommand::SetupCommand(QString url,int CSeq,Sdp sdp):
@@ -24,7 +24,7 @@ QString SetupCommand::getEntireMessage()
 
 
     return QString("SETUP %1 RTSP/1.0\r\nCSeq: %2\r\nTransport: %3;unicast;client_port=%4-%5\r\n\r\n")
-        .arg(m_url+m_sdp.controlUrl)
+        .arg(m_url+"/"+videoMedia.control)
         .arg(m_CSeq)
         .arg("RTP/AVP")
         .arg(videoMedia.serverPort)

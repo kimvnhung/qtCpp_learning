@@ -1,6 +1,7 @@
 #include "playcommand.h"
 #include "rtspclient.h"
 #include "setupcommand.h"
+#include "startupcommand.h"
 
 RtspClient::RtspClient(QObject *parent)
     : QObject{parent}
@@ -43,13 +44,14 @@ QString RtspClient::getSessionError()
     return m_sessionSocket->errorString();
 }
 
-void RtspClient::sendCommand(RtspCommand cmd)
+void RtspClient::sendCommand(RtspCommand *cmd)
 {
     if(m_sessionSocket->isOpen()){
-        qDebug()<<__FUNCTION__<<"Write : "<<cmd.getEntireMessage();
-        m_sessionSocket->write(cmd.getEntireMessage().toUtf8());
+        qDebug()<<__FUNCTION__<<"Write : "<<cmd->getEntireMessage();
+        m_sessionSocket->write(cmd->getEntireMessage().toUtf8());
         m_sessionSocket->flush();
     }
+    delete cmd;
 }
 
 //slots:
@@ -61,7 +63,7 @@ void RtspClient::onDataReady()
     if(res.code == RtspCommand::Result::OK){
         switch (m_CSeq) {
         case RtspCommand::OPTIONS:
-            sendCommand(RtspCommand::createNew(RtspCommand::DESCRIBE,m_url.toDisplayString(),++m_CSeq));
+            sendCommand(StartupCommand::createNew(RtspCommand::DESCRIBE,m_url.toDisplayString(),++m_CSeq));
             break;
         case RtspCommand::DESCRIBE:
             m_sdp.parse(res.data);
@@ -86,7 +88,7 @@ void RtspClient::onDataReady()
             break;
         }
         default:
-            sendCommand(RtspCommand::createNew(RtspCommand::TEARDOWN,m_url.toDisplayString(),++m_CSeq));
+            sendCommand(StartupCommand::createNew(RtspCommand::TEARDOWN,m_url.toDisplayString(),++m_CSeq));
             break;
         }
 
@@ -104,7 +106,7 @@ void RtspClient::onError(QAbstractSocket::SocketError errCode)
 void RtspClient::onSessionEstablished()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
-    sendCommand(RtspCommand::createNew(RtspCommand::OPTIONS,m_url.toDisplayString(),m_CSeq));
+    sendCommand(StartupCommand::createNew(RtspCommand::OPTIONS,m_url.toDisplayString(),m_CSeq));
 }
 
 void RtspClient::onSessionExpired()

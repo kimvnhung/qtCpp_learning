@@ -8,7 +8,7 @@
 class SetupCommand : protected RtspCommand
 {
 public:
-    static RtspCommand
+    static RtspCommand*
     createNew(QString url, int CSeq,Sdp sdp);
     QString getEntireMessage() override;
 private:

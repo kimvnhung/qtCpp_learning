@@ -1,8 +1,8 @@
 #include "playcommand.h"
 
-RtspCommand PlayCommand::createNew(QString url, int CSeq, QString sessionID)
+RtspCommand* PlayCommand::createNew(QString url, int CSeq, QString sessionID)
 {
-    return PlayCommand(url,CSeq,sessionID);
+    return new PlayCommand(url,CSeq,sessionID);
 }
 
 PlayCommand::PlayCommand(QString url,int CSeq,QString sessionID):
