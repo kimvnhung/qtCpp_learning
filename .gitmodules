@@ -4,3 +4,6 @@
 [submodule "rtsp-client-ffmpeg-opencv/glog"]
 	path = rtsp-client-ffmpeg-opencv/glog
 	url = https://github.com/google/glog.git
+[submodule "rtsp_client_demo/live555"]
+	path = rtsp_client_demo/live555
+	url = https://github.com/melchi45/live555.git
