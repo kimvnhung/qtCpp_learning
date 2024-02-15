@@ -1,58 +1,26 @@
 #include <windows.h>
 #include <iostream>
+#include <vector>
+#include <serial_port_info.h>
+#include <serial_port.h>
+
+using namespace SerialPortUtils;
 
 int main() {
     // Open serial port
-    HANDLE serialPort = CreateFile("COM1", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    // Get all COM port
+    std::vector<SerialPortInfo> comPorts = SerialPort::getSerialPortList();
 
-    if (serialPort == INVALID_HANDLE_VALUE) {
-        std::cerr << "Error opening serial port." << std::endl;
-        return 1;
+    // Print result
+    if (comPorts.size() > 0)
+    {
+        std::cout << "There is " + std::to_string(comPorts.size()) + " port found:" << std::endl;
+        for (int i=0;i<comPorts.size();i++) {
+            std::cout << comPorts[i].friendlyName << std::endl;
+        }
     }
-
-    // Set parameters
-    DCB dcbSerialParams = { 0 };
-    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-
-    if (!GetCommState(serialPort, &dcbSerialParams)) {
-        std::cerr << "Error getting serial port state." << std::endl;
-        CloseHandle(serialPort);
-        return 1;
+    else
+    {
+        std::cout << "There is no any serial port." << std::endl;
     }
-
-    dcbSerialParams.BaudRate = CBR_9600; // Example baud rate
-    dcbSerialParams.ByteSize = 8; // 8 data bits
-    dcbSerialParams.StopBits = ONESTOPBIT; // 1 stop bit
-    dcbSerialParams.Parity = NOPARITY; // No parity
-
-    if (!SetCommState(serialPort, &dcbSerialParams)) {
-        std::cerr << "Error setting serial port state." << std::endl;
-        CloseHandle(serialPort);
-        return 1;
-    }
-
-    // Write to serial port
-    char data[] = "Hello, serial port!";
-    DWORD bytesWritten;
-    if (!WriteFile(serialPort, data, sizeof(data), &bytesWritten, NULL)) {
-        std::cerr << "Error writing to serial port." << std::endl;
-        CloseHandle(serialPort);
-        return 1;
-    }
-
-    // Read from serial port
-    char buffer[256];
-    DWORD bytesRead;
-    if (!ReadFile(serialPort, buffer, sizeof(buffer), &bytesRead, NULL)) {
-        std::cerr << "Error reading from serial port." << std::endl;
-        CloseHandle(serialPort);
-        return 1;
-    }
-
-    std::cout << "Received data: " << buffer << std::endl;
-
-    // Close serial port
-    CloseHandle(serialPort);
-
-    return 0;
 }
