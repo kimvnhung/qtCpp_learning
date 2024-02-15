@@ -7,3 +7,6 @@
 [submodule "rtsp_client_demo/live555"]
 	path = rtsp_client_demo/live555
 	url = https://github.com/melchi45/live555.git
+[submodule "rtsp_server_qt_demo/live555"]
+	path = rtsp_server_qt_demo/live555
+	url = https://github.com/melchi45/live555.git
