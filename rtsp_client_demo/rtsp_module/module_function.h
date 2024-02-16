@@ -2,6 +2,7 @@
 #define MODULE_FUNCTION_H
 
 // #include "rtspclient.h"
+#include "h264_video_streamer.h"
 #include "live555_client.h"
 
 #include <QDebug>
@@ -16,6 +17,11 @@ void startRtspClient(){
     //     qDebug()<<rtspcl->getSessionError();
     // }
     startLive555Client("rtsp://192.168.1.42:8554/h264ESVideoTest");
+}
+
+void testH264VideoStreamer()
+{
+    start();
 }
 
 #endif // MODULE_FUNCTION_H

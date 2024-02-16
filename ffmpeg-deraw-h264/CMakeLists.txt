@@ -42,7 +42,27 @@ else()
     endif()
 endif()
 
-target_link_libraries(ffmpeg-deraw-h264 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+set(
+    FFMPEG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg"
+)
+set(FFMPEG_INCLUDES "${FFMPEG_DIR}/include")
+
+target_include_directories(ffmpeg-deraw-h264
+    PRIVATE
+        ${FFMPEG_INCLUDES}
+)
+
+file(GLOB_RECURSE DLL_FILES "${FFMPEG_DIR}/.*dll")
+foreach(DLL_FILE ${DLL_FILES})
+    configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
+endforeach()
+
+file(GLOB FFMPEG_LIBS "${FFMPEG_DIR}/lib/*.lib")
+target_link_libraries(ffmpeg-deraw-h264
+    PRIVATE
+        Qt${QT_VERSION_MAJOR}::Widgets
+        ${FFMPEG_LIBS}
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

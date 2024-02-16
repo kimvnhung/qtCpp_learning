@@ -25,5 +25,6 @@ target_link_libraries(rtsp_module
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Gui
         live555
 )
