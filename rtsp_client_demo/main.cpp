@@ -1,6 +1,5 @@
 
-
-#include "mainwindow.h"
+#include "module_function.h"
 
 #include <QApplication>
 
@@ -15,9 +14,8 @@ extern "C" {
 }
 
 #include <libavformat/avformat.h>
-#include <iostream>
 
-#include "module_function.h"
+
 
 int main(int argc, char *argv[])
 {
