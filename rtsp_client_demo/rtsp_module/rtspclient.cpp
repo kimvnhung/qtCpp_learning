@@ -78,13 +78,21 @@ void RtspClient::onDataReady()
             // Extract session ID and CSeq
             for (const QString& line : lines) {
                 if (line.startsWith("Session:")) {
-                    QStringList tokens = line.split(' ');
-                    if (tokens.size() >= 2) {
-                        sessionID = tokens[1]; // Extract session ID
+                    QStringList tokens = line.split(';');
+                    if (tokens.size() >= 1) {
+                        QStringList sesions = tokens[0].split(' ');
+                        if (sesions.size() >= 2){
+                            sessionID = sesions[1]; // Extract session ID
+                        }
                     }
                 }
             }
             sendCommand(PlayCommand::createNew(m_url.toDisplayString(),++m_CSeq,sessionID));
+            break;
+        }
+        case RtspCommand::PLAY:
+        {
+
             break;
         }
         default:
