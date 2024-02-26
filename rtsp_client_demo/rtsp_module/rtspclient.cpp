@@ -3,14 +3,22 @@
 #include "setupcommand.h"
 #include "startupcommand.h"
 
+#define DEFAULT_RTP_PORT 554
+
+
+const QByteArray RtspClient::kOptionsCommand = "OPTIONS";
+const QByteArray RtspClient::kDescribeCommand = "DESCRIBE";
+const QByteArray RtspClient::kSetupCommand = "SETUP";
+const QByteArray RtspClient::kPlayCommand = "PLAY";
+const QByteArray RtspClient::kSetParameterCommand = "SET_PARAMETER";
+const QByteArray RtspClient::kGetParameterCommand = "GET_PARAMETER";
+const QByteArray RtspClient::kPauseCommand = "PAUSE";
+const QByteArray RtspClient::kTeardownCommand = "TEARDOWN";
+
 RtspClient::RtspClient(QObject *parent)
     : QObject{parent}
 {
-    m_sessionSocket = new QTcpSocket(this);
-    connect(m_sessionSocket,&QTcpSocket::connected,this,&RtspClient::onSessionEstablished);
-    connect(m_sessionSocket,&QTcpSocket::readyRead,this,&RtspClient::onDataReady);
-    connect(m_sessionSocket,&QTcpSocket::errorOccurred,this, &RtspClient::onError);
-    connect(m_sessionSocket,&QTcpSocket::disconnected,this,&RtspClient::onSessionExpired);
+
 }
 
 RtspClient::~RtspClient()
@@ -18,20 +26,43 @@ RtspClient::~RtspClient()
 
 }
 
-bool RtspClient::open(const QString &url)
+bool RtspClient::isOpened() const
 {
-    if(m_url != url){
-        m_url = url;
-        if(m_sessionSocket->isOpen()){
-            m_sessionSocket->close();
-        }
+    QMutexLocker locker(&m_socketMutex);
+    return m_tcpSock && m_tcpSock->isOpen();
+}
+
+Result RtspClient::open(const QString &url,qint64 startTime)
+{
+    // if(m_url != url){
+    //     m_url = url;
+    //     if(m_tcpSock->isOpen()){
+    //         m_tcpSock->close();
+    //     }
 
 
-        m_sessionSocket->connectToHost(m_url.host(),m_url.port(8554));
-        return m_sessionSocket->waitForConnected();
+    //     m_tcpSock->connectToHost(m_url.host(),m_url.port(8554));
+    //     return m_tcpSock->waitForConnected();
+    // }
+
+    // return false;
+    {
+        QMutexLocker locker(&m_socketMutex);
+        m_tcpSock = new QTcpSocket(this);
+        connect(m_tcpSock,&QTcpSocket::connected,this,&RtspClient::onSessionEstablished);
+        connect(m_tcpSock,&QTcpSocket::readyRead,this,&RtspClient::onDataReady);
+        connect(m_tcpSock,&QTcpSocket::errorOccurred,this, &RtspClient::onError);
+        connect(m_tcpSock,&QTcpSocket::disconnected,this,&RtspClient::onSessionExpired);
     }
 
-    return false;
+    QHostAddress host(QUrl(url).host());
+    m_tcpSock->connectToHost(host,QUrl(url).port(DEFAULT_RTP_PORT));
+    if(isOpened()){
+        auto result = sendOptions();
+        return result;
+    }
+
+    return Result{};
 }
 
 bool RtspClient::reopen()
@@ -41,15 +72,15 @@ bool RtspClient::reopen()
 
 QString RtspClient::getSessionError()
 {
-    return m_sessionSocket->errorString();
+    return m_tcpSock->errorString();
 }
 
 void RtspClient::sendCommand(RtspCommand *cmd)
 {
-    if(m_sessionSocket->isOpen()){
+    if(m_tcpSock->isOpen()){
         qDebug()<<__FUNCTION__<<"Write : "<<cmd->getEntireMessage();
-        m_sessionSocket->write(cmd->getEntireMessage().toUtf8());
-        m_sessionSocket->flush();
+        m_tcpSock->write(cmd->getEntireMessage().toUtf8());
+        m_tcpSock->flush();
     }
     delete cmd;
 }
@@ -58,7 +89,7 @@ void RtspClient::sendCommand(RtspCommand *cmd)
 void RtspClient::onDataReady()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
-    RtspCommand::Result res = RtspCommand::extractResult(m_sessionSocket->readAll());
+    RtspCommand::Result res = RtspCommand::extractResult(m_tcpSock->readAll());
     // m_sessionSocket->close();
     if(res.code == RtspCommand::Result::OK){
         switch (m_CSeq) {
@@ -108,7 +139,7 @@ void RtspClient::onDataReady()
 
 void RtspClient::onError(QAbstractSocket::SocketError errCode)
 {
-    qWarning()<<"Socket error: "<< m_sessionSocket->errorString();
+    qWarning()<<"Socket error: "<< m_tcpSock->errorString();
 }
 
 void RtspClient::onSessionEstablished()

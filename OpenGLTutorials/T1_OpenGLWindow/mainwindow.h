@@ -2,22 +2,21 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QOpenGLWindow>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class MainWindow : public QOpenGLWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow();
     ~MainWindow();
 
+
+    void initializeGL();
+    void resizeGL(int w, int h);
+    void paintGL();
 private:
-    Ui::MainWindow *ui;
+    QTimer *m_timer = NULL;
 };
 #endif // MAINWINDOW_H
