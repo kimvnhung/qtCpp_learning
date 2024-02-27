@@ -13,13 +13,14 @@ GLuint VBO;
 
 void CreateVertexBuffer()
 {
-    QVector3D vertices[2];
-    vertices[0] = QVector3D(0.0f,0.0f,0.0f);
+    QVector3D vertices[3];
+    vertices[0] = QVector3D(-0.5f,0.5f,0.0f);
     vertices[1] = QVector3D(0.5f,0.5f,0.0f);
+    vertices[2] = QVector3D(0.0f,-0.5f,0.0f);
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
-    f->glGenBuffers(2,&VBO);
+    f->glGenBuffers(sizeof(vertices),&VBO);
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
 }
@@ -78,7 +79,7 @@ void MainWindow::paintGL()
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
-    f->glDrawArrays(GL_POINTS,0,2);
+    f->glDrawArrays(GL_TRIANGLES,0,3);
     f->glDisableVertexAttribArray(0);
 }
 
