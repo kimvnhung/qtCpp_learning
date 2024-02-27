@@ -13,12 +13,13 @@ GLuint VBO;
 
 void CreateVertexBuffer()
 {
-    QVector3D vertices[1];
+    QVector3D vertices[2];
     vertices[0] = QVector3D(0.0f,0.0f,0.0f);
+    vertices[1] = QVector3D(0.5f,0.5f,0.0f);
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
-    f->glGenBuffers(1,&VBO);
+    f->glGenBuffers(2,&VBO);
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
 }
@@ -58,9 +59,7 @@ void MainWindow::initializeGL()
 
 
     //
-    f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
+    CreateVertexBuffer();
 
 
 }
@@ -71,21 +70,16 @@ void MainWindow::paintGL()
 {
     // qDebug()<<__FUNCTION__;
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
-    red += 1.f/256.f;
-    green += 1.f/256.f;
-    blue += 1.f/256.f;
-    if(red >= 1)
-        red = 0.f;
 
-    if(green >= 1)
-        green = 0.f;
+    f->glClear(GL_COLOR_BUFFER_BIT);
 
-    if(blue >= 1)
-        blue = 0.f;
 
-    qDebug()<<"red "<<red;
-    f->glClearColor(red, green, blue, 1);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
+    f->glEnableVertexAttribArray(0);
+    f->glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
+    f->glDrawArrays(GL_POINTS,0,2);
+    f->glDisableVertexAttribArray(0);
 }
 
 void MainWindow::resizeGL(int w, int h)
