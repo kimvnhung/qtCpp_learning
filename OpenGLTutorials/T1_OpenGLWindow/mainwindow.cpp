@@ -1,15 +1,43 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QFile>
 #include <QOpenGLExtraFunctions>
 #include <QScreen>
 #include <QStyle>
 #include <QTimer>
 #include <QVector3D>
 
+
 #define FPS 60
 
 GLuint VBO;
+GLint gScaleLocation;
+const char* vsPath = ":/assets/shaders/tutorial4.vert";
+const char* fsPath = ":/assets/shaders/tutorial4.frag";
+
+
+std::string ReadFile(const char* filePath)
+{
+    // Create a QFile object
+    QFile file(filePath);
+
+    // Try to open the file in Read-Only mode
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Failed to open file:" << file.errorString();
+        return "";
+    }
+
+    // Read all contents of the file into a QByteArray
+    QByteArray data = file.readAll();
+
+    // Convert QByteArray to QString and print
+    QString text = QString::fromUtf8(data);
+
+    // Close the file
+    file.close();
+    return text.toStdString();
+}
 
 void CreateVertexBuffer()
 {
@@ -25,6 +53,77 @@ void CreateVertexBuffer()
     f->glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
 }
 
+void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
+{
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+    GLuint shaderObj = f->glCreateShader(ShaderType);
+    if (shaderObj == 0)
+        exit(0);
+
+    const GLchar* p[1];
+    p[0] = pShaderText;
+
+    GLint lengths[1];
+    lengths[0] = strlen(pShaderText);
+
+    f->glShaderSource(shaderObj,1,p,lengths);
+    f->glCompileShader(shaderObj);
+
+    GLint success;
+    f->glGetShaderiv(shaderObj,GL_COMPILE_STATUS,&success);
+
+    if (!success){
+        GLchar infoLog[1024];
+        f->glGetShaderInfoLog(shaderObj,1024,NULL,infoLog);
+        qDebug()<<infoLog;
+        exit(1);
+    }
+
+    f->glAttachShader(ShaderProgram,shaderObj);
+}
+
+void CompileShaders()
+{
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+    GLuint shaderProgram = f->glCreateProgram();
+
+    if(shaderProgram == 0)
+        exit(0);
+
+    std::string vs,fs;
+    vs = ReadFile(vsPath);
+    qDebug()<<vs;
+    fs = ReadFile(fsPath);
+    qDebug()<<fs;
+
+    //add vertex shader
+    AddShader(shaderProgram,vs.c_str(),GL_VERTEX_SHADER);
+    //add fragment shader
+    AddShader(shaderProgram,fs.c_str(),GL_FRAGMENT_SHADER);
+
+    GLint success = 0;
+    GLchar errorLog[1024] = {0};
+
+    f->glLinkProgram(shaderProgram);
+    f->glGetProgramiv(shaderProgram,GL_LINK_STATUS,&success);
+    if (!success){
+        f->glGetProgramInfoLog(shaderProgram,sizeof(errorLog),NULL,errorLog);
+        qDebug()<<errorLog;
+        exit(1);
+    }
+
+    gScaleLocation = f->glGetUniformLocation(shaderProgram,"gScale");
+
+    f->glValidateProgram(shaderProgram);
+    f->glGetProgramiv(shaderProgram,GL_VALIDATE_STATUS,&success);
+    if (!success){
+        f->glGetProgramInfoLog(shaderProgram,sizeof(errorLog),NULL,errorLog);
+        qDebug()<<errorLog;
+        exit(1);
+    }
+
+    f->glUseProgram(shaderProgram);
+}
 
 MainWindow::MainWindow()
 {
@@ -61,7 +160,7 @@ void MainWindow::initializeGL()
 
     //
     CreateVertexBuffer();
-
+    CompileShaders();
 
 }
 
@@ -74,12 +173,18 @@ void MainWindow::paintGL()
 
     f->glClear(GL_COLOR_BUFFER_BIT);
 
+    static float Scale = 0.0f;
+    static float Delta = 0.005f;
+    Scale += Delta;
+    if(Scale >= 1.0f || Scale <= -1.0f)
+        Delta *= -1.0f;
 
+    f->glUniform1f(gScaleLocation,Scale);
 
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
-    f->glDrawArrays(GL_LINES,0,2);
+    f->glDrawArrays(GL_TRIANGLES,0,3);
     f->glDisableVertexAttribArray(0);
 }
 

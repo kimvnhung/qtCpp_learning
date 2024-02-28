@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>assets/shaders/tutorial4.vert</file>
+    <file>assets/shaders/tutorial4.frag</file>
+</qresource>
+</RCC>

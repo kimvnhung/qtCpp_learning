@@ -12,17 +12,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Gui Widgets OpenGL)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Widgets OpenGL)
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-)
+file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE UI_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+file(GLOB QRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qrc)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(T1_OpenGLWindow
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+        ${SRC_FILES}
+        ${HEADER_FILES}
+        ${UI_FILES}
+        ${QRC_FILES}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET T1_OpenGLWindow APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
