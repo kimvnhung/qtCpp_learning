@@ -175,15 +175,17 @@ void MainWindow::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT);
 
     static float Scale = 0.0f;
-    static float Delta = 0.005f;
-    static float T = 1.f; // 1s per round
+    static float Delta = 0.01f;
     Scale += Delta;
-    if(Scale >= 1.0f || Scale <= -1.0f)
-        Delta *= -1.0f;
+    if (Scale >= 2*M_PI)
+        Scale -= 2*M_PI;
+
+    float cosA = cos(Scale);
+    float sinA = sin(Scale);
 
     QMatrix4x4 transaltion(
-        1,0,0,-1.f/Scale,
-        0,1,0,-1.f/Scale,
+        cosA,-sinA,0,0,
+        sinA,cosA,0,0,
         0,0,1,0,
         0,0,0,1
     );
