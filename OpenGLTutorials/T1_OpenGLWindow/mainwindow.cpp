@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QMatrix4x4>
 #include <QOpenGLExtraFunctions>
 #include <QScreen>
 #include <QStyle>
@@ -12,7 +13,7 @@
 #define FPS 60
 
 GLuint VBO;
-GLint gScaleLocation;
+GLint gTranslation;
 const char* vsPath = ":/assets/shaders/tutorial4.vert";
 const char* fsPath = ":/assets/shaders/tutorial4.frag";
 
@@ -112,7 +113,7 @@ void CompileShaders()
         exit(1);
     }
 
-    gScaleLocation = f->glGetUniformLocation(shaderProgram,"gScale");
+    gTranslation = f->glGetUniformLocation(shaderProgram,"gTranslation");
 
     f->glValidateProgram(shaderProgram);
     f->glGetProgramiv(shaderProgram,GL_VALIDATE_STATUS,&success);
@@ -175,11 +176,19 @@ void MainWindow::paintGL()
 
     static float Scale = 0.0f;
     static float Delta = 0.005f;
+    static float T = 1.f; // 1s per round
     Scale += Delta;
     if(Scale >= 1.0f || Scale <= -1.0f)
         Delta *= -1.0f;
 
-    f->glUniform1f(gScaleLocation,Scale);
+    QMatrix4x4 transaltion(
+        1,0,0,-1.f/Scale,
+        0,1,0,-1.f/Scale,
+        0,0,1,0,
+        0,0,0,1
+    );
+
+    f->glUniformMatrix4fv(gTranslation,1,GL_TRUE,transaltion.constData()); // GL_TRUE because the matrix is row major order
 
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glEnableVertexAttribArray(0);
