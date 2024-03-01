@@ -13,6 +13,7 @@
 #define FPS 60
 
 GLuint VBO;
+GLuint IBO;
 GLint gTranslation;
 const char* vsPath = ":/assets/shaders/tutorial4.vert";
 const char* fsPath = ":/assets/shaders/tutorial4.frag";
@@ -40,18 +41,78 @@ std::string ReadFile(const char* filePath)
     return text.toStdString();
 }
 
+struct Vertex{
+    QVector3D pos;
+    QVector3D color;
+
+    Vertex(){}
+
+    Vertex(float x, float y)
+    {
+        pos = QVector3D(x,y,0.0f);
+
+        float red = rand()*1.f/RAND_MAX;
+        float green = rand()*1.f/RAND_MAX;
+        float blue = rand()*1.f/RAND_MAX;
+
+        color = QVector3D(red,green,blue);
+    }
+};
+
 void CreateVertexBuffer()
 {
-    QVector3D vertices[3];
-    vertices[0] = QVector3D(-0.5f,0.5f,0.0f);
-    vertices[1] = QVector3D(0.5f,0.5f,0.0f);
-    vertices[2] = QVector3D(0.0f,-0.5f,0.0f);
+    Vertex vertices[19];
+
+    //Center
+    vertices[0] = Vertex(0.0f,0.0f);
+
+    //Top row
+    vertices[1] = Vertex(-1.0f,1.0f);
+    vertices[2] = Vertex(-0.75f,1.0f);
+    vertices[3] = Vertex(-0.5f,1.0f);
+    vertices[4] = Vertex(-0.25f,1.0f);
+    vertices[5] = Vertex(0.0f,1.0f);
+    vertices[6] = Vertex(0.25f,1.0f);
+    vertices[7] = Vertex(0.5f,1.0f);
+    vertices[8] = Vertex(0.75f,1.0f);
+    vertices[9] = Vertex(1.0f,1.0f);
+
+    //Bottom row
+    vertices[10] = Vertex(-1.0f,-1.0f);
+    vertices[11] = Vertex(-0.75f,-1.f);
+    vertices[12] = Vertex(-0.5f,-1.0f);
+    vertices[13] = Vertex(-0.25f,-1.0f);
+    vertices[14] = Vertex(0.0f,-1.0f);
+    vertices[15] = Vertex(0.25f,-1.0f);
+    vertices[16] = Vertex(0.5f,-1.0f);
+    vertices[17] = Vertex(0.75f,-1.0f);
+    vertices[18] = Vertex(1.0f,-1.0f);
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
-    f->glGenBuffers(sizeof(vertices),&VBO);
+    f->glGenBuffers(1,&VBO);
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
+}
+
+
+
+void CreateIndexBuffer()
+{
+    unsigned int indices[] = {
+        //Top triangle
+        0,1,2,
+        0,2,3,
+        0,3,4,
+        0,4,5,
+        0,5,6
+    };
+
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+
+    f->glGenBuffers(1,&IBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
 void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -161,6 +222,7 @@ void MainWindow::initializeGL()
 
     //
     CreateVertexBuffer();
+    CreateIndexBuffer();
     CompileShaders();
 
 }
@@ -176,7 +238,7 @@ void MainWindow::paintGL()
 
     static float Scale = 0.0f;
     static float Delta = 0.01f;
-    Scale += Delta;
+    // Scale += Delta;
     if (Scale >= 2*M_PI)
         Scale -= 2*M_PI;
 
@@ -193,10 +255,20 @@ void MainWindow::paintGL()
     f->glUniformMatrix4fv(gTranslation,1,GL_TRUE,transaltion.constData()); // GL_TRUE because the matrix is row major order
 
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
-    f->glDrawArrays(GL_TRIANGLES,0,3);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,IBO);
+
+    //position
+    f->glEnableVertexAttribArray(0);//reference with layout (location = 0) in .vert file
+    f->glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),0); // vec3 pos and vec3 color
+
+    //color
+    f->glEnableVertexAttribArray(1);// reference with 'layout (location = 1) in .vert file'
+    f->glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3*sizeof(float)));// 3*sizeof(float) is offset to first float of color
+
+    f->glDrawElements(GL_TRIANGLES,3*5,GL_UNSIGNED_INT,0);
+
     f->glDisableVertexAttribArray(0);
+    f->glDisableVertexAttribArray(1);
 }
 
 void MainWindow::resizeGL(int w, int h)

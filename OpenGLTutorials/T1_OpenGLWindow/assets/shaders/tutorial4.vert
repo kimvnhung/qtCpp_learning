@@ -1,6 +1,7 @@
 #version 330 core
 
-layout (location = 0) in vec3 Position;
+layout (location = 0) in vec3 pos;
+layout (location = 1) in vec3 color;
 
 uniform mat4 gTranslation;
 
@@ -14,6 +15,6 @@ const vec4 colors[3] = vec4[3](
 
 void main()
 {
-    gl_Position = gTranslation * vec4(Position,1.0);
-    Color = colors[gl_VertexID];
+    gl_Position = gTranslation * vec4(pos,1.0);
+    Color = vec4(clamp(color,0,1),1);
 }
