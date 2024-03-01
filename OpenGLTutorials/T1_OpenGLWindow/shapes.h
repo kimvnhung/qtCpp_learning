@@ -33,11 +33,11 @@ public:
 
     Circle(float x,float y,float radius = 0.5)
     {
-        vertices[0] = Vertex(0,0);
+        vertices[0] = Vertex(x,y);
 
         float alpha = 2*M_PI/CIRCLE_SMOOTH;
         for(int i=0;i<CIRCLE_SMOOTH;i++){
-            vertices[i+1] = Vertex(radius*cos(i*alpha),radius*sin(i*alpha));
+            vertices[i+1] = Vertex(radius*cos(i*alpha)+x,radius*sin(i*alpha)+y);
         }
 
         for(int i=0;i<CIRCLE_SMOOTH;i++){

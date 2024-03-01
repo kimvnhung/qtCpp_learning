@@ -43,11 +43,11 @@ std::string ReadFile(const char* filePath)
 }
 
 
-Circle circle(0,0,0.5);
+Circle circle(-0.5,0.5,0.6);
 
 void CreateVertexBuffer()
 {
-
+    
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
     f->glGenBuffers(1,&VBO);
@@ -166,6 +166,8 @@ MainWindow::~MainWindow()
 void MainWindow::initializeGL()
 {
     qDebug()<<__FUNCTION__;
+    srand(static_cast<unsigned int>(time(nullptr)));
+
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
     f->glClearColor(0, 0, 0, 1);
