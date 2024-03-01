@@ -105,7 +105,20 @@ void CreateIndexBuffer()
         0,2,3,
         0,3,4,
         0,4,5,
-        0,5,6
+        0,5,6,
+        0,6,7,
+        0,7,8,
+        0,8,9,
+        0,9,18,
+        0,10,11,
+        0,11,12,
+        0,12,13,
+        0,13,14,
+        0,14,15,
+        0,15,16,
+        0,16,17,
+        0,17,18,
+        0,1,10
     };
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
@@ -265,7 +278,7 @@ void MainWindow::paintGL()
     f->glEnableVertexAttribArray(1);// reference with 'layout (location = 1) in .vert file'
     f->glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3*sizeof(float)));// 3*sizeof(float) is offset to first float of color
 
-    f->glDrawElements(GL_TRIANGLES,3*5,GL_UNSIGNED_INT,0);
+    f->glDrawElements(GL_TRIANGLES,18*3,GL_UNSIGNED_INT,0);
 
     f->glDisableVertexAttribArray(0);
     f->glDisableVertexAttribArray(1);
