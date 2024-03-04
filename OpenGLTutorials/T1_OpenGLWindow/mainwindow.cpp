@@ -14,6 +14,7 @@
 #define FPS 60
 
 GLuint VBO;
+GLuint crossVBO;
 GLuint IBO;
 GLint gTranslation;
 const char* vsPath = ":/assets/shaders/tutorial4.vert";
@@ -43,16 +44,25 @@ std::string ReadFile(const char* filePath)
 }
 
 
-Circle circle(-0.5,0.5,0.6);
+Circle circle(0,0,0.3);
 
 void CreateVertexBuffer()
 {
-    
+    Vertex crossVertices[4];
+    crossVertices[0] = Vertex(0,1);
+    crossVertices[1] = Vertex(0,-1);
+    crossVertices[2] = Vertex(-1,0);
+    crossVertices[3] = Vertex(1,0);
+
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
     f->glGenBuffers(1,&VBO);
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    f->glBufferData(GL_ARRAY_BUFFER,sizeof(circle.vertices),circle.vertices,GL_STATIC_DRAW);
+    f->glBufferData(GL_ARRAY_BUFFER,sizeof(Vertex)*circle.verticesCount(),circle.getVertices(),GL_STATIC_DRAW);
+
+    f->glGenBuffers(1,&crossVBO);
+    f->glBindBuffer(GL_ARRAY_BUFFER,crossVBO);
+    f->glBufferData(GL_ARRAY_BUFFER,sizeof(crossVertices),crossVertices,GL_STATIC_DRAW);
 }
 
 
@@ -64,7 +74,7 @@ void CreateIndexBuffer()
 
     f->glGenBuffers(1,&IBO);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(circle.indices), circle.indices, GL_STATIC_DRAW);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*circle.indicesCount(), circle.getIndices(), GL_STATIC_DRAW);
 }
 
 void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -205,6 +215,20 @@ void MainWindow::paintGL()
         0,0,1,0,
         0,0,0,1
     );
+
+    static float angle = 0;
+    angle += 5;
+    if (angle >= 360)
+        angle = 0;
+
+    static float translate = 0;
+    translate += 0.1;
+    if (translate >= 1)
+        translate = -1;
+
+    transaltion.translate(QVector3D(translate,0.0f,0.0f));
+    transaltion.rotate(angle,QVector3D(0.0f,0.0f,1.0f));
+
 
     f->glUniformMatrix4fv(gTranslation,1,GL_TRUE,transaltion.constData()); // GL_TRUE because the matrix is row major order
 
