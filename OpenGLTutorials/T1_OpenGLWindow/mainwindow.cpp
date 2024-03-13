@@ -180,8 +180,10 @@ void MainWindow::initializeGL()
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
-    f->glClearColor(0, 0, 0, 1);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    f->glClearColor(0, 0, 0, 0);
+    f->glEnable(GL_CULL_FACE);
+    f->glFrontFace(GL_CW);
+    f->glCullFace(GL_BACK);
 
 
     //
@@ -201,36 +203,39 @@ void MainWindow::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT);
 
     static float Scale = 0.0f;
-    static float Delta = 0.01f;
-    // Scale += Delta;
-    if (Scale >= 2*M_PI)
-        Scale -= 2*M_PI;
+    Scale += 0.02;
 
-    float cosA = cos(Scale);
-    float sinA = sin(Scale);
-
-    QMatrix4x4 transaltion(
-        cosA,-sinA,0,0,
-        sinA,cosA,0,0,
-        0,0,1,0,
-        0,0,0,1
+    QMatrix4x4 rotation(
+        cosf(Scale),0.0f,-sinf(Scale),0.0f,
+        0.0f,1.0f,0.0f,0.0f,
+        sinf(Scale),0.0f,cosf(Scale),0.0f,
+        0.0f,0.0f,0.0f,1.0f
     );
 
-    static float angle = 0;
-    angle += 5;
-    if (angle >= 360)
-        angle = 0;
+    QMatrix4x4 translattion(
+        1.0f,0.0f,0.0f,0.0f,
+        0.0f,1.0f,0.0f,0.0f,
+        0.0f,0.0f,1.0f,5.0f,
+        0.0f,0.0f,0.0f,1.0f
+    );
 
-    static float translate = 0;
-    translate += 0.1;
-    if (translate >= 1)
-        translate = -1;
+    float FOV = 90.0f;
+    float tanHalfFOV = tanf(qDegreesToRadians(FOV/2.0f));
+    float factor = 1/tanHalfFOV;
 
-    transaltion.translate(QVector3D(translate,0.0f,0.0f));
-    transaltion.rotate(angle,QVector3D(0.0f,0.0f,1.0f));
+    QMatrix4x4 projection(
+        factor,0.0f,0.0f,0.0f,
+        0.0f,factor,0.0f,0.0f,
+        0.0f,0.0f,1.0f,0.0f,
+        0.0f,0.0f,1.0f,0.0f
+    );
 
 
-    f->glUniformMatrix4fv(gTranslation,1,GL_TRUE,transaltion.constData()); // GL_TRUE because the matrix is row major order
+    QMatrix4x4 finalMatrix = projection * translattion * rotation;
+    // QMatrix4x4 finalMatrix = projection;
+
+
+    f->glUniformMatrix4fv(gTranslation,1,GL_TRUE,finalMatrix.constData()); // GL_TRUE because the matrix is row major order
 
     f->glBindBuffer(GL_ARRAY_BUFFER,VBO);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,IBO);
