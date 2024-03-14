@@ -1,4 +1,4 @@
-#include "my_library.h"
+#include <my_library/my_library.h>
 
 MyClass::MyClass(const char* name):
     m_name(name)
