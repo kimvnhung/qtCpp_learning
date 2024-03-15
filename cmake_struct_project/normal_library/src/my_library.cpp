@@ -6,17 +6,14 @@ MyClass::MyClass(const char* name):
 
 }
 
-// void MyClass::testSharedLink()
-// {
+void MyClass::testLink(StaticLib lib)
+{
+    lib.printName();
+    std::cout << "print add static lib "<<lib.add(1,1)<<std::endl;
+}
 
-// }
-
-// void MyClass::testStaticLink()
-// {
-
-// }
-
-// void MyClass::testSubLink()
-// {
-
-// }
+void MyClass::testLink(SharedLib lib)
+{
+    lib.printName();
+    std::cout << "print add shared lib "<<lib.multiple(1,2)<<std::endl;
+}

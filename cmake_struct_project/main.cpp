@@ -1,7 +1,12 @@
 #include <iostream>
 
-int main() {
+#include <normal_library/my_library.h>
 
-    // std::cout << "Hello, world! " <<myclass.getName() << std::endl;
+int main() {
+    MyClass myClass("hello");
+    StaticLib lib;
+    SharedLib lib2;
+    myClass.testLink(lib);
+    myClass.testLink(lib2);
     return 0;
 }

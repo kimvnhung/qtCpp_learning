@@ -4,7 +4,7 @@
 
 int StaticLib::add(int a, int b)
 {
-    return addFromStatic(a, b);
+    return addFromStaticLib(a, b);
 }
 
 void StaticLib::printName()

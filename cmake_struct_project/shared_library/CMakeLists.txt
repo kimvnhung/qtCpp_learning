@@ -11,20 +11,29 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB_RECURSE SOURCES "${SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE HEADERS "${SOURCE_DIR}/*.h")
 
+# Tell cmake we want it to automate generating an export stub for the dll
+SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${HEADERS})
+set(INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Specify the directories to install headers
+include(../cmake/functions.cmake)
+configure_files(${SOURCE_DIR} "${INCLUDE_DIR}/${PROJECT_NAME}" ".h")
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
 
 # Set the output directory for the shared library
 set_target_properties(${PROJECT_NAME} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
+# Set the output directory for the library
+set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-# Specify the directories to install headers
-include(../cmake/functions.cmake)
-configure_files(${SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/include" ".h")
 
 
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
+    LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib
 )

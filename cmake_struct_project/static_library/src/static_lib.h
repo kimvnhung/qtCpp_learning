@@ -1,3 +1,3 @@
 void name();
 
-int addFromStatic(int a, int b);
+int addFromStaticLib(int a, int b);

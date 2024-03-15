@@ -13,14 +13,18 @@ file(GLOB_RECURSE HEADERS "${SOURCE_DIR}/*.h")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${HEADERS})
+set(INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Specify the directories to install headers
+include(../cmake/functions.cmake)
+configure_files(${SOURCE_DIR} "${INCLUDE_DIR}/${PROJECT_NAME}" ".h")
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
 
 # Set the output directory for the library
 set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-# Specify the directories to install headers
-include(../cmake/functions.cmake)
-configure_files(${SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/include" ".h")
+
 
 
 # Optionally, you can install the library
