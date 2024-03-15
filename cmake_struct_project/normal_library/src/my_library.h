@@ -1,10 +1,12 @@
 #include <iostream>
 
+// #include <static_library/static_c.h>
+
 class MyClass {
 public:
     MyClass(const char* name);
 
-    std::string getName();
+    // void testLink(StaticLib lib);
 private:
     const char* m_name;
 };

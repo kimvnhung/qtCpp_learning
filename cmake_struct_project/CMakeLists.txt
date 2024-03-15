@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 project(cmake_struct_project)
 
 # Add the library project
-add_subdirectory(my_library)
+add_subdirectory(shared_library)
+add_subdirectory(static_library)
+
+add_subdirectory(normal_library)
 
 set(
     MY_LIBRARY_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/my_library/include
@@ -21,4 +24,4 @@ add_executable(cmake_struct_project ${SOURCE_FILES})
 target_include_directories(cmake_struct_project PRIVATE ${MY_LIBRARY_INCLUDE})
 
 # Link against the library target
-target_link_libraries(cmake_struct_project PRIVATE MyLibrary)
+target_link_libraries(cmake_struct_project PRIVATE normal_library)
