@@ -16,3 +16,6 @@
 [submodule "serial_port/serial_window"]
 	path = serial_port/serial_window
 	url = https://github.com/kcwongjoe/serial_port.git
+[submodule "QtAVPlayerCMakeDemo/QtAVPlayer"]
+	path = QtAVPlayerCMakeDemo/QtAVPlayer
+	url = https://github.com/kimvnhung/QtAVPlayerCMake.git
