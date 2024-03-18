@@ -25,7 +25,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
 set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 
-
-
 # Optionally, you can install the library
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib)
