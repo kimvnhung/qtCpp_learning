@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/begin.vert</file>
+        <file>shaders/begin.frag</file>
+        <file>images/back.png</file>
+        <file>images/bottom.png</file>
+        <file>images/front.png</file>
+        <file>images/left.png</file>
+        <file>images/right.png</file>
+        <file>images/top.png</file>
+    </qresource>
+</RCC>

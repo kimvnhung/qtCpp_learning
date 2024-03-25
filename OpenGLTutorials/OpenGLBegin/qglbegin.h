@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QOpenGLWidget>
+#include <QOpenGLBuffer>
+#include <QOpenGLShaderProgram>
 
 class QGLBegin : public QOpenGLWidget
 {
@@ -19,6 +21,8 @@ protected:
 
 private:
     float xrot,yrot,zrot;
+    QOpenGLBuffer m_buffer;
+    QOpenGLShaderProgram m_shaderProgram;
 };
 
 #endif // QGLBEGIN_H

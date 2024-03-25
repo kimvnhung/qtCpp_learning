@@ -18,13 +18,14 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         qglbegin.h qglbegin.cpp
+        qopenglskyboxwidget.h qopenglskyboxwidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(OpenGLBegin
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
+        assets.qrc
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET OpenGLBegin APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
