@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     m_queue = new FrameQueue(this);
-    m_player = new FfmpegPlayer(m_queue,this);
+    m_player = new FfmpegPlayer(m_queue);
     m_player->start();
 
     m_timer = new QTimer(this);
@@ -26,10 +26,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    if(m_player->isRunning()){
-        m_player->quit();
+    if(m_player != NULL){
+        m_player->stop();
     }
+    delete ui;
 }
 
 void MainWindow::on_openRGBbtn_clicked()
@@ -78,17 +78,19 @@ void MainWindow::on_frameAvailable(char *yuvData, int width, int height,int *str
 }
 
 
-bool isdisplayed = false;
+// bool isdisplayed = false;
 void MainWindow::on_handleFrame()
 {
-    if(m_queue->hasFrame() && !isdisplayed){
+    if(m_queue->hasFrame()){
         YUVFrame frame = m_queue->popFrame();
         if(!frame.isValid()){
             return;
         }
-        ui->openGLWidget->setYUV420pParameters(frame.width,frame.height);
+        if(!isInitSize){
+            ui->openGLWidget->setYUV420pParameters(frame.width,frame.height);
+            isInitSize = true;
+        }
         ui->openGLWidget->setFrameData(frame.data);
-        isdisplayed = true;
         qDebug()<<"Displayed";
     }else{
         qDebug()<<"Frame Queue empty";

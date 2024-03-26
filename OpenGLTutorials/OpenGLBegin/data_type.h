@@ -23,7 +23,7 @@ struct YUVFrame
     QByteArray data;
     int width = 0;
     int height = 0;
-    int stride[3];
+    int *stride;
 
     bool isValid(){
         return width != 0 && height != 0;

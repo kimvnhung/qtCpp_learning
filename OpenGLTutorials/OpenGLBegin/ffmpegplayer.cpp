@@ -50,7 +50,14 @@ void convertFrameToYUV(const AVFrame *frame, char **yuvData, int *width, int *he
 
 void FfmpegPlayer::run()
 {
+    m_isRunning = true;
+    // realDecoded();
     fakeDecoded();
+}
+
+void FfmpegPlayer::stop()
+{
+    m_isRunning = false;
 }
 
 void FfmpegPlayer::realDecoded()
@@ -140,10 +147,22 @@ void FfmpegPlayer::realDecoded()
                 int width, height;
                 int stride[3]; // 0: Y stride, 1: U stride, 2: V stride
                 convertFrameToYUV(frame,&yuvData,&width,&height,stride);
-                // emit frameAvailable(yuvData,width,height,stride);
+                if(queue != NULL){
+                    YUVFrame frame = YUVFrame{
+                        QByteArray(yuvData),
+                        width,
+                        height
+                    };
+                    frame.stride = stride;
+                    queue->pushFrame(frame);
+                }
             }
         }
         av_packet_unref(&packet);
+
+        if(!m_isRunning){
+            break;
+        }
     }
 
     av_frame_free(&frame);
@@ -154,7 +173,7 @@ void FfmpegPlayer::realDecoded()
 
 void FfmpegPlayer::fakeDecoded()
 {
-    while (true) {
+    while (m_isRunning) {
         QThread::msleep(100);
         QString imgPath;
         if(rand()%2==0){

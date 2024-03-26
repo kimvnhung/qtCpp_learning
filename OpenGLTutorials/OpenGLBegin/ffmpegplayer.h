@@ -12,12 +12,14 @@ class FfmpegPlayer : public QThread
 public:
     explicit FfmpegPlayer(FrameQueue *queue, QObject *parent = nullptr);
 
+    void stop();
 protected:
     void run() override;
 
 private:
     QString m_url;
     FrameQueue *queue;
+    bool m_isRunning = false;
 
     void realDecoded();
     void fakeDecoded();

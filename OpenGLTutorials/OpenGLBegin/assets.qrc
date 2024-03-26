@@ -13,5 +13,10 @@
         <file>images/1280x720.yuv</file>
         <file>images/test.png</file>
         <file>images/1280x720_2.yuv</file>
+        <file>images/file_0.txt</file>
+        <file>images/file_1.txt</file>
+        <file>images/file_2.txt</file>
+        <file>images/file_3.txt</file>
+        <file>images/file_4.txt</file>
     </qresource>
 </RCC>
