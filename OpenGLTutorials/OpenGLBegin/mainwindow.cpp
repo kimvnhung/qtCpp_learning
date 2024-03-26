@@ -4,54 +4,93 @@
 #include "glvideowidget.h"
 
 #include <QFile>
+#include <QTimer>
 
+bool isInitSize = false;
+int FPS = 7;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_queue = new FrameQueue(this);
+    m_player = new FfmpegPlayer(m_queue,this);
+    m_player->start();
+
+    m_timer = new QTimer(this);
+    m_timer->setInterval(1000/FPS);
+    connect(m_timer, &QTimer::timeout,this,&MainWindow::on_handleFrame);
+    m_timer->start();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    if(m_player->isRunning()){
+        m_player->quit();
+    }
 }
 
 void MainWindow::on_openRGBbtn_clicked()
 {
-    if(ui->openGLWidget != NULL){
-        delete ui->openGLWidget;
-        ui->openGLWidget = NULL;
+    QImage img;
+    if(rand()%2==0){
+        img = QImage(":/images/test.png").convertToFormat(QImage::Format_RGB888);
+    }else {
+        img = QImage(":/images/front.png").convertToFormat(QImage::Format_RGB888);
     }
-
-    if(ui->openGLWidget == NULL){
-        ui->openGLWidget = new GLVideoWidget(this);
-        QImage img = QImage(":/images/test.png").convertToFormat(QImage::Format_RGB888);
-        dynamic_cast<GLVideoWidget*>(ui->openGLWidget)->setQImageParameters(img.format(),img.width(),img.height(),img.bytesPerLine());
-        dynamic_cast<GLVideoWidget*>(ui->openGLWidget)->setImage(img);
-        ui->openGLWidget->show();
-    }
+    ui->openGLWidget->setQImageParameters(img.format(),img.width(),img.height(),img.bytesPerLine());
+    ui->openGLWidget->setImage(img);
 }
 
 
 void MainWindow::on_openYUVbtn_clicked()
 {
-    if(ui->openGLWidget != NULL){
-        delete ui->openGLWidget;
-        ui->openGLWidget = NULL;
+    QString imgPath;
+    if(rand()%2==0){
+        imgPath = ":/images/1280x720.yuv";
+    }else {
+        imgPath = ":/images/1280x720_2.yuv";
+    }
+    QFile f(imgPath);
+    f.open(QIODevice::ReadOnly);
+    QByteArray data(f.readAll());
+    qDebug("data size: %d", data.size());
+    const int w = 1280, h = 720;
+    if(!isInitSize){
+        ui->openGLWidget->setYUV420pParameters(w,h);
+        isInitSize = true;
     }
 
-    if(ui->openGLWidget == NULL){
-        ui->openGLWidget = new GLVideoWidget(this);
-        QFile f(":/images/1280x720.yuv");
-        f.open(QIODevice::ReadOnly);
-        QByteArray data(f.readAll());
-        qDebug("data size: %d", data.size());
-        const int w = 1280, h = 720;
-        dynamic_cast<GLVideoWidget*>(ui->openGLWidget)->setYUV420pParameters(w,h);
-        dynamic_cast<GLVideoWidget*>(ui->openGLWidget)->setFrameData(data);
-        ui->openGLWidget->show();
-    }
+    ui->openGLWidget->setFrameData(data);
 }
 
+
+void MainWindow::on_frameAvailable(char *yuvData, int width, int height,int *stride)
+{
+    // if(!isInitSize){
+    //     ui->openGLWidget->setYUV420pParameters(width,height);
+    //     isInitSize = true;
+    // }
+
+    // m_frameQueues.enqueue(yuvData);
+}
+
+
+bool isdisplayed = false;
+void MainWindow::on_handleFrame()
+{
+    if(m_queue->hasFrame() && !isdisplayed){
+        YUVFrame frame = m_queue->popFrame();
+        if(!frame.isValid()){
+            return;
+        }
+        ui->openGLWidget->setYUV420pParameters(frame.width,frame.height);
+        ui->openGLWidget->setFrameData(frame.data);
+        isdisplayed = true;
+        qDebug()<<"Displayed";
+    }else{
+        qDebug()<<"Frame Queue empty";
+    }
+}

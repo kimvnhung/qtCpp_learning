@@ -230,6 +230,9 @@ void GLVideoWidget::paintGL()
 {
     QMutexLocker lock(&m_mutex);
     Q_UNUSED(lock);
+    if(plane.size()==0){
+        return;
+    }
     if (!plane[0].data)
         return;
     if (update_res || !tex[0]) {

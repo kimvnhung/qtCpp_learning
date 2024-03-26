@@ -17,4 +17,16 @@ struct Vertex
     }
 };
 
+
+struct YUVFrame
+{
+    QByteArray data;
+    int width = 0;
+    int height = 0;
+    int stride[3];
+
+    bool isValid(){
+        return width != 0 && height != 0;
+    }
+};
 #endif // DATA_TYPE_H

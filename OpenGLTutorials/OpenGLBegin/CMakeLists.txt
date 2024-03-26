@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         data_type.h
         videotexturewidget.h videotexturewidget.cpp
         glvideowidget.h glvideowidget.cpp
+        ffmpegplayer.h ffmpegplayer.cpp
+        framequeue.h framequeue.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -30,7 +32,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         assets.qrc
-
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET OpenGLBegin APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -50,12 +51,31 @@ else()
     endif()
 endif()
 
+set(
+    FFMPEG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg"
+)
+set(FFMPEG_INCLUDES "${FFMPEG_DIR}/include")
+
+target_include_directories(OpenGLBegin
+    PRIVATE
+        ${FFMPEG_INCLUDES}
+)
+
+file(GLOB_RECURSE DLL_FILES "${FFMPEG_DIR}/.*dll")
+foreach(DLL_FILE ${DLL_FILES})
+    configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
+endforeach()
+
+file(GLOB FFMPEG_LIBS "${FFMPEG_DIR}/lib/*.lib")
+
+
 target_link_libraries(OpenGLBegin
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::OpenGLWidgets
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::OpenGL
+        ${FFMPEG_LIBS}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})

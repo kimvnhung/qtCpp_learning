@@ -12,5 +12,6 @@
         <file>shaders/texture_mapping.frag</file>
         <file>images/1280x720.yuv</file>
         <file>images/test.png</file>
+        <file>images/1280x720_2.yuv</file>
     </qresource>
 </RCC>
