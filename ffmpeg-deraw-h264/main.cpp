@@ -27,96 +27,94 @@ int decodeH264()
 {
     // av_register_all();
 
-    // Open input file (replace "input.mp4" with your input file)
-    AVFormatContext* format_ctx = avformat_alloc_context();
-    if (avformat_open_input(&format_ctx, "D:\\Codes\\NGS_documents\\video_sample.264", nullptr, nullptr) != 0) {
-        // Error handling
-        return -1;
+    AVFormatContext *formatContext = avformat_alloc_context();
+    if (!formatContext) {
+        fprintf(stderr, "Could not allocate format context\n");
+        return 1;
     }
 
-    // Retrieve stream information
-    if (avformat_find_stream_info(format_ctx, nullptr) < 0) {
-        // Error handling
-        avformat_close_input(&format_ctx);
-        return -1;
+    if (avformat_open_input(&formatContext, "rtsp://admin:abcd1234@14.241.65.40:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif", NULL, NULL) != 0) {
+        fprintf(stderr, "Failed to open RTSP stream\n");
+        return 1;
     }
 
-    // Find the video stream
-    int video_stream_index = -1;
-    for (unsigned int i = 0; i < format_ctx->nb_streams; i++) {
-        if (format_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            video_stream_index = i;
+    if (avformat_find_stream_info(formatContext, NULL) < 0) {
+        fprintf(stderr, "Failed to find stream info\n");
+        return 1;
+    }
+
+    const AVCodec *codec = NULL;
+    int videoStreamIndex = -1;
+
+    for (int i = 0; i < formatContext->nb_streams; i++) {
+        if (formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            videoStreamIndex = i;
+            codec = avcodec_find_decoder(formatContext->streams[i]->codecpar->codec_id);
+            if (!codec) {
+                fprintf(stderr, "Failed to find decoder\n");
+                return 1;
+            }
             break;
         }
     }
 
-    if (video_stream_index == -1) {
-        // No video stream found
-        avformat_close_input(&format_ctx);
-        return -1;
+    if (videoStreamIndex == -1) {
+        fprintf(stderr, "Could not find video stream in the input\n");
+        return 1;
     }
 
-    // Find and open the video decoder
-    const AVCodec* codec = avcodec_find_decoder(format_ctx->streams[video_stream_index]->codecpar->codec_id);
-    if (!codec) {
-        // Codec not found
-        avformat_close_input(&format_ctx);
-        return -1;
+    AVCodecContext *codecContext = avcodec_alloc_context3(codec);
+    if (!codecContext) {
+        fprintf(stderr, "Failed to allocate codec context\n");
+        return 1;
     }
 
-    AVCodecContext* codec_ctx = avcodec_alloc_context3(codec);
-    if (!codec_ctx) {
-        // Error allocating codec context
-        avformat_close_input(&format_ctx);
-        return -1;
+    if (avcodec_parameters_to_context(codecContext, formatContext->streams[videoStreamIndex]->codecpar) < 0) {
+        fprintf(stderr, "Failed to copy codec parameters to codec context\n");
+        return 1;
     }
 
-    if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
-        // Error opening codec
-        avcodec_free_context(&codec_ctx);
-        avformat_close_input(&format_ctx);
-        return -1;
+    if (avcodec_open2(codecContext, codec, NULL) < 0) {
+        fprintf(stderr, "Failed to open codec\n");
+        return 1;
     }
 
-    // Allocate a frame for decoded output
-    AVFrame* frame = av_frame_alloc();
+    AVFrame *frame = av_frame_alloc();
     if (!frame) {
-        // Error allocating frame
-        avcodec_free_context(&codec_ctx);
-        avformat_close_input(&format_ctx);
-        return -1;
+        fprintf(stderr, "Failed to allocate frame\n");
+        return 1;
     }
 
-    // Read and decode frames
     AVPacket packet;
-    int frameCount = 0;
-    while (av_read_frame(format_ctx, &packet) >= 0) {
-        if (packet.stream_index == video_stream_index) {
-            if (avcodec_send_packet(codec_ctx, &packet) == 0 &&
-                avcodec_receive_frame(codec_ctx, frame) == 0) {
-                // Successfully decoded a frame, do something with it
-                // For example, process or display the frame
-                // Check if any linesize is zero
-                for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
-                    if (frame->linesize[i] <= 0) {
-                        qDebug() << "Incomplete frame data at plane" << i;
-                        break;
-                    }
-                    if(i==AV_NUM_DATA_POINTERS-1){
-                        QImage image = convertAVFrameToQImage(frame);
-                        qDebug()<<"afterconvert";
-                        image.save("image_"+QString::number(frameCount++)+".png");
-                    }
+    av_init_packet(&packet);
+
+    while (av_read_frame(formatContext, &packet) >= 0) {
+        if (packet.stream_index == videoStreamIndex) {
+            int response = avcodec_send_packet(codecContext, &packet);
+            if (response < 0) {
+                qDebug()<<"Error while sending a packet to the decoder: ";
+                break;
+            }
+            while (response >= 0) {
+                response = avcodec_receive_frame(codecContext, frame);
+                if (response == AVERROR(EAGAIN) || response == AVERROR_EOF)
+                    break;
+                else if (response < 0) {
+                    qDebug()<<"Error while receiving a frame from the decoder: ";
+                    return 1;
                 }
+
+                // Do something with the frame (e.g., display it)
+                qDebug()<<"display";
             }
         }
         av_packet_unref(&packet);
     }
 
-    // Free resources
     av_frame_free(&frame);
-    avcodec_free_context(&codec_ctx);
-    avformat_close_input(&format_ctx);
+    avcodec_free_context(&codecContext);
+    avformat_close_input(&formatContext);
+    avformat_free_context(formatContext);
 
     return 0;
 }

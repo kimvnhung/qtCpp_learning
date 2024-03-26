@@ -10,6 +10,7 @@ extern "C" {
 
 #include <QDebug>
 #include <QFile>
+#include <QImage>
 
 
 FfmpegPlayer::FfmpegPlayer(FrameQueue *queue, QObject *parent)
@@ -45,6 +46,44 @@ void convertFrameToYUV(const AVFrame *frame, char **yuvData, int *width, int *he
     for (int i = 0; i < *height / 2; i++) {
         memcpy(ptr, frame->data[2] + i * stride[2], *width / 2);
         ptr += *width / 2;
+    }
+}
+
+// Convert BGR24 to RGB24
+void convertBGR24toRGB24(const char* bgr24Data, char* rgb24Data, int width, int height) {
+    for (int i = 0; i < width * height ; ++i) {
+        rgb24Data[3 * i + 0] = bgr24Data[3 * i + 2]; // Red
+        rgb24Data[3 * i + 1] = bgr24Data[3 * i + 1]; // Green
+        rgb24Data[3 * i + 2] = bgr24Data[3 * i + 0]; // Blue
+    }
+}
+
+// Convert RGB24 to YUV420
+void convertRGB24toYUV420(const char* rgb24Data, char* yuv420Data, int width, int height) {
+    int imageSize = width * height;
+    int uvSize = (width / 2) * (height / 2);
+
+    // Y plane
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            int index = i * width + j;
+            int y = (int)(0.299 * rgb24Data[3 * index] + 0.587 * rgb24Data[3 * index + 1] + 0.114 * rgb24Data[3 * index + 2]);
+            yuv420Data[index] = (uint8_t)y;
+        }
+    }
+
+    // U and V planes
+    for (int i = 0; i < height / 2; ++i) {
+        for (int j = 0; j < width / 2; ++j) {
+            int index = i * (width / 2) + j;
+            int uvIndex = imageSize + i * (width / 2) + j;
+            int u = (int)(-0.147 * rgb24Data[6 * index] - 0.289 * rgb24Data[6 * index + 1] + 0.436 * rgb24Data[6 * index + 2]
+                           + 128);
+            int v = (int)(0.615 * rgb24Data[6 * index] - 0.515 * rgb24Data[6 * index + 1] - 0.100 * rgb24Data[6 * index + 2]
+                           + 128);
+            yuv420Data[imageSize + uvIndex] = (uint8_t)u;
+            yuv420Data[imageSize + uvSize + uvIndex] = (uint8_t)v;
+        }
     }
 }
 
@@ -171,24 +210,63 @@ void FfmpegPlayer::realDecoded()
     avformat_free_context(formatContext);
 }
 
+enum ImageFormat {
+    Unknown,
+    RGB,
+    BGR,
+    ARGB,
+    BGRA,
+    RGBA,
+    ABGR,
+    GRAY // Grayscale
+};
+
+ImageFormat detectImageFormat(const char* imageData) {
+    if (imageData[0] == 'R' && imageData[1] == 'G' && imageData[2] == 'B')
+        return RGB;
+    else if (imageData[0] == 'B' && imageData[1] == 'G' && imageData[2] == 'R')
+        return BGR;
+    else if (imageData[0] == 'A' && imageData[1] == 'R' && imageData[2] == 'G' && imageData[3] == 'B')
+        return ARGB;
+    else if (imageData[0] == 'B' && imageData[1] == 'G' && imageData[2] == 'R' && imageData[3] == 'A')
+        return BGRA;
+    else if (imageData[0] == 'R' && imageData[1] == 'G' && imageData[2] == 'B' && imageData[3] == 'A')
+        return RGBA;
+    else if (imageData[0] == 'A' && imageData[1] == 'B' && imageData[2] == 'G' && imageData[3] == 'R')
+        return ABGR;
+    else if (imageData[0] == 'G' && imageData[1] == 'R' && imageData[2] == 'A' && imageData[3] == 0)
+        return GRAY; // Grayscale (alpha channel indicates transparency)
+
+    return Unknown;
+}
+
 void FfmpegPlayer::fakeDecoded()
 {
+    const int w = 1920, h = 1080;
     while (m_isRunning) {
         QThread::msleep(100);
-        QString imgPath;
-        if(rand()%2==0){
-            imgPath = ":/images/1280x720.yuv";
-        }else {
-            imgPath = ":/images/1280x720_2.yuv";
-        }
+        QString imgPath = QString(":/images/file_0.txt")/*.arg(rand()%5)*/;
         QFile f(imgPath);
         f.open(QIODevice::ReadOnly);
         QByteArray data(f.readAll());
-        qDebug("data size: %d", data.size());
-        const int w = 1280, h = 720;
+        QImage img = QImage(imgPath,"BGR");
+        qDebug()<<img.format();
+        // Allocate memory for RGB24 and YUV420 data
+        qDebug("data size: %d, width*height*3 : %d, format %d", data.size(),w*h*3,detectImageFormat(data.constData()));
+        char* rgb24Data = new char[w * h * 3]; // RGB24 data
+        char* yuv420Data = new char[w * h * 3 / 2]; // YUV420 data
+
+        // Convert BGR24 to RGB24
+        convertBGR24toRGB24(data.data(), rgb24Data, w, h);
+
+        // Convert RGB24 to YUV420
+        convertRGB24toYUV420(rgb24Data, yuv420Data, w, h);
+
+
+
         if(queue != NULL){
             queue->pushFrame({
-                data,w,h,NULL
+                yuv420Data,w,h,NULL
             });
         }
     }

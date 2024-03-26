@@ -18,5 +18,10 @@
         <file>images/file_2.txt</file>
         <file>images/file_3.txt</file>
         <file>images/file_4.txt</file>
+        <file>images/frame_1_0.bin</file>
+        <file>images/frame_1_1.bin</file>
+        <file>images/frame_1_2.bin</file>
+        <file>images/frame_1_3.bin</file>
+        <file>images/frame_1_4.bin</file>
     </qresource>
 </RCC>

@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         glvideowidget.h glvideowidget.cpp
         ffmpegplayer.h ffmpegplayer.cpp
         framequeue.h framequeue.cpp
+        concurrentqueue.h concurrentqueue.cpp
+        avframeopenglwidget.h avframeopenglwidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
