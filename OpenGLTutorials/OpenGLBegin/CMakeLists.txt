@@ -18,7 +18,11 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         qglbegin.h qglbegin.cpp
+        texturewidget.h texturewidget.cpp
         qopenglskyboxwidget.h qopenglskyboxwidget.cpp
+        data_type.h
+        videotexturewidget.h videotexturewidget.cpp
+        glvideowidget.h glvideowidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -26,6 +30,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         assets.qrc
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET OpenGLBegin APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -8,5 +8,9 @@
         <file>images/left.png</file>
         <file>images/right.png</file>
         <file>images/top.png</file>
+        <file>shaders/texture_mapping.vert</file>
+        <file>shaders/texture_mapping.frag</file>
+        <file>images/1280x720.yuv</file>
+        <file>images/test.png</file>
     </qresource>
 </RCC>

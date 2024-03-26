@@ -17,6 +17,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_openRGBbtn_clicked();
+
+    void on_openYUVbtn_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

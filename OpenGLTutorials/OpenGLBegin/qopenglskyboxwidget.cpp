@@ -93,14 +93,17 @@ void QOpenGLSkyboxWidget::initializeGL()
         QOpenGLShader::Vertex,
         R"(
                 #version 330 core
-                attribute vec3 aPosition;
-                out vec3 vTexCoord;
-                uniform mat4 mvpMatrix;
+                layout (location = 0) in vec3 Position;
+                layout (location = 0) in vec2 TextCoord;
+
+                uniform mat4 gWVP;
+
+                out vec2 TextCoord0;
 
                 void main()
                 {
-                    gl_Position = mvpMatrix * vec4(aPosition, 1.0);
-                    vTexCoord = aPosition;
+                    gl_Position = gWVP * vec4(aPosition, 1.0);
+                    TextCoord0 = TextCoord;
                 }
                 )");
 
@@ -108,12 +111,15 @@ void QOpenGLSkyboxWidget::initializeGL()
         QOpenGLShader::Fragment,
         R"(
                 #version 330 core
-                uniform samplerCube uTexture;
-                in vec3 vTexCoord;
+                in vec2 TextCoord0;
+
+                out vec4 FragColor;
+
+                uniform sampler2D gSampler;
 
                 void main()
                 {
-                    gl_FragColor = textureCube(uTexture, vTexCoord);
+                    FragColor = texture2D(gSampler, TextCoord0);
                 }
                 )");
 

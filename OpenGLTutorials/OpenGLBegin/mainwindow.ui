@@ -17,16 +17,10 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="1" colspan="3">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="1">
-       <widget class="QSlider" name="z_rot_slider">
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>360</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Rotate Y:</string>
         </property>
        </widget>
       </item>
@@ -50,15 +44,21 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Rotate Y:</string>
+      <item row="1" column="1">
+       <widget class="QSlider" name="y_rot_slider">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>360</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QSlider" name="y_rot_slider">
+      <item row="2" column="1">
+       <widget class="QSlider" name="z_rot_slider">
         <property name="minimum">
          <number>0</number>
         </property>
@@ -74,6 +74,20 @@
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Rotate Z:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="openRGBbtn">
+        <property name="text">
+         <string>Open RGB</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="openYUVbtn">
+        <property name="text">
+         <string>Open YUV</string>
         </property>
        </widget>
       </item>
