@@ -20,6 +20,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_increaseSpeedBtn_clicked();
+
+    void on_decreaseSpeedBtn_clicked();
+
+    void on_increaseFanBtn_clicked();
+
+    void on_decreaseFanBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
     // DemoQuickWidget *m_demoWidget = NULL;

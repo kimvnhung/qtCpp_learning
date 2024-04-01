@@ -31,16 +31,16 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="changeTextBtn">
+       <widget class="QPushButton" name="increaseSpeedBtn">
         <property name="text">
-         <string>ChangeText</string>
+         <string>Increase Speed</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="textFromQmlSignalLb">
+       <widget class="QPushButton" name="decreaseSpeedBtn">
         <property name="text">
-         <string>TextFromQmlSignal</string>
+         <string>Decrease Speed</string>
         </property>
        </widget>
       </item>
@@ -58,9 +58,16 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="callFunctionQmlBtn">
+       <widget class="QPushButton" name="increaseFanBtn">
         <property name="text">
-         <string>CallFuncOnQml</string>
+         <string>Increase Fan</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="decreaseFanBtn">
+        <property name="text">
+         <string>Decrease Fan</string>
         </property>
        </widget>
       </item>

@@ -21,3 +21,27 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::on_increaseSpeedBtn_clicked()
+{
+    m_sampleView->increaseSpeed();
+}
+
+
+void MainWindow::on_decreaseSpeedBtn_clicked()
+{
+    m_sampleView->decreaseSpeed();
+}
+
+
+void MainWindow::on_increaseFanBtn_clicked()
+{
+    m_sampleView->increaseFan();
+}
+
+
+void MainWindow::on_decreaseFanBtn_clicked()
+{
+    m_sampleView->decreaseFan();
+}
+

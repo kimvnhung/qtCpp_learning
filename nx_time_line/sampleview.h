@@ -12,11 +12,16 @@ public:
     explicit SampleView(QObject *parent = nullptr);
 
     QQuickWidget *widget() const;
-signals:
+
+    void increaseSpeed();
+    void decreaseSpeed();
+    void increaseFan();
+    void decreaseFan();
+
 protected:
     SampleView(const QUrl& componentUrl, QObject *parent);
 private:
-    struct Private;
+    class Private;
     QSharedPointer<Private> d;
 };
 
