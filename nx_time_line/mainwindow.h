@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "demoquickwidget.h"
+#include "sampleview.h"
 
 #include <QMainWindow>
 
@@ -21,6 +22,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    DemoQuickWidget *m_demoWidget = NULL;
+    // DemoQuickWidget *m_demoWidget = NULL;
+    SampleView *m_sampleView = NULL;
 };
 #endif // MAINWINDOW_H

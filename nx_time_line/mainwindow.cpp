@@ -10,8 +10,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_demoWidget = new DemoQuickWidget(this);
-    ui->centralwidget->layout()->addWidget(m_demoWidget->widget());
+    // m_demoWidget = new DemoQuickWidget(this);
+    // ui->centralwidget->layout()->addWidget(m_demoWidget->widget());
+
+    m_sampleView = new SampleView(this);
+    ui->centralwidget->layout()->addWidget(m_sampleView->widget());
 }
 
 MainWindow::~MainWindow()

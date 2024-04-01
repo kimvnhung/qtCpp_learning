@@ -19,6 +19,8 @@ set(PROJECT_SOURCES
         mainwindow.ui
         bubbletooltip.h bubbletooltip.cpp
         demoquickwidget.h demoquickwidget.cpp
+        sampleview.h sampleview.cpp
+        models/sample.h models/sample.cpp
         qml.qrc
 )
 

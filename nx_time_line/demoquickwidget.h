@@ -12,6 +12,10 @@ class DemoQuickWidget : public QObject
 public:
     DemoQuickWidget(QObject *parent = NULL);
     QQuickWidget* widget() const;
+signals:
+    void textChanged(QString& text);
+public slots:
+    void setText(QString text);
 protected:
     DemoQuickWidget(const QUrl &url, QObject *parent = NULL);
 private:
