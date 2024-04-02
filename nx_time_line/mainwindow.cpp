@@ -13,8 +13,10 @@ MainWindow::MainWindow(QWidget *parent)
     // m_demoWidget = new DemoQuickWidget(this);
     // ui->centralwidget->layout()->addWidget(m_demoWidget->widget());
 
-    m_sampleView = new SampleView(this);
-    ui->centralwidget->layout()->addWidget(m_sampleView->widget());
+    // m_sampleView = new SampleView(this);
+    m_bubble = new BubbleToolTip2(this);
+    // ui->centralwidget->layout()->addWidget(m_sampleView->widget());
+    ui->centralwidget->layout()->addWidget(m_bubble->widget());
 }
 
 MainWindow::~MainWindow()

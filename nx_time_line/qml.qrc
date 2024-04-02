@@ -2,5 +2,10 @@
     <qresource prefix="/">
         <file>qml/demo.qml</file>
         <file>qml/sample_view.qml</file>
+        <file>qml/bubble_tool_tip.qml</file>
+        <file>qml/NxObject.qml</file>
+        <file>qml/math_utils.js</file>
+        <file>qml/utils.js</file>
+        <file>qml/qmldir</file>
     </qresource>
 </RCC>

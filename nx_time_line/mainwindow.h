@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "bubbletooltip2.h"
 #include "demoquickwidget.h"
 #include "sampleview.h"
 
@@ -33,5 +34,6 @@ private:
     Ui::MainWindow *ui;
     // DemoQuickWidget *m_demoWidget = NULL;
     SampleView *m_sampleView = NULL;
+    BubbleToolTip2 *m_bubble = NULL;
 };
 #endif // MAINWINDOW_H

@@ -21,6 +21,9 @@ set(PROJECT_SOURCES
         demoquickwidget.h demoquickwidget.cpp
         sampleview.h sampleview.cpp
         models/sample.h models/sample.cpp
+        bubbletooltip2.h bubbletooltip2.cpp
+        singleton.h singleton.cpp
+        color_substitutions.h
         qml.qrc
 )
 
