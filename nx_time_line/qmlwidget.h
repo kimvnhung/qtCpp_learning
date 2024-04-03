@@ -2,18 +2,22 @@
 #define QMLWIDGET_H
 
 #include <QObject>
+#include <QQuickWidget>
 #include <QUrl>
 #include <QVariant>
 
  class QmlWidget : public QObject
 {
     Q_OBJECT
+public:
+    virtual QQuickWidget* widget() const = 0;
 
 protected:
     QmlWidget(const QUrl& componentUrl, QObject *parent = NULL);
     virtual void registerQmlType() = 0;
     virtual void setUpQmlUrl(const QUrl& componentUrl) = 0;
     virtual QObject* rootObject() const = 0;
+
 
     void init();
 

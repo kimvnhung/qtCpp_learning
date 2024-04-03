@@ -10,19 +10,23 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_demoWidget = new DemoQuickWidget(this);
-    ui->centralwidget->layout()->addWidget(m_demoWidget->widget());
-    QTimer::singleShot(1000,[this]{
-        m_demoWidget->setText("Hellsadasd");
-    });
+    // m_demoWidget = new DemoQuickWidget(this);
+    // ui->centralwidget->layout()->addWidget(m_demoWidget->widget());
+    // QTimer::singleShot(1000,[this]{
+    //     m_demoWidget->setText("Hellsadasd");
+    // });
 
     // m_sampleView = new SampleView(this);
     // m_bubble = new BubbleToolTip2(this);
-    m_timeMarker = new TimeMarker(this);
+    // m_timeMarker = new TimeMarker(this);
     // ui->centralwidget->layout()->addWidget(m_sampleView->widget());
     // ui->centralwidget->layout()->addWidget(m_bubble->widget());
-    ui->centralwidget->layout()->addWidget(m_timeMarker->widget());
-    m_timeMarker->show();
+    // ui->centralwidget->layout()->addWidget(m_timeMarker->widget());
+    // m_timeMarker->show();
+
+
+    m_timerPlayback = new TimerPlayback(this);
+    ui->centralwidget->layout()->addWidget(m_timerPlayback->widget());
 }
 
 MainWindow::~MainWindow()

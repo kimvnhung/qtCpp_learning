@@ -5,6 +5,7 @@
 #include "demoquickwidget.h"
 #include "sampleview.h"
 #include "timemarker.h"
+#include "timerplayback.h"
 
 #include <QMainWindow>
 
@@ -37,5 +38,6 @@ private:
     SampleView *m_sampleView = NULL;
     BubbleToolTip2 *m_bubble = NULL;
     TimeMarker *m_timeMarker = NULL;
+    TimerPlayback *m_timerPlayback = NULL;
 };
 #endif // MAINWINDOW_H

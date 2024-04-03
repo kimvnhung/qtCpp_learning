@@ -10,13 +10,51 @@
 class BubbleToolTipModel : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(State state READ state WRITE setState NOTIFY stateChanged FINAL)
+    Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged FINAL)
+    Q_PROPERTY(qreal normalizedPointerPos READ normalizedPointerPos WRITE setNormalizedPointerPos NOTIFY normalizedPointerPosChanged FINAL)
+    Q_PROPERTY(int pointerEdge READ pointerEdge WRITE setPointerEdge NOTIFY pointerEdgeChanged FINAL)
+
 public:
+    BubbleToolTipModel(QObject *parent = NULL);
+    ~BubbleToolTipModel();
+
     enum class State
     {
         shown,
         hidden,
         suppressed
     };
+    Q_ENUM(State)
+
+    State state();
+    void setState(State state);
+
+    QString text() const;
+    void setText(const QString &newText);
+
+    qreal normalizedPointerPos() const;
+    void setNormalizedPointerPos(qreal newNormalizedPointerPos);
+    int pointerEdge() const;
+    void setPointerEdge(int newPointerEdge);
+
+signals:
+    void stateChanged();
+
+    void textChanged();
+
+    void normalizedPointerPosChanged();
+    void pointerEdgeChanged();
+
+private:
+    State m_state;
+    QString m_text;
+    qreal m_normalizedPointerPos;
+    int m_pointerEdge;
+    bool m_visible;
+
+
+
 };
 
 class BubbleToolTip2 : public QmlWidget
@@ -45,7 +83,7 @@ public:
     void setTarget(const QPoint& targetPoint);
     void setEnclosingRect(const QRect& value);
 
-
+    virtual BubbleToolTipModel* model() const;
 
     State state() const;
 

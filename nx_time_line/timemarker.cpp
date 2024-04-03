@@ -4,16 +4,25 @@
 
 #include <QDateTime>
 
+using namespace std::chrono;
 static constexpr int kPointerLength = 3;
 
-struct TimeMarker::Private
+class TimeMarker::Private
 {
+public:
+    Private(TimeMarker* parent):
+        q(parent)
+    {
+        model = new Timeline(parent);
+    }
     TimeMarker* const q;
+    Timeline* model;
 
     FormatterPtr dateFormatter = Formatter::custom(
         QLocale(), Formatter::system()->is24HoursTimeFormat());
 
     std::optional<TimeContent> timeContent;
+
 
     int pointerX = 0;
     int bottomY = 0;
@@ -25,12 +34,6 @@ struct TimeMarker::Private
     void applyTimeContent();
     void updatePosition();
 
-    // const QmlProperty<QString> dateText{q->widget(), "dateText"};
-    // const QmlProperty<QString> timeText{q->widget(), "timeText"};
-    // const QmlProperty<QPointF> pointerPos{q->widget(), "pointerPos"};
-    // const QmlProperty<qreal> pointerLength{q->widget(), "pointerLength"};
-    // const QmlProperty<qreal> timestampMs{q->widget(), "timestampMs"};
-    // const QmlProperty<int> mode{q->widget(), "mode"};
 };
 
 TimeMarker::TimeMarker(QObject* parent):
@@ -38,13 +41,6 @@ TimeMarker::TimeMarker(QObject* parent):
 {
     setSuppressedOnMouseClick(false);
 }
-
-// void TimeMarker::registerQmlType()
-// {
-//     qDebug()<<"register models";
-//     qmlRegisterType<Timeline>("models",1,0,"Timeline");
-
-// }
 
 TimeMarker::TimeMarker(const QUrl& sourceUrl, QObject* parent):
     base_type(sourceUrl, parent,false),
@@ -57,10 +53,6 @@ TimeMarker::TimeMarker(const QUrl& sourceUrl, QObject* parent):
     setObjectName("TimeSliderTooltip");
     setOrientation(Qt::Vertical);
 
-    // if (ini().debugDisableQmlTooltips)
-    //     return;
-
-    // widget()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 }
 
 void TimeMarker::registerQmlType()
@@ -87,29 +79,26 @@ void TimeMarker::setShown(bool value)
         hide();
 }
 
-// QPointF TimeMarker::pointerPos() const
-// {
-//     return d->pointerPos();
-// }
+QPointF TimeMarker::pointerPos() const
+{
+    return reinterpret_cast<Timeline*>(model())->pointerPos();
+}
 
-// TimeMarker::Mode TimeMarker::mode() const
-// {
-//     return (Mode) d->mode.value();
-// }
+TimeMarker::Mode TimeMarker::mode() const
+{
+    return (Mode)reinterpret_cast<Timeline*>(model())->mode();
+}
 
-// void TimeMarker::setMode(Mode value)
-// {
-//     if (d->mode == (int) value)
-//         return;
-
-//     d->mode = (int) value;
-//     d->updatePosition();
-// }
+void TimeMarker::setMode(Mode value)
+{
+    reinterpret_cast<Timeline*>(model())->setMode((int)value);
+    d->updatePosition();
+}
 
 void TimeMarker::setTimeContent(const TimeContent& value)
 {
     d->timeContent = value;
-    // d->timestampMs = value.archivePosition.count();
+    reinterpret_cast<Timeline*>(model())->setTimestampMs(value.archivePosition.count());
     d->applyTimeContent();
 }
 
@@ -120,6 +109,11 @@ void TimeMarker::setTimeMarkerDisplay(Display value)
 
     d->display = value;
     d->applyTimeContent();
+}
+
+BubbleToolTipModel* TimeMarker::model() const
+{
+    return d->model;
 }
 
 void TimeMarker::setPosition(int pointerX, int bottomY, int minX, int maxX)
@@ -150,49 +144,134 @@ void TimeMarker::Private::applyTimeContent()
     else
     {
         dateTextLine.clear();
-        // timeFormat = timeContent->localFileLength >= 1h
-        //                  ? (timeContent->showMilliseconds ? Format::hhh_mm_ss_zzz : Format::hhh_mm_ss)
-        //                  : (timeContent->showMilliseconds ? Format::mm_ss_zzz : Format::mm_ss);
+        timeFormat = timeContent->localFileLength >= 1h
+                         ? (timeContent->showMilliseconds ? Format::hhh_mm_ss_zzz : Format::hhh_mm_ss)
+                         : (timeContent->showMilliseconds ? Format::mm_ss_zzz : Format::mm_ss);
     }
 
     timeTextLine = toString(timeContent->displayPosition.count(), timeFormat);
 
     if (dateTextLine.isEmpty())
     {
-        // timeText = timeTextLine;
-        // dateText = {};
+        model->setTimeText(timeTextLine);
+        model->setDateText({});
         return;
     }
 
-    // timeText = timeContent->showDate ? "" : timeTextLine;
-    // dateText = dateTextLine;
+    model->setTimeText(timeContent->showDate ? "" : timeTextLine);
+    model->setDateText(dateTextLine);
+
 }
 
 void TimeMarker::Private::updatePosition()
 {
-    // switch ((Mode) mode.value())
-    // {
-    // case Mode::normal:
-    // {
-    //     pointerLength = kPointerLength;
-    //     q->setEnclosingRect({minX, 0, maxX - minX, QWIDGETSIZE_MAX});
-    //     break;
-    // }
+    switch ((Mode)model->mode())
+    {
+    case Mode::normal:
+    {
+        model->setPointerLength(kPointerLength);
+        q->setEnclosingRect({minX, 0, maxX - minX, QWIDGETSIZE_MAX});
+        break;
+    }
 
-    // case Mode::leftmost:
-    // {
-    //     pointerLength = 0;
-    //     q->setEnclosingRect({pointerX, 0, QWIDGETSIZE_MAX, QWIDGETSIZE_MAX});
-    //     break;
-    // }
+    case Mode::leftmost:
+    {
+        model->setPointerLength(0);
+        q->setEnclosingRect({pointerX, 0, QWIDGETSIZE_MAX, QWIDGETSIZE_MAX});
+        break;
+    }
 
-    // case Mode::rightmost:
-    // {
-    //     pointerLength = 0;
-    //     q->setEnclosingRect({pointerX - QWIDGETSIZE_MAX, 0, QWIDGETSIZE_MAX, QWIDGETSIZE_MAX});
-    //     break;
-    // }
-    // }
+    case Mode::rightmost:
+    {
+        model->setPointerLength(0);
+        q->setEnclosingRect({pointerX - QWIDGETSIZE_MAX, 0, QWIDGETSIZE_MAX, QWIDGETSIZE_MAX});
+        break;
+    }
+    }
 
-    // q->setTarget(QPoint(pointerX, bottomY + pointerLength));
+    q->setTarget(QPoint(pointerX, bottomY + model->pointerLength()));
+}
+
+Timeline::Timeline(QObject *parent):
+    BubbleToolTipModel(parent)
+{
+
+}
+
+QString Timeline::dateText() const
+{
+    return m_dateText;
+}
+
+void Timeline::setDateText(const QString &newDateText)
+{
+    if (m_dateText == newDateText)
+        return;
+    m_dateText = newDateText;
+    emit dateTextChanged();
+}
+
+QString Timeline::timeText() const
+{
+    return m_timeText;
+}
+
+void Timeline::setTimeText(const QString &newTimeText)
+{
+    if (m_timeText == newTimeText)
+        return;
+    m_timeText = newTimeText;
+    emit timeTextChanged();
+}
+
+QPointF Timeline::pointerPos() const
+{
+    return m_pointerPos;
+}
+
+void Timeline::setPointerPos(QPointF newPointerPos)
+{
+    if (m_pointerPos == newPointerPos)
+        return;
+    m_pointerPos = newPointerPos;
+    emit pointerPosChanged();
+}
+
+qreal Timeline::pointerLength() const
+{
+    return m_pointerLength;
+}
+
+void Timeline::setPointerLength(qreal newPointerLength)
+{
+    if (qFuzzyCompare(m_pointerLength, newPointerLength))
+        return;
+    m_pointerLength = newPointerLength;
+    emit pointerLengthChanged();
+}
+
+qreal Timeline::timestampMs() const
+{
+    return m_timestampMs;
+}
+
+void Timeline::setTimestampMs(qreal newTimestampMs)
+{
+    if (qFuzzyCompare(m_timestampMs, newTimestampMs))
+        return;
+    m_timestampMs = newTimestampMs;
+    emit timestampMsChanged();
+}
+
+int Timeline::mode() const
+{
+    return m_mode;
+}
+
+void Timeline::setMode(int mode)
+{
+    if(m_mode == mode)
+        return;
+    m_mode = mode;
+    emit modeChanged();
 }

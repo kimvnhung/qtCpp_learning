@@ -5,10 +5,18 @@
 
 
 #include <QObject>
-class Timeline : public QObject
+class Timeline : public BubbleToolTipModel
 {
     Q_OBJECT
+    Q_PROPERTY(QString dateText READ dateText WRITE setDateText NOTIFY dateTextChanged FINAL)
+    Q_PROPERTY(QString timeText READ timeText WRITE setTimeText NOTIFY timeTextChanged FINAL)
+    Q_PROPERTY(QPointF pointerPos READ pointerPos WRITE setPointerPos NOTIFY pointerPosChanged FINAL)
+    Q_PROPERTY(qreal pointerLength READ pointerLength WRITE setPointerLength NOTIFY pointerLengthChanged FINAL)
+    Q_PROPERTY(qreal timestampMs READ timestampMs WRITE setTimestampMs NOTIFY timestampMsChanged FINAL)
+    Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged FINAL)
 public:
+    Timeline(QObject *parent = NULL);
+
     enum class TimeMarkerMode
     {
         normal,
@@ -24,6 +32,36 @@ public:
         automatic
     };
     Q_ENUM(TimeMarkerDisplay)
+
+    QString dateText() const;
+    void setDateText(const QString &newDateText);
+    QString timeText() const;
+    void setTimeText(const QString &newTimeText);
+    QPointF pointerPos() const;
+    void setPointerPos(QPointF newPointerPos);
+    qreal pointerLength() const;
+    void setPointerLength(qreal newPointerLength);
+    qreal timestampMs() const;
+    void setTimestampMs(qreal newTimestampMs);
+    int mode() const;
+    void setMode(int mode);
+
+signals:
+    void dateTextChanged();
+    void timeTextChanged();
+    void pointerPosChanged();
+    void pointerLengthChanged();
+    void timestampMsChanged();
+    void modeChanged();
+
+private:
+    QString m_dateText;
+    QString m_timeText;
+    QPointF m_pointerPos;
+    qreal m_pointerLength;
+    qreal m_timestampMs;
+    int m_mode;
+
 };
 
 class TimeMarker : public BubbleToolTip2
@@ -32,6 +70,7 @@ class TimeMarker : public BubbleToolTip2
     using base_type = BubbleToolTip2;
     using Mode = Timeline::TimeMarkerMode;
     using Display = Timeline::TimeMarkerDisplay;
+    using State = Timeline::State;
 public:
     struct TimeContent
     {
@@ -75,11 +114,12 @@ public:
      */
     void setPosition(int pointerX, int bottomY, int minX = 0, int maxX = 0);
 
+    BubbleToolTipModel* model() const;
 protected:
     explicit TimeMarker(const QUrl& sourceUrl, QObject* parent = nullptr);
 
 private:
-    struct Private;
+    class Private;
     QSharedPointer<Private> d;
 
     // QmlWidget interface
