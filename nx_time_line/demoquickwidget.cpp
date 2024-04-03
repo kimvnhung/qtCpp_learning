@@ -1,6 +1,7 @@
 #include "demoquickwidget.h"
 
 #include <QQuickWidget>
+#include <QQuickItem>
 
 struct DemoQuickWidget::Private {
     DemoQuickWidget* const q;
@@ -25,7 +26,7 @@ DemoQuickWidget::DemoQuickWidget(const QUrl& compentUrl,QObject* parent):
     d->widget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     d->widget->setSource(compentUrl);
 
-    connect(d->widget.get(),SIGNAL(textChanged(QString)), this, SIGNAL(textChanged(QString)));
+    // connect(d->widget.get(),SIGNAL(textChanged(&QString)), this, SIGNAL(textChanged(QString&)));
 }
 
 QQuickWidget* DemoQuickWidget::widget() const
@@ -36,7 +37,7 @@ QQuickWidget* DemoQuickWidget::widget() const
 void DemoQuickWidget::setText(QString text)
 {
     bool success;
-    QMetaObject::invokeMethod(d->widget.get(), "showText",
+    QMetaObject::invokeMethod(d->widget.get()->rootObject(), "showText",
                             Q_RETURN_ARG(bool,success),
                             Q_ARG(QString, text));
     qDebug()<<"set success : "<<success;

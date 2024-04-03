@@ -25,5 +25,6 @@ Item{
 
     function showText(text: string) : bool {
         demoText.text = text
+        return true
     }
 }

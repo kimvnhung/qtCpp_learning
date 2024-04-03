@@ -1,5 +1,0 @@
-module models
-
-MathUtils 1.0 math_utils.js
-NxObject 1.0 NxObject.qml
-Utils 1.0 utils.js

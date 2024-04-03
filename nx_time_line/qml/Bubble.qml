@@ -83,6 +83,7 @@ Item
 
     function show()
     {
+        console.log("das")
         if (showAnimation.running)
             return
 

@@ -2,10 +2,14 @@
     <qresource prefix="/">
         <file>qml/demo.qml</file>
         <file>qml/sample_view.qml</file>
-        <file>qml/bubble_tool_tip.qml</file>
+        <file>qml/Bubble.qml</file>
         <file>qml/NxObject.qml</file>
         <file>qml/math_utils.js</file>
         <file>qml/utils.js</file>
-        <file>qml/qmldir</file>
+        <file>qml/TimeMarker.qml</file>
+        <file>qml/SliderToolTip.qml</file>
+        <file>images/arrow_left.svg</file>
+        <file>images/arrow_right.svg</file>
+        <file>qml/DeprecatedIconButton.qml</file>
     </qresource>
 </RCC>

@@ -24,6 +24,9 @@ set(PROJECT_SOURCES
         bubbletooltip2.h bubbletooltip2.cpp
         singleton.h singleton.cpp
         color_substitutions.h
+        timemarker.h timemarker.cpp
+        formatter.h formatter.cpp
+        qmlwidget.h qmlwidget.cpp
         qml.qrc
 )
 
@@ -31,6 +34,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(nx_time_line
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
     )
 
 # Define target properties for Android with Qt 6 as:

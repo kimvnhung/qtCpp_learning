@@ -4,6 +4,7 @@
 #include "bubbletooltip2.h"
 #include "demoquickwidget.h"
 #include "sampleview.h"
+#include "timemarker.h"
 
 #include <QMainWindow>
 
@@ -32,8 +33,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    // DemoQuickWidget *m_demoWidget = NULL;
+    DemoQuickWidget *m_demoWidget = NULL;
     SampleView *m_sampleView = NULL;
     BubbleToolTip2 *m_bubble = NULL;
+    TimeMarker *m_timeMarker = NULL;
 };
 #endif // MAINWINDOW_H
