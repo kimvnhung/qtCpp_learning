@@ -20,5 +20,7 @@
         <file>images/earth.jpg</file>
         <file>qml/ScrollThumbnail.qml</file>
         <file>qml/ScrollableView.qml</file>
+        <file>qml/Scrollable.qml</file>
+        <file>qml/ScrollView.qml</file>
     </qresource>
 </RCC>
