@@ -22,5 +22,6 @@
         <file>qml/ScrollableView.qml</file>
         <file>qml/Scrollable.qml</file>
         <file>qml/ScrollView.qml</file>
+        <file>qml/ScrollCenterThumbnail.qml</file>
     </qresource>
 </RCC>
