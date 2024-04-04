@@ -11,7 +11,14 @@
         <file>images/arrow_left.svg</file>
         <file>images/arrow_right.svg</file>
         <file>qml/DeprecatedIconButton.qml</file>
-        <file>qml/ScrollableRule.qml</file>
+        <file>qml/Rule.qml</file>
         <file>qml/TimerPlayback.qml</file>
+        <file>qml/AdaptiveMouseWheelTransmission.qml</file>
+        <file>qml/AdaptiveTransmission.qml</file>
+        <file>qml/TestWidget.qml</file>
+        <file>images/tab_close_current_hovered@2x.png</file>
+        <file>images/earth.jpg</file>
+        <file>qml/ScrollThumbnail.qml</file>
+        <file>qml/ScrollableView.qml</file>
     </qresource>
 </RCC>
