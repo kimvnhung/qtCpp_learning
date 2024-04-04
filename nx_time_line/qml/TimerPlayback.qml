@@ -30,17 +30,42 @@ Item {
                 }
 
                 background.scrollPos = mouseX/width
+
             }
         }
 
         Rectangle{
             id: rule
-            width: 700
+            width: parent.width/background.scaleFactor
             height: 60
             anchors{
                 top: parent.top
             }
             color: "grey"
+
+            onWidthChanged: {
+                console.log("rule.Widt "+parseInt(width/20))
+            }
+
+            Row {
+                id: lv1
+                Repeater {
+                    model: Math.floor(rule.width/10)
+                    Rectangle{
+                        width: 10
+                        Rectangle {
+                            width: 2
+                            height: 20
+                            color: "green"
+                            anchors{
+                                top: parent.top
+                                left: parent.left
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         ScrollBar {
