@@ -11,7 +11,6 @@
         <file>images/arrow_left.svg</file>
         <file>images/arrow_right.svg</file>
         <file>qml/DeprecatedIconButton.qml</file>
-        <file>qml/Rule.qml</file>
         <file>qml/TimerPlayback.qml</file>
         <file>qml/AdaptiveMouseWheelTransmission.qml</file>
         <file>qml/AdaptiveTransmission.qml</file>
@@ -23,5 +22,6 @@
         <file>qml/Scrollable.qml</file>
         <file>qml/ScrollView.qml</file>
         <file>qml/ScrollCenterThumbnail.qml</file>
+        <file>qml/Rule.qml</file>
     </qresource>
 </RCC>

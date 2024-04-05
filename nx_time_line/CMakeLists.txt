@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
         formatter.h formatter.cpp
         qmlwidget.h qmlwidget.cpp
         timerplayback.h timerplayback.cpp
+        models/timerplaybackmodel.h models/timerplaybackmodel.cpp
+        models/ruleline.h models/ruleline.cpp
         qml.qrc
 )
 
@@ -35,6 +37,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(nx_time_line
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
     )
 
 # Define target properties for Android with Qt 6 as:

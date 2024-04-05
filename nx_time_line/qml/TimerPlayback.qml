@@ -1,18 +1,15 @@
 import QtQuick 2.15
 import QtQuick.Controls.Basic
 
-Item {
+import models 1.0
 
+Item {
     Rectangle {
         id: background
         width: 300
         height: 300
         color: "black"
         clip: true
-
-        property real scaleFactor: 1
-        property real scrollPos: 0
-        property real maxPos: 1-scaleFactor
 
         MouseArea{
             anchors.fill: parent
@@ -21,58 +18,47 @@ Item {
             }
 
             onWheel: {
-                background.scaleFactor += wheel.angleDelta.y/1200
-                if(background.scaleFactor >= 1){
-                    background.scaleFactor = 1;
-                }
-                if(background.scaleFactor <= 0.1){
-                    background.scaleFactor = 0.1
+                if(wheel.angleDelta.y < 0 && rule.width <= parent.width){
+                    return
                 }
 
-                background.scrollPos = mouseX/width
+                //calculate new ruleSize
+                var ruleSize = rule.width
+                ruleSize *= 1 + wheel.angleDelta.y/1200
+                if(ruleSize <= parent.width){
+                    ruleSize = 1
+                }
+                console.log("ruleSize "+ruleSize+"; parentWidth "+parent.width)
+                var scale = ruleSize/parent.width
+                if(ruleSize >= parent.width){
+                    instance.ruleWidth = ruleSize
+                    rule.x = mouseX*(1-scale)
+                }else {
+                    instance.ruleWidth = parent.width
+                    rule.x = 0
+                }
 
+                console.log("scale "+scale)
+
+                //calculate scrollbar size
+                var scrollSize = 1/scale
+                scrollbar.size = scrollSize<=0.1 ? 0.1:scrollSize
+
+                scrollbar.position = (mouseX-x)/rule.width-scrollbar.size/2
+                console.log("position "+scrollbar.position)
             }
         }
 
-        Rectangle{
+        Rule {
             id: rule
-            width: parent.width/background.scaleFactor
-            height: 60
-            anchors{
-                top: parent.top
-            }
-            color: "grey"
-
-            onWidthChanged: {
-                console.log("rule.Widt "+parseInt(width/20))
-            }
-
-            Row {
-                id: lv1
-                Repeater {
-                    model: Math.floor(rule.width/10)
-                    Rectangle{
-                        width: 10
-                        Rectangle {
-                            width: 2
-                            height: 20
-                            color: "green"
-                            anchors{
-                                top: parent.top
-                                left: parent.left
-                            }
-                        }
-                    }
-                }
-            }
-
+            width: instance.ruleWidth
         }
 
         ScrollBar {
-            id: control
+            id: scrollbar
             width: parent.width
-            size: background.scaleFactor
-            position: background.scrollPos
+            size: 1
+            position: 0
             active: true
             orientation: Qt.Horizontal
             policy: ScrollBar.AlwaysOn
@@ -84,9 +70,9 @@ Item {
             contentItem: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: 15
-                color: control.pressed ? "#81e889" : "#c2f4c6"
+                color: scrollbar.pressed ? "#81e889" : "#c2f4c6"
                 // Hide the ScrollBar when it's not needed.
-                opacity: control.policy === ScrollBar.AlwaysOn || (control.active && control.size < 1.0) ? 0.75 : 0
+                opacity: scrollbar.policy === ScrollBar.AlwaysOn || (scrollbar.active && scrollbar.size < 1.0) ? 0.75 : 0
 
                 // Animate the changes in opacity (default duration is 250 ms).
                 Behavior on opacity {
@@ -99,11 +85,27 @@ Item {
             }
 
             onPositionChanged: {
-                rule.x = position*(rule.width-parent.width)/background.maxPos
+                var maxPos = 1 - size
+                // rule.x = position*(rule.width-parent.width)/maxPos
             }
         }
 
 
+    }
+
+    function getHeightFromType(type) : real {
+        switch(type){
+        case 0: //RuleLineType.HIGHEST:
+            return 15
+        case 1: //RuleLineType.NORMAL:
+            return 11
+        case 2: //RuleLineType.SMALL:
+            return 7
+        case 3: //RuleLineType.SMALLEST:
+            return 3
+        default:
+            return 0
+        }
     }
 
 }
