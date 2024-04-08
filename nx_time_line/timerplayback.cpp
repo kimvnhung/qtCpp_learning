@@ -118,95 +118,38 @@ void TimerPlayback::Private::updateRuleLines()
 
     double widthPerMiliSecond = width/duration.count();
     int highestCount = 0;
-    std::chrono::milliseconds highestUnit = std::chrono::milliseconds(static_cast<int>(50/widthPerMiliSecond));
 
-    while ((widthPerMiliSecond*highestUnit.count())<HIGHEST_VISABLE_W) {
-        while (highestUnit <= duration) {
-            highestUnit += 100ms;
-            if (highestUnit > 3h)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(duration_cast<milliseconds>(3h).count())==0)
-                    break;
-            }
-            else if (highestUnit > 1h)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%duration_cast<milliseconds>(1h).count()==0)
-                    break;
-            }
-            else if (highestUnit > 30min)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%duration_cast<milliseconds>(30min).count()==0)
-                    break;
-            }
-            else if (highestUnit > 10min)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__<<"hihgestCount :"<<highestUnit.count()<<" 10ms.count :"<<duration_cast<milliseconds>(10min).count();
-                if (highestUnit.count()%duration_cast<milliseconds>(10min).count()==0)
-                    break;
-            }
-            else if (highestUnit > 5min)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(5min).count()==0)
-                    break;
-            }
-            else if (highestUnit > 1min)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(1min).count()==0)
-                    break;
-            }
-            else if (highestUnit > 30s)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(30s).count()==0)
-                    break;
-            }
-            else if (highestUnit > 10s)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(10s).count()==0)
-                    break;
-            }
-            else if (highestUnit > 30s)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(30s).count()==0)
-                    break;
-            }
-            else if (highestUnit > 10s)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(10s).count()==0)
-                    break;
-            }
-            else if (highestUnit > 5s)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(5s).count()==0)
-                    break;
-            }
-            else if (highestUnit > 1s)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(1s).count()==0)
-                    break;
-            }
-            else if (highestUnit > 500ms)
-            {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(500ms).count()==0)
-                    break;
-            }else {
-                qDebug()<<__FUNCTION__<<__LINE__;
-                if (highestUnit.count()%(100ms).count()==0)
-                    break;
-            }
-        }
+    std::chrono::milliseconds highestUnit = std::chrono::milliseconds(100);
+    if((100ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        //donothing
+    }else if((5*100ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 500ms;
+    }else if((1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 1000ms;
+    }else if((5000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 1000ms;
+    }else if((1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 1000ms;
+    }else if((5*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 5*1000ms;
+    }else if((10*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 10*1000ms;
+    }else if((30*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 30*1000ms;
+    }else if((60*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 60*1000ms;
+    }else if((5*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 5*60000ms;
+    }else if((10*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 10*60000ms;
+    }else if((30*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 30*60000ms;
+    }else if((60*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 60*60000ms;
+    }else if((3*60*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 3*60*60000ms;
     }
+
     qDebug()<<"highestUnit : "<<highestUnit<<"; distance : "<<widthPerMiliSecond*highestUnit.count();
 
     highestCount = duration/highestUnit;
