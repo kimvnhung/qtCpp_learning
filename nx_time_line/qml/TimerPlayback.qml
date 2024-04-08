@@ -4,7 +4,7 @@ import QtQuick.Controls.Basic
 import models 1.0
 
 Item {
-    Component.onCompleted: {
+    onWidthChanged: {
         instance.ruleWidth = background.width
     }
 
@@ -96,13 +96,13 @@ Item {
 
     function getHeightFromType(type) : real {
         switch(type){
-        case 0: //RuleLineType.HIGHEST:
+        case RuleLine.HIGHEST:
             return 15
-        case 1: //RuleLineType.NORMAL:
+        case RuleLine.NORMAL:
             return 11
-        case 2: //RuleLineType.SMALL:
+        case RuleLine.SMALL:
             return 7
-        case 3: //RuleLineType.SMALLEST:
+        case RuleLine.SMALLEST:
             return 3
         default:
             return 0

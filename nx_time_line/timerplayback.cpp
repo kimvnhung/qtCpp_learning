@@ -31,6 +31,10 @@ public:
     QList<RuleLine*> ruleLines;
     std::chrono::milliseconds duration;
 
+
+    template<typename Rep, typename Period>
+    bool is_round(const std::chrono::duration<Rep, Period>& duration, std::chrono::duration<Rep, Period> unit);
+
     void updateRuleLines();
     bool setWidth(double width);
 };
@@ -91,35 +95,131 @@ void TimerPlayback::setRuleWidth(double width)
 
 bool TimerPlayback::Private::setWidth(double w)
 {
+    qDebug()<<__FUNCTION__<<"width : "<<w;
+    if(!w)
+        return false;
+
     if(!initWidth)
         initWidth = w;
 
     if(width == w)
         return false;
 
-    updateRuleLines();
-
     width = w;
+    updateRuleLines();
     return true;
 }
 
 void TimerPlayback::Private::updateRuleLines()
 {
+    qDebug()<<__FUNCTION__;
+    if(!width)
+        return;
+
     double widthPerMiliSecond = width/duration.count();
     int highestCount = 0;
-    std::chrono::milliseconds highestUnit = std::chrono::milliseconds(100);
+    std::chrono::milliseconds highestUnit = std::chrono::milliseconds(static_cast<int>(50/widthPerMiliSecond));
 
-    if(duration >= 3h){
-        highestCount = duration_cast<hours>(duration).count()/3 +1;
-        highestUnit = std::chrono::hours(3);
+    while ((widthPerMiliSecond*highestUnit.count())<HIGHEST_VISABLE_W) {
+        while (highestUnit <= duration) {
+            highestUnit += 100ms;
+            if (highestUnit > 3h)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(duration_cast<milliseconds>(3h).count())==0)
+                    break;
+            }
+            else if (highestUnit > 1h)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%duration_cast<milliseconds>(1h).count()==0)
+                    break;
+            }
+            else if (highestUnit > 30min)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%duration_cast<milliseconds>(30min).count()==0)
+                    break;
+            }
+            else if (highestUnit > 10min)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__<<"hihgestCount :"<<highestUnit.count()<<" 10ms.count :"<<duration_cast<milliseconds>(10min).count();
+                if (highestUnit.count()%duration_cast<milliseconds>(10min).count()==0)
+                    break;
+            }
+            else if (highestUnit > 5min)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(5min).count()==0)
+                    break;
+            }
+            else if (highestUnit > 1min)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(1min).count()==0)
+                    break;
+            }
+            else if (highestUnit > 30s)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(30s).count()==0)
+                    break;
+            }
+            else if (highestUnit > 10s)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(10s).count()==0)
+                    break;
+            }
+            else if (highestUnit > 30s)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(30s).count()==0)
+                    break;
+            }
+            else if (highestUnit > 10s)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(10s).count()==0)
+                    break;
+            }
+            else if (highestUnit > 5s)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(5s).count()==0)
+                    break;
+            }
+            else if (highestUnit > 1s)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(1s).count()==0)
+                    break;
+            }
+            else if (highestUnit > 500ms)
+            {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(500ms).count()==0)
+                    break;
+            }else {
+                qDebug()<<__FUNCTION__<<__LINE__;
+                if (highestUnit.count()%(100ms).count()==0)
+                    break;
+            }
+        }
     }
+    qDebug()<<"highestUnit : "<<highestUnit<<"; distance : "<<widthPerMiliSecond*highestUnit.count();
 
+    highestCount = duration/highestUnit;
+
+    qDebug()<<"higestCount : "<<highestCount;
+    qDebug()<<"width : "<<width;
+    qDebug()<<"widthPerMiliSecond : "<<widthPerMiliSecond;
+    qDebug()<<"widthPerHighest : "<<duration_cast<milliseconds>(highestUnit*1).count()*widthPerMiliSecond;
 
     //case still not initialized
     if(ruleLines.empty()){
         for(int i=0; i< highestCount;i++){
             ruleLines.append(new RuleLine(q,RuleLine::RuleLineType::HIGHEST,highestUnit*i));
-            qDebug()<<"milicaonvert "<<duration_cast<milliseconds>(highestUnit*i).count()<<" width permisli "<<widthPerMiliSecond;
             ruleLines[i]->setPosition(duration_cast<milliseconds>(highestUnit*i).count()*widthPerMiliSecond);
         }
     }else {
@@ -130,7 +230,6 @@ void TimerPlayback::Private::updateRuleLines()
 
 double TimerPlayback::typeDistance(RuleLine::RuleLineType type)
 {
-    qDebug()<<"type "<<type;
     double startPos = 0;
     for (int i = 0; i < d->ruleLines.size(); i++) {
         if(d->ruleLines[i]->type() == type){

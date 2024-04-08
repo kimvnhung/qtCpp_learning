@@ -37,6 +37,7 @@ Rectangle{
                     width: instance.typeDistance(prRpt.model.modelData)
                     height: 30
                     color: "transparent"
+
                     Column{
                         anchors{
                             top: parent.top
@@ -57,10 +58,6 @@ Rectangle{
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                         }
-                    }
-
-                    onWidthChanged: {
-                        console.log("width "+width)
                     }
                 }
             }
