@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     m_timerPlayback = new TimerPlayback(this);
+    m_timerPlayback->setDuration(std::chrono::hours(7));
     ui->centralwidget->layout()->addWidget(m_timerPlayback->widget());
 }
 

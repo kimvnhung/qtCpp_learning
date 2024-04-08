@@ -4,10 +4,14 @@ import QtQuick.Controls.Basic
 import models 1.0
 
 Item {
+    Component.onCompleted: {
+        instance.ruleWidth = background.width
+    }
+
     Rectangle {
         id: background
-        width: 300
-        height: 300
+        width: parent.width
+        height: 400
         color: "black"
         clip: true
 
@@ -28,7 +32,6 @@ Item {
                 if(ruleSize <= parent.width){
                     ruleSize = 1
                 }
-                console.log("ruleSize "+ruleSize+"; parentWidth "+parent.width)
                 var scale = ruleSize/parent.width
                 if(ruleSize >= parent.width){
                     instance.ruleWidth = ruleSize
@@ -38,14 +41,12 @@ Item {
                     rule.x = 0
                 }
 
-                console.log("scale "+scale)
 
                 //calculate scrollbar size
                 var scrollSize = 1/scale
                 scrollbar.size = scrollSize<=0.1 ? 0.1:scrollSize
 
                 scrollbar.position = (mouseX-x)/rule.width-scrollbar.size/2
-                console.log("position "+scrollbar.position)
             }
         }
 
@@ -86,7 +87,7 @@ Item {
 
             onPositionChanged: {
                 var maxPos = 1 - size
-                // rule.x = position*(rule.width-parent.width)/maxPos
+                rule.x = position*(rule.width-parent.width)/maxPos
             }
         }
 

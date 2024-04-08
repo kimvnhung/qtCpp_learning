@@ -14,6 +14,7 @@ class TimerPlayback : public QmlWidget
     using base_type = QmlWidget;
 public:
     explicit TimerPlayback(QObject *parent = nullptr,bool isInit = true);
+    void setDuration(std::chrono::milliseconds duration);
 
     QQmlListProperty<RuleLine> ruleLines();
     double ruleWidth() const;
@@ -23,6 +24,10 @@ public:
 signals:
     void ruleLinesChanged();
     void ruleWidthChanged();
+
+
+public slots:
+    double typeDistance(RuleLine::RuleLineType type);
 
     // QmlWidget interface
 protected:

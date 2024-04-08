@@ -5,9 +5,13 @@
 #include <QQuickItem>
 
 using namespace std::chrono;
+
+double HIGHEST_VISABLE_W = 50;
+
 class TimerPlayback::Private{
 public:
     Private(TimerPlayback *parent):
+        q(parent),
         initWidth(0),
         initHeight(0),
         width(0),
@@ -15,22 +19,14 @@ public:
         duration(std::chrono::milliseconds(0))
     {
         //demo init
-        ruleLines.append(new RuleLine(parent,RuleLine::HIGHEST,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::NORMAL,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::SMALL,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::SMALLEST,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::HIGHEST,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::NORMAL,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::SMALL,"1h",1h));
-        ruleLines.append(new RuleLine(parent,RuleLine::SMALLEST,"1h",1h));
+
     }
+    TimerPlayback* q;
 
     std::unique_ptr<QQuickWidget> widget{new QQuickWidget()};
 
     double width,height;
     double initWidth,initHeight;
-
-
 
     QList<RuleLine*> ruleLines;
     std::chrono::milliseconds duration;
@@ -48,9 +44,15 @@ TimerPlayback::TimerPlayback(QObject *parent, bool isInit):
     }
 }
 
+void TimerPlayback::setDuration(std::chrono::milliseconds duration)
+{
+    d->duration = duration;
+    d->updateRuleLines();
+}
+
 void TimerPlayback::registerQmlType()
 {
-    qmlRegisterType<TimerPlayback>("models",1,0,"TimerPlaybackModel");
+    qmlRegisterUncreatableType<RuleLine>("models",1,0,"RuleLine","Cannot create RuleLine in QML");
     widget()->rootContext()->setContextProperty(QString("instance"),this);
 }
 
@@ -89,7 +91,6 @@ void TimerPlayback::setRuleWidth(double width)
 
 bool TimerPlayback::Private::setWidth(double w)
 {
-    qDebug()<<"width "<<w;
     if(!initWidth)
         initWidth = w;
 
@@ -104,6 +105,42 @@ bool TimerPlayback::Private::setWidth(double w)
 
 void TimerPlayback::Private::updateRuleLines()
 {
+    double widthPerMiliSecond = width/duration.count();
+    int highestCount = 0;
+    std::chrono::milliseconds highestUnit = std::chrono::milliseconds(100);
 
+    if(duration >= 3h){
+        highestCount = duration_cast<hours>(duration).count()/3 +1;
+        highestUnit = std::chrono::hours(3);
+    }
+
+
+    //case still not initialized
+    if(ruleLines.empty()){
+        for(int i=0; i< highestCount;i++){
+            ruleLines.append(new RuleLine(q,RuleLine::RuleLineType::HIGHEST,highestUnit*i));
+            qDebug()<<"milicaonvert "<<duration_cast<milliseconds>(highestUnit*i).count()<<" width permisli "<<widthPerMiliSecond;
+            ruleLines[i]->setPosition(duration_cast<milliseconds>(highestUnit*i).count()*widthPerMiliSecond);
+        }
+    }else {
+         //case alread initialized
+    }
+    emit q->ruleLinesChanged();
+}
+
+double TimerPlayback::typeDistance(RuleLine::RuleLineType type)
+{
+    qDebug()<<"type "<<type;
+    double startPos = 0;
+    for (int i = 0; i < d->ruleLines.size(); i++) {
+        if(d->ruleLines[i]->type() == type){
+            if(startPos == 0)
+                startPos = d->ruleLines[i]->position();
+            else
+                return d->ruleLines[i]->position()-startPos;
+        }
+    }
+
+    return 40;// default
 }
 

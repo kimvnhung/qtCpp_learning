@@ -21,6 +21,30 @@ FfmpegPlayer::FfmpegPlayer(FrameQueue *queue, QObject *parent)
     m_url ="";
 }
 
+// QImage avFrameToQImage(const AVFrame *frame) {
+//     if (!frame)
+//         return QImage();
+
+//     /* 1. Get frame and QImage to show */
+//     QImage *myImage = new QImage(1920, 1080, QImage::Format_RGBA8888);
+
+//     /* 2. Convert and write into image buffer  */
+//     uint8_t *dst[] = {myImage->bits()};
+//     int linesizes[4];
+//     av_image_fill_linesizes(linesizes, AV_PIX_FMT_RGBA, frame->width);
+
+//     sws_scale(myswscontext, frame->data, (const int*)frame->linesize,
+//               0, frame->height, dst, linesizes);
+
+//     // Free the SwsContext
+//     sws_freeContext(swsCtx);
+
+//     // Delete the RGB data buffer
+//     delete[] rgbData;
+
+//     return image;
+// }
+
 void convertFrameToYUV(const AVFrame *frame, char **yuvData, int *width, int *height, int *stride) {
     // Extract width, height, and stride
     *width = frame->width;
