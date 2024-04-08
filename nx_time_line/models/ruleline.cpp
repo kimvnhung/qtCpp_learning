@@ -6,21 +6,20 @@ std::string convertMillisecondsToString(std::chrono::milliseconds duration) {
     using namespace std::chrono;
 
     // Convert milliseconds to seconds, minutes, hours, and remaining milliseconds
-    auto totalSeconds = duration_cast<seconds>(duration).count();
-    auto totalMinutes = duration_cast<minutes>(duration).count();
-    auto totalHours = duration_cast<hours>(duration).count();
 
-    // Calculate remaining milliseconds after converting to minutes
-    auto remainingMillis = duration.count() % 1000;
+    std::chrono::hours totalHours = duration_cast<hours>(duration);
+    std::chrono::minutes totalMinutes = duration_cast<minutes>(duration-totalHours);
+    std::chrono::seconds totalSeconds = duration_cast<seconds>(duration-totalHours-totalMinutes);
+    std::chrono::milliseconds totalMiliseconds = duration_cast<milliseconds>(duration-totalHours-totalMinutes-totalSeconds);
 
-    if (totalHours > 0) {
-        return std::to_string(totalHours) + "h";
-    } else if (totalMinutes > 0) {
-        return std::to_string(totalMinutes) + "m";
-    } else if (totalSeconds > 0) {
-        return std::to_string(totalSeconds) + "s";
+    if (totalSeconds.count() > 0) {
+        return std::to_string(totalSeconds.count()) + "s";
+    } else if (totalMinutes.count() > 0) {
+        return std::to_string(totalMinutes.count()) + "m";
+    } else if (totalHours.count() > 0) {
+        return std::to_string(totalHours.count()) + "h";
     } else {
-        return std::to_string(remainingMillis) + "ms";
+        return std::to_string(totalMiliseconds.count()) + "ms";
     }
 }
 
@@ -32,6 +31,11 @@ RuleLine::RuleLine(QObject *parent, RuleLineType type, std::chrono::milliseconds
     m_value(value)
 {
 
+}
+
+std::chrono::milliseconds RuleLine::value() const
+{
+    return m_value;
 }
 
 QString RuleLine::text() const

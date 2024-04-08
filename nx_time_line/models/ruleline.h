@@ -36,6 +36,8 @@ public:
     double position() const;
     void setPosition(double pos);
 
+    std::chrono::milliseconds value() const;
+
 signals:
     void textChanged();
     void typeChanged();

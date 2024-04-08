@@ -16,6 +16,8 @@ public:
         initHeight(0),
         width(0),
         height(0),
+        viewWidth(0),
+        viewX(0),
         duration(std::chrono::milliseconds(0))
     {
         //demo init
@@ -27,6 +29,8 @@ public:
 
     double width,height;
     double initWidth,initHeight;
+    double viewWidth;
+    double viewX;
 
     QList<RuleLine*> ruleLines;
     std::chrono::milliseconds duration;
@@ -37,6 +41,8 @@ public:
 
     void updateRuleLines();
     bool setWidth(double width);
+    bool setViewWidth(double value);
+    bool setViewX(double value);
 };
 
 TimerPlayback::TimerPlayback(QObject *parent, bool isInit):
@@ -93,6 +99,28 @@ void TimerPlayback::setRuleWidth(double width)
         emit ruleWidthChanged();
 }
 
+double TimerPlayback::viewWidth() const
+{
+    return d->viewWidth;
+}
+
+void TimerPlayback::setViewWidth(double value)
+{
+    if(d->setViewWidth(value))
+        emit viewWidthChanged();
+}
+
+double TimerPlayback::viewX() const
+{
+    return d->viewX;
+}
+
+void TimerPlayback::setViewX(double value)
+{
+    if(d->setViewX(value))
+        emit viewXChanged();
+}
+
 bool TimerPlayback::Private::setWidth(double w)
 {
     qDebug()<<__FUNCTION__<<"width : "<<w;
@@ -110,9 +138,46 @@ bool TimerPlayback::Private::setWidth(double w)
     return true;
 }
 
+bool TimerPlayback::Private::setViewWidth(double value)
+{
+    qDebug()<<__FUNCTION__<<"viewWidth : "<<value;
+    if(value == 0)
+        return false;
+
+    if(viewWidth == value)
+        return false;
+
+    viewWidth = value;
+    updateRuleLines();
+    return true;
+}
+
+bool TimerPlayback::Private::setViewX(double value)
+{
+    qDebug()<<__FUNCTION__<<"x : "<<value;
+    if(value == 0)
+        return false;
+
+    if(viewX == value)
+        return false;
+
+    viewX = value;
+    updateRuleLines();
+    return true;
+}
+
+std::chrono::milliseconds roundByUnit(std::chrono::milliseconds duration, std::chrono::milliseconds unit){
+    int divided = duration.count()/unit.count();
+    return std::chrono::milliseconds(divided*unit.count());
+}
+
 void TimerPlayback::Private::updateRuleLines()
 {
     qDebug()<<__FUNCTION__;
+    //for test other
+    if(1)
+        return;
+
     if(!width)
         return;
 
@@ -120,53 +185,96 @@ void TimerPlayback::Private::updateRuleLines()
     int highestCount = 0;
 
     std::chrono::milliseconds highestUnit = std::chrono::milliseconds(100);
-    if((100ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        //donothing
-    }else if((5*100ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 500ms;
-    }else if((1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 1000ms;
-    }else if((5000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 1000ms;
-    }else if((1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 1000ms;
-    }else if((5*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 5*1000ms;
-    }else if((10*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 10*1000ms;
-    }else if((30*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 30*1000ms;
-    }else if((60*1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 60*1000ms;
-    }else if((5*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 5*60000ms;
-    }else if((10*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 10*60000ms;
-    }else if((30*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 30*60000ms;
-    }else if((60*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 60*60000ms;
-    }else if((3*60*60000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
-        highestUnit = 3*60*60000ms;
+    std::chrono::milliseconds normalUnit,smallUnit,smallestUnit;
+    // if((100ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+    //     //Minimum Smallest
+    // }else if((5*100ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+    //     //Minimum Small
+    //     highestUnit = 500ms;
+    // }else if((1000ms).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+    //     //Minimum Normal
+    //     highestUnit = 1000ms;
+    // }else
+    if(duration_cast<milliseconds>(5s).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        //Minimum Highest
+        highestUnit = 5s;
+        normalUnit = 1s;
+        smallUnit = 500ms;
+        smallestUnit = 100ms;
+    }else if(duration_cast<milliseconds>(10s).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 10s;
+        normalUnit = 5s;
+        smallUnit = 1s;
+        smallestUnit = 500ms;
+    }else if(duration_cast<milliseconds>(30s).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 30s;
+        normalUnit = 10s;
+        smallUnit = 5s;
+        smallestUnit = 1s;
+    }else if(duration_cast<milliseconds>(1min).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 1min;
+        normalUnit = 30s;
+        smallUnit = 10s;
+        smallestUnit = 5s;
+    }else if(duration_cast<milliseconds>(5min).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 5min;
+        normalUnit = 1min;
+        smallUnit = 30s;
+        smallestUnit = 10s;
+    }else if(duration_cast<milliseconds>(10min).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 10min;
+        normalUnit = 5min;
+        smallUnit = 1min;
+        smallestUnit = 30s;
+    }else if(duration_cast<milliseconds>(30min).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 30min;
+        normalUnit = 10min;
+        smallUnit = 5min;
+        smallestUnit = 1min;
+    }else if(duration_cast<milliseconds>(1h).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 1h;
+        normalUnit = 30min;
+        smallUnit = 10min;
+        smallestUnit = 5min;
+    }else if(duration_cast<milliseconds>(3h).count()*widthPerMiliSecond > HIGHEST_VISABLE_W){
+        highestUnit = 3h;
+        normalUnit = 1h;
+        smallUnit = 30min;
+        smallestUnit = 10min;
     }
 
-    qDebug()<<"highestUnit : "<<highestUnit<<"; distance : "<<widthPerMiliSecond*highestUnit.count();
-
+    int totalCount = duration/std::chrono::milliseconds(100);
     highestCount = duration/highestUnit;
 
-    qDebug()<<"higestCount : "<<highestCount;
-    qDebug()<<"width : "<<width;
-    qDebug()<<"widthPerMiliSecond : "<<widthPerMiliSecond;
-    qDebug()<<"widthPerHighest : "<<duration_cast<milliseconds>(highestUnit*1).count()*widthPerMiliSecond;
-
     //case still not initialized
-    if(ruleLines.empty()){
-        for(int i=0; i< highestCount;i++){
-            ruleLines.append(new RuleLine(q,RuleLine::RuleLineType::HIGHEST,highestUnit*i));
-            ruleLines[i]->setPosition(duration_cast<milliseconds>(highestUnit*i).count()*widthPerMiliSecond);
+    if(ruleLines.length() < totalCount){
+        ruleLines.clear();
+
+        std::chrono::milliseconds startValue = roundByUnit(std::chrono::milliseconds(static_cast<int>(viewX/widthPerMiliSecond)),smallestUnit);
+        std::chrono::milliseconds stopValue = roundByUnit(std::chrono::milliseconds(static_cast<int>((viewX+viewWidth)/widthPerMiliSecond)),smallestUnit);
+        //smallest point
+        std::chrono::milliseconds counter = startValue;
+        while (counter<=stopValue) {
+            qDebug()<<__FUNCTION__<<__LINE__<<counter;
+            RuleLine *newLine = new RuleLine(q,RuleLine::RuleLineType::SMALLEST,counter);
+            newLine->setPosition(counter.count()*widthPerMiliSecond);
+            ruleLines.append(newLine);
+            counter += smallestUnit;
         }
+
+        startValue = roundByUnit(startValue,highestUnit);
+        stopValue = roundByUnit(stopValue,highestUnit);
+        counter = startValue;
+        while (counter<=stopValue) {
+            qDebug()<<__FUNCTION__<<__LINE__;
+            RuleLine *newLine = new RuleLine(q,RuleLine::RuleLineType::HIGHEST,counter);
+            newLine->setPosition(counter.count()*widthPerMiliSecond);
+            ruleLines.append(newLine);
+            counter += highestUnit;
+        }
+
     }else {
-         //case alread initialized
+        //case alread initialized
     }
     emit q->ruleLinesChanged();
 }

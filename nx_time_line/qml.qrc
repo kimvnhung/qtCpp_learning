@@ -23,5 +23,7 @@
         <file>qml/ScrollView.qml</file>
         <file>qml/ScrollCenterThumbnail.qml</file>
         <file>qml/Rule.qml</file>
+        <file>qml/RuleLineItem.qml</file>
+        <file>qml/RuleLineEdge.qml</file>
     </qresource>
 </RCC>

@@ -6,6 +6,7 @@ import models 1.0
 Item {
     onWidthChanged: {
         instance.ruleWidth = background.width
+        // instance.viewWidth = background.width
     }
 
     Rectangle {
@@ -53,6 +54,9 @@ Item {
         Rule {
             id: rule
             width: instance.ruleWidth
+            onXChanged: {
+                // instance.viewX = Math.abs(x)
+            }
         }
 
         ScrollBar {
@@ -94,19 +98,6 @@ Item {
 
     }
 
-    function getHeightFromType(type) : real {
-        switch(type){
-        case RuleLine.HIGHEST:
-            return 15
-        case RuleLine.NORMAL:
-            return 11
-        case RuleLine.SMALL:
-            return 7
-        case RuleLine.SMALLEST:
-            return 3
-        default:
-            return 0
-        }
-    }
+
 
 }
