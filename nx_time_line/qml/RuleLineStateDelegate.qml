@@ -18,6 +18,16 @@ Rectangle{
     height: parent.height
     color: "transparent"
 
+    RuleLineEdge{
+        anchors{
+            top: parent.top
+            left: parent.left
+        }
+        lineType: parent.lineType
+        value: offset+(root.index+1)*parent.unit
+        visible: curCount==1 || parent.index !== 0
+    }
+
     Row{
         anchors {
             top: parent.top
@@ -36,22 +46,14 @@ Rectangle{
                     item.curCount = root.subCount
                     item.index = index
                     item.lineType = root.lineType+1
+                    item.offset = root.offset
                 }
             }
         }
     }
 
-    RuleLineEdge{
-        anchors{
-            top: parent.top
-            right: parent.right
-        }
-        lineType: parent.lineType
-        value: offset+(root.index+1)*parent.unit
-        visible: curCount==1 || parent.index !== parent.curCount-1
+    onOffsetChanged: {
+        console.log("offset "+offset)
     }
 
-    onIndexChanged: {
-        console.log("rootIndex "+index+"; lineType:"+lineType)
-    }
 }

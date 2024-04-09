@@ -70,8 +70,17 @@ Rectangle{
     //         left: ruleHeader.left
     //     }
     // }
+    property int totalInput : 10800000
 
-    RuleLineStateItem {
-        width: parent.width*0.9
+    Row{
+        Repeater{
+            id: repeater
+            model: 3
+            RuleLineStateItem {
+                width: rule.width/repeater.count
+                ms: rule.totalInput/repeater.count
+                offset: index*rule.totalInput/repeater.count
+            }
+        }
     }
 }
