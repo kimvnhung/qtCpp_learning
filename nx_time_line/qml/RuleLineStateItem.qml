@@ -10,86 +10,29 @@ Rectangle {
 
     property int ms: 5000
 
-    Row{
-        anchors {
-            top: parent.top
-            left: parent.left
-        }
-
-        Repeater{
-            id: repNormal
-            property int ms: root.ms/count
-
-
-            model: 2
-            // Rectangle{
-            //     id: repNormalContent
-            //     width: root.width/repNormal.count
-            //     height: root.height
-            //     color: "transparent"
-
-            //     Row{
-            //         anchors {
-            //             top: parent.top
-            //             left: parent.left
-            //         }
-
-            //         Repeater {
-            //             id: repSmall
-            //             property int ms: repNormal.ms/count
-            //             model: 5
-            //             Rectangle{
-            //                 id: repSmallContent
-            //                 width: repNormalContent.width/repSmall.count
-            //                 height: root.height
-            //                 color: "transparent"
-
-            //                 RuleLineStateDelegate{
-            //                     offset: 0
-            //                     ms: 0
-            //                     model: 10
-            //                     lineType: RuleLine.SMALLEST
-            //                 }
-
-            //                 RuleLineEdge{
-            //                     anchors{
-            //                         top: parent.top
-            //                         right: parent.right
-            //                     }
-            //                     lineType: RuleLine.SMALL
-            //                     value: (index+1)*repSmall.ms+(repNormal.index+1)*repNormal.ms
-            //                     visible: index !== repSmall.count-1
-            //                 }
-            //             }
-            //         }
-            //     }
-
-            //     RuleLineEdge{
-            //         anchors{
-            //             top: parent.top
-            //             right: parent.right
-            //         }
-            //         lineType: RuleLine.NORMAL
-            //         value: (index+1)*repNormal.ms
-            //         visible: index !== repNormal.count-1
-            //     }
-            // }
-            RuleLineStateDelegate{
-                offset: 0
-                ms: 1000
-                model: 2
-                lineType: RuleLine.NORMAL
+    RuleLineStateDelegate{
+        unit: 5000
+        curCount: 1
+        subCount: 5
+        lineType: RuleLine.HIGHEST
+        component: RuleLineStateDelegate{
+            unit: 1000
+            curCount: 5
+            subCount: 2
+            lineType: RuleLine.NORMAL
+            component: RuleLineStateDelegate{
+                unit: 500
+                curCount: 2
+                subCount: 5
+                lineType: RuleLine.SMALL
+                component: RuleLineStateDelegate{
+                    unit: 100
+                    curCount: 5
+                    subCount: 0
+                    lineType: RuleLine.SMALLEST
+                }
             }
         }
-    }
-
-    RuleLineEdge{
-        anchors{
-            top: parent.top
-            right: parent.right
-        }
-        lineType: RuleLine.HIGHEST
-        value: root.ms
     }
 
     states: [
