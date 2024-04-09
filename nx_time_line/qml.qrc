@@ -25,5 +25,10 @@
         <file>qml/Rule.qml</file>
         <file>qml/RuleLineItem.qml</file>
         <file>qml/RuleLineEdge.qml</file>
+        <file>qml/DurationRule.qml</file>
+        <file>qml/DurationRuleContent.qml</file>
+        <file>qml/RuleHalfSpace.qml</file>
+        <file>qml/RuleLineStateItem.qml</file>
+        <file>qml/RuleLineStateDelegate.qml</file>
     </qresource>
 </RCC>

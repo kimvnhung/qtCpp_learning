@@ -4,7 +4,7 @@ import models 1.0
 
 
 Rectangle {
-    property int lineType: RuleLine.UNDEFINED
+
     property int msValue: 100
     width: parent.width
     height: 100
@@ -17,6 +17,7 @@ Rectangle {
         RuleLineSubItem{
             height: getHeightFromType(lineType)
         }
+
         RuleLineSubItem{
             height: getHeightFromType(lineType)
         }

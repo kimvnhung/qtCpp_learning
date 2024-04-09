@@ -64,11 +64,14 @@ Rectangle{
     //     }
     // }
 
-    RuleLineItem{
-        anchors{
-            top: ruleHeader.bottom
-            left: ruleHeader.left
-        }
-        lineType: RuleLine.HIGHEST
+    // RuleLineItem{
+    //     anchors{
+    //         top: ruleHeader.bottom
+    //         left: ruleHeader.left
+    //     }
+    // }
+
+    RuleLineStateItem {
+        width: parent.width*0.9
     }
 }
