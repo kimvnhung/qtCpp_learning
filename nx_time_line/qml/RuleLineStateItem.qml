@@ -6,7 +6,7 @@ Rectangle {
     id: root
     width: parent.width
     height: 100
-    color:"green"
+    color:"transparent"
 
     readonly property var delegateStates : [
         [2,5,10]
@@ -19,7 +19,6 @@ Rectangle {
     property int offset: 0
 
     onWidthChanged: {
-        console.log("offset "+offset)
         delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
     }
 
@@ -71,9 +70,6 @@ Rectangle {
             height: parent.height
         }
         model: []
-        onUnitChanged: {
-            console.log("unit "+unit+"; offset "+offset)
-        }
     }
 
     // onMsChanged: {
