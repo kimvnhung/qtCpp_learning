@@ -36,7 +36,7 @@ Rectangle{
                 offset: index*rule.totalInput/repeater.count
 
                 onWidthChanged: {
-                    console.log("idnex "+index)
+                    console.log("idnex "+index+";offset "+ offset)
                 }
             }
 

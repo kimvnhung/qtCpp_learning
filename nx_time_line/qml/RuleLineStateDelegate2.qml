@@ -5,6 +5,7 @@ import models 1.0
 Rectangle{
     id: root
     required property int unit
+    property int offset: 0
     required property int lineType
     property alias model: repeater.model
     property Component delegate: Item{}
@@ -17,7 +18,7 @@ Rectangle{
             left: parent.right
         }
         lineType: root.lineType
-        value: unit
+        value: unit+offset
     }
 
     Row{
