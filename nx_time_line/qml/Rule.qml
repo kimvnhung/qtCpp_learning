@@ -23,12 +23,12 @@ Rectangle{
         color: "grey"
     }
 
-    property int totalInput : 5000
+    property int totalInput : 10000
 
     Row{
         Repeater{
             id: repeater
-            model: 5
+            model: 2
             RuleLineStateItem {
                 required property int index
                 width: rule.width/repeater.count

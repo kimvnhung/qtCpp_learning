@@ -11,7 +11,10 @@ Column {
         width: 1
         height: getHeightFromType(lineType)
         color: "white"
-        opacity: 1-parent.lineType*0.1
+        opacity: 1-parent.lineType*0.25
+        onOpacityChanged: {
+            console.log("lineType "+lineType+";opacity :"+opacity)
+        }
     }
 
     Text {
@@ -20,6 +23,7 @@ Column {
         text: convertMillisecondsToString(value)
         color: root.lineType != RuleLine.SMALLEST? "white":"transparent"
         horizontalAlignment: Text.AlignHCenter
+        opacity: 1-parent.lineType*0.25
     }
 
     function getHeightFromType(type) : real {
