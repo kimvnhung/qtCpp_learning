@@ -30,14 +30,16 @@ Rectangle{
             id: repeater
             model: 5
             RuleLineStateItem {
+                required property int index
                 width: rule.width/repeater.count
                 ms: rule.totalInput/repeater.count
                 offset: index*rule.totalInput/repeater.count
+
+                onWidthChanged: {
+                    console.log("idnex "+index)
+                }
             }
 
-            onModelChanged: {
-                console.log("rule.width "+rule.width+"; modelCount "+count)
-            }
         }
     }
 

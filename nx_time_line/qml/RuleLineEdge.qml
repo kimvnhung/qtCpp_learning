@@ -44,14 +44,14 @@ Column {
         var totalSeconds = Math.floor((duration % (1000 * 60)) / 1000);
         var totalMilliseconds = duration % 1000;
 
-        if (totalSeconds > 0) {
+        if(totalMilliseconds > 0){
+            return totalMilliseconds + "ms";
+        }else if (totalSeconds > 0) {
             return totalSeconds + "s";
         } else if (totalMinutes > 0) {
             return totalMinutes + "m";
         } else if (totalHours > 0) {
             return totalHours + "h";
-        } else {
-            return totalMilliseconds + "ms";
         }
     }
 }
