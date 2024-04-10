@@ -70,7 +70,7 @@ Rectangle{
     //         left: ruleHeader.left
     //     }
     // }
-    property int totalInput : 10800000
+    property int totalInput : 15000
 
     Row{
         Repeater{

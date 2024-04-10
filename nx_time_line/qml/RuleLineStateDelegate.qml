@@ -24,8 +24,11 @@ Rectangle{
             left: parent.left
         }
         lineType: parent.lineType
-        value: offset+(root.index+1)*parent.unit
+        value: offset+root.index*parent.unit
         visible: curCount==1 || parent.index !== 0
+        onValueChanged: {
+            console.log("value "+value)
+        }
     }
 
     Row{

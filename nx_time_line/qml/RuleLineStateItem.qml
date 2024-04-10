@@ -14,36 +14,34 @@ Rectangle {
     RuleLineStateDelegate{
         id: highest
         offset: parent.offset
-        unit: 5000
+        unit: root.ms
         curCount: 1
         subCount: 5
         lineType: RuleLine.HIGHEST
-        // component: RuleLineStateDelegate{
-        //     id: normal
-        //     unit: 1000
-        //     curCount: 5
-        //     subCount: 2
-        //     lineType: RuleLine.NORMAL
-        //     component: RuleLineStateDelegate{
-        //         id: small
-        //         unit: 500
-        //         curCount: 2
-        //         subCount: 5
-        //         lineType: RuleLine.SMALL
-        //         component: RuleLineStateDelegate{
-        //             id: smallest
-        //             unit: 100
-        //             curCount: 5
-        //             subCount: 0
-        //             lineType: RuleLine.SMALLEST
-        //         }
-        //     }
-        // }
+        component: RuleLineStateDelegate{
+            id: normal
+            unit: highest.unit/highest.subCount
+            curCount: 5
+            subCount: 2
+            lineType: RuleLine.NORMAL
+            component: RuleLineStateDelegate{
+                id: small
+                unit: normal.unit/normal.subCount
+                curCount: 2
+                subCount: 5
+                lineType: RuleLine.SMALL
+                component: RuleLineStateDelegate{
+                    id: smallest
+                    unit: small.unit/small.subCount
+                    curCount: 5
+                    subCount: 0
+                    lineType: RuleLine.SMALLEST
+                }
+            }
+        }
     }
 
     onMsChanged: {
-        console.log("ms : "+ms)
-        console.log("offset :" +offset )
         var secs = ms/1000
         var mins = ms/(60*1000)
         var hours = ms/(60*60*1000)
