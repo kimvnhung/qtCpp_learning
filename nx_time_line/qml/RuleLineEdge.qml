@@ -12,9 +12,6 @@ Column {
         height: getHeightFromType(lineType)
         color: "white"
         opacity: 1-parent.lineType*0.25
-        onOpacityChanged: {
-            console.log("lineType "+lineType+";opacity :"+opacity)
-        }
     }
 
     Text {

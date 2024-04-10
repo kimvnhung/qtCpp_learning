@@ -10,10 +10,6 @@ DelegateChooser{
     property double width: 0
     property double height: 0
 
-    onWidthChanged: {
-        console.log("width : "+width)
-    }
-
     DelegateChoice{
         roleValue: 'leaf'
 
@@ -46,9 +42,6 @@ DelegateChooser{
             delegate: chooser
             model: modelData.children
 
-            onWidthChanged: {
-                console.log("node changge "+width)
-            }
         }
     }
 }

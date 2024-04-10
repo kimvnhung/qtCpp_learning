@@ -45,7 +45,6 @@ Rectangle {
                               'lineType': depth+1,
                               })
             }else {
-                console.log("nextObset "+(offset+(i+1)*value/curChildCount))
                 if(i === curChildCount-1){
                     children.push({
                                   'type': 'node',
