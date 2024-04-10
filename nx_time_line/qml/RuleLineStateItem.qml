@@ -8,88 +8,114 @@ Rectangle {
     height: 100
     color:"green"
 
-    property int ms: 5000
+    readonly property var delegateStates : [
+        [2,5,10]
+    ]
+
+    property var delegateState: delegateStates[0]
+
+
+    required property int ms
     property int offset: 0
 
-    RuleLineStateDelegate{
-        id: highest
-        offset: parent.offset
-        unit: root.ms
-        curCount: 1
-        subCount: 5
-        lineType: RuleLine.HIGHEST
-        component: RuleLineStateDelegate{
-            id: normal
-            unit: highest.unit/highest.subCount
-            curCount: 5
-            subCount: 2
-            lineType: RuleLine.NORMAL
-            component: RuleLineStateDelegate{
-                id: small
-                unit: normal.unit/normal.subCount
-                curCount: 2
-                subCount: 5
-                lineType: RuleLine.SMALL
-                component: RuleLineStateDelegate{
-                    id: smallest
-                    unit: small.unit/small.subCount
-                    curCount: 5
-                    subCount: 0
-                    lineType: RuleLine.SMALLEST
+    onWidthChanged: {
+        console.log("offset "+offset)
+        delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
+    }
+
+    function generateObjectFromArray(array,depth,value,offset, width) {
+        var children = []
+        var curChildCount = array[depth]
+
+        for (var i = 0;i < curChildCount;i++){
+            if(depth === array.length-1){
+                children.push({
+                              'type': 'leaf',
+                              'value': (offset+(i+1)*value/curChildCount),
+                              'width': width/curChildCount,
+                              'lineType': depth+1,
+                              })
+            }else {
+                console.log("nextObset "+(offset+(i+1)*value/curChildCount))
+                if(i === curChildCount-1){
+                    children.push({
+                                  'type': 'node',
+                                  'value': (offset+(i+1)*value/curChildCount),
+                                  'width': width/curChildCount,
+                                  'lineType': RuleLine.SMALLEST,
+                                  'children': (depth+1 < array.length) ? generateObjectFromArray(array,depth+1,value/curChildCount,(offset +i*value/curChildCount),width/curChildCount) : []
+                                  })
+                }else {
+                    children.push({
+                                  'type': 'node',
+                                  'value': (offset+(i+1)*value/curChildCount),
+                                  'width': width/curChildCount,
+                                  'lineType': (depth+1),
+                                  'children': (depth+1 < array.length) ? generateObjectFromArray(array,depth+1,value/curChildCount,(offset +i*value/curChildCount),width/curChildCount) : []
+                                  })
                 }
             }
         }
+        return children
     }
 
-    onMsChanged: {
-        var secs = ms/1000
-        var mins = ms/(60*1000)
-        var hours = ms/(60*60*1000)
-        if(secs == 1){
-            state = "1sLarge"
-        }else if(secs == 5){
-            state = "5s"
-        }else if(mins == 5){
-            state = "5min"
-        }else if(hours == 3){
-            state = "3h"
-        }else if(secs == 10 || mins == 10 || hours == 10){
-            state = "10any"
-        }else if(secs == 30 || mins == 30 || hours == 30){
-            state = "30any"
-        }else if(secs == 1 || mins == 1 || hours == 1){
-            state = "1any"
+
+    RuleLineStateDelegate2{
+        id: delegateItem
+        width: parent.width
+        height: parent.height
+        unit: 1000
+        lineType: RuleLine.HIGHEST
+        delegate: RuleStateDelegateChooser{
+            height: parent.height
         }
-
-        console.log("state : "+state)
+        model: []
     }
+
+    // onMsChanged: {
+    //     // var secs = ms/1000
+    //     // var mins = ms/(60*1000)
+    //     // var hours = ms/(60*60*1000)
+    //     // if(secs == 1){
+    //     //     state = "1sLarge"
+    //     // }else if(secs == 5){
+    //     //     state = "5s"
+    //     // }else if(mins == 5){
+    //     //     state = "5min"
+    //     // }else if(hours == 3){
+    //     //     state = "3h"
+    //     // }else if(secs == 10 || mins == 10 || hours == 10){
+    //     //     state = "10any"
+    //     // }else if(secs == 30 || mins == 30 || hours == 30){
+    //     //     state = "30any"
+    //     // }else if(secs == 1 || mins == 1 || hours == 1){
+    //     //     state = "1any"
+    //     // }
+
+    //     // console.log("state : "+state)
+    // }
 
     states: [
         State{
             name:"1sLarge"
             PropertyChanges {
                 target: highest
-                unit: 5000
-                curCount: 1
-                subCount: 5
-            }
-            PropertyChanges {
-                target: normal
                 unit: 1000
-                curCount: 5
                 subCount: 2
             }
             PropertyChanges {
-                target: small
+                target: normal
                 unit: 500
-                curCount: 2
                 subCount: 5
             }
             PropertyChanges {
-                target: smallest
+                target: small
                 unit: 100
-                curCount: 5
-                subCount: 0
+                subCount: 10
+            }
+            PropertyChanges {
+                target: smallest
+                unit: 10
             }
         },
         State{

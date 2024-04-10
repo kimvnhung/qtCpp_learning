@@ -30,5 +30,7 @@
         <file>qml/RuleHalfSpace.qml</file>
         <file>qml/RuleLineStateItem.qml</file>
         <file>qml/RuleLineStateDelegate.qml</file>
+        <file>qml/RuleStateDelegateChooser.qml</file>
+        <file>qml/RuleLineStateDelegate2.qml</file>
     </qresource>
 </RCC>

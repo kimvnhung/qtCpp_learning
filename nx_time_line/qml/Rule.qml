@@ -23,64 +23,50 @@ Rectangle{
         color: "grey"
     }
 
-    // Repeater{
-    //     id: prRpt
-    //     model: [RuleLine.HIGHEST,RuleLine.NORMAL,RuleLine.SMALL,RuleLine.SMALLEST]
-    //     Row {
-    //         anchors{
-    //             top: ruleHeader.bottom
-    //             left: ruleHeader.left
-    //         }
-    //         Repeater {
-    //             model: instance.ruleLines
-    //             Rectangle{
-    //                 width: instance.typeDistance(prRpt.model.modelData)
-    //                 height: 30
-    //                 color: "transparent"
-
-    //                 Column{
-    //                     anchors{
-    //                         top: parent.top
-    //                         left: parent.left
-    //                     }
-    //                     visible: index !== 0 && index !== (Math.floor(rule.width/10)-1)
-
-    //                     Rectangle {
-    //                         width: 1
-    //                         height: getHeightFromType(modelData.type)
-    //                         color: "white"
-    //                         opacity: 1/(1+modelData.type)
-    //                     }
-    //                     Text{
-    //                         width: parent.width
-    //                         height: 15 // Adjust height according to your requirement
-    //                         text: modelData.text // You can replace "Your Text Here" with index+"ms" if you have a variable named 'index'
-    //                         color: "white"
-    //                         horizontalAlignment: Text.AlignHCenter
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // RuleLineItem{
-    //     anchors{
-    //         top: ruleHeader.bottom
-    //         left: ruleHeader.left
-    //     }
-    // }
-    property int totalInput : 15000
+    property int totalInput : 5000
 
     Row{
         Repeater{
             id: repeater
-            model: 3
+            model: 5
             RuleLineStateItem {
                 width: rule.width/repeater.count
                 ms: rule.totalInput/repeater.count
                 offset: index*rule.totalInput/repeater.count
             }
+
+            onModelChanged: {
+                console.log("rule.width "+rule.width+"; modelCount "+count)
+            }
         }
+    }
+
+    function modelFromTotalInput(){
+        const widthPerMillisecond = parent.width/totalInput
+        const HIGHEST_VISIBLE_W = 50
+
+        let highestUnit
+
+        if (widthPerMillisecond*5000 > HIGHEST_VISIBLE_W) {//5s
+            highestUnit = 5000;
+        } else if (widthPerMillisecond*10000 > HIGHEST_VISIBLE_W) {//10s
+            highestUnit = 10000;
+        } else if (widthPerMillisecond*30000 > HIGHEST_VISIBLE_W) {//30s
+            highestUnit = 30000;
+        } else if (widthPerMillisecond*60000 > HIGHEST_VISIBLE_W) {//1min
+            highestUnit = 60000;
+        } else if (widthPerMillisecond*300000 > HIGHEST_VISIBLE_W) {//5min
+            highestUnit = 300000;
+        } else if (widthPerMillisecond*600000 > HIGHEST_VISIBLE_W) {//10min
+            highestUnit = 600000;
+        } else if (widthPerMillisecond*1800000 > HIGHEST_VISIBLE_W) {//30min
+            highestUnit = 1800000;
+        } else if (widthPerMillisecond*3600000 > HIGHEST_VISIBLE_W) {//1h
+            highestUnit = 3600000;
+        } else if (widthPerMillisecond*10800000 > HIGHEST_VISIBLE_W) {//3h
+            highestUnit = 10800000;
+        }
+
+        return Math.floor(totalInput/highestUnit)
     }
 }

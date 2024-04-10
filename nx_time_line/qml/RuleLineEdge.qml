@@ -54,8 +54,4 @@ Column {
             return totalMilliseconds + "ms";
         }
     }
-
-    onValueChanged: {
-        console.log("value :"+value)
-    }
 }
