@@ -5,10 +5,20 @@ import models 1.0
 Rectangle{
     id: root
     required property int unit
-    property int offset: 0
     required property int lineType
     property alias model: repeater.model
     property Component delegate: Item{}
+
+    border{
+        color: (unit===60000 )?"red":"transparent"
+        width: (unit===60000)?1:0
+    }
+
+    onXChanged: {
+        if(unit===60000){
+            console.log("width:"+width+"; x: "+x+"; lineType:"+lineType)
+        }
+    }
 
     color: "transparent"
 
@@ -18,7 +28,7 @@ Rectangle{
             left: parent.right
         }
         lineType: root.lineType
-        value: unit+offset
+        value: unit
     }
 
     Row{

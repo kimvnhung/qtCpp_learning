@@ -72,13 +72,17 @@ Rectangle {
         id: delegateItem
         width: parent.width
         height: parent.height
-        unit: ms
-        offset: root.offset
+        unit: ms+offset
         lineType: RuleLine.HIGHEST
         delegate: RuleStateDelegateChooser{
             height: parent.height
         }
         model: []
+        onModelChanged: {
+            // if(root.offset==10000){
+            //     console.log(JSON.stringify(model,null,4))
+            // }
+        }
     }
 
     onMsChanged: {

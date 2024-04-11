@@ -7,8 +7,7 @@ DelegateChooser{
     id: chooser
     role: 'type'
 
-    property double width: 0
-    property double height: 0
+    required property double height
 
     DelegateChoice{
         roleValue: 'leaf'
@@ -18,6 +17,11 @@ DelegateChooser{
             width: modelData.width
             height: chooser.height
             color: "transparent"
+
+            border{
+                color: (modelData.value==60000)?"green":"transparent"
+                width: (modelData.value==60000)?1:0
+            }
 
             RuleLineEdge{
                 anchors{
@@ -41,7 +45,6 @@ DelegateChooser{
             lineType: modelData.lineType
             delegate: chooser
             model: modelData.children
-
         }
     }
 }
