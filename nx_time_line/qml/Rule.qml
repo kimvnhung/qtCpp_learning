@@ -5,6 +5,8 @@ import models 1.0
 
 Rectangle{
     id: rule
+    property double initWidth: parent.width
+
     width: parent.width
     height: 60
     color: "transparent"
@@ -26,34 +28,63 @@ Rectangle{
     property int totalInput : 30000000
 
     Row{
+        anchors{
+            top: parent.top
+        }
+
+        x: getPaddingVisible()
+
         Repeater{
             id: repeater
-            model: roundWithHighestUnit()+1
+            model: visibleModel()
+
             RuleLineStateItem {
                 required property int index
-                width: getHighestUnit()*widthPerMillisecond()
+                width: getHighestUnitWidth()
                 ms: getHighestUnit()
-                offset: index*getHighestUnit()
-
-                onWidthChanged: {
-                    // console.log("unit "+ms+"; offset "+offset)
-                }
-
-                onMsChanged: {
-                    console.log("unit "+ms+"; offset "+offset)
-                }
+                offset: index*getHighestUnit()+getVisibleOffset()
             }
 
         }
     }
 
+
     onWidthChanged: {
-        // repeater.model = roundWithHighestUnit()+1
-        console.log("highestU "+getHighestUnit())
+        console.log("padding : "+getPaddingVisible()+"; offset "+getVisibleOffset()+"; higehstUnit:"+getHighestUnit()+"; ruleWidth:"+rule.width+"; ruleX: "+rule.x)
+    }
+
+    function getCurPosFromMouseX(parentMouseX){
+        return Math.floor((parentMouseX+Math.abs(x))/widthPerMillisecond())
+    }
+
+    function getVisibleOffset(){
+        return getMissingLeftUnit()*getHighestUnit()
+    }
+
+    function getPaddingVisible(){
+        return getMissingLeftUnit()*getHighestUnitWidth()
+    }
+
+    function visibleModel() {
+        return Math.floor(initWidth/getHighestUnitWidth())+2
+    }
+
+    function paddingVisible() {
+        return Math.floor(Math.abs(x)/(widthPerMillisecond()*getHighestUnit()))*widthPerMillisecond()*getHighestUnit()
+    }
+
+    function getOffsetWithPadding(){
+        return Math.round(paddingVisible()/(widthPerMillisecond()*getHighestUnit()))*getHighestUnit()
+    }
+
+
+
+    function getMissingLeftUnit(){
+        return Math.floor(Math.abs(x)/getHighestUnitWidth())
     }
 
     function widthPerMillisecond(){
-        return parent.width/totalInput
+        return width/totalInput
     }
 
     function roundWithHighestUnit(){
@@ -61,10 +92,17 @@ Rectangle{
         return Math.floor(totalInput/getHighestUnit())
     }
 
+    function getHighestUnitWidth(){
+        return widthPerMillisecond()*getHighestUnit()
+    }
+
+    function isMaximumScale(){
+        return getHighestUnit() === 5000 && getHighestUnitWidth() > 400
+    }
+
     function getHighestUnit(){
         const wPerMillisecond = widthPerMillisecond()
-        console.log("wPermili "+wPerMillisecond)
-        const HIGHEST_VISIBLE_W = 150
+        const HIGHEST_VISIBLE_W = 200
 
         let highestUnit
 

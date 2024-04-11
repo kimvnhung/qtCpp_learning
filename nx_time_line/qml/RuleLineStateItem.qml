@@ -101,7 +101,6 @@ Rectangle {
             state = "1any"
         }
 
-        console.log("state : "+state)
         delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
     }
 

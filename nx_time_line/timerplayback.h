@@ -13,9 +13,11 @@ class TimerPlayback : public QmlWidget
     Q_PROPERTY(double ruleWidth READ ruleWidth WRITE setRuleWidth NOTIFY ruleWidthChanged FINAL)
     Q_PROPERTY(double viewWidth READ viewWidth WRITE setViewWidth NOTIFY viewWidthChanged FINAL)
     Q_PROPERTY(double viewX READ viewX WRITE setViewX NOTIFY viewXChanged FINAL)
+    Q_PROPERTY(qint64 curPos READ curPos WRITE setCurPos NOTIFY curPosChanged FINAL)
     using base_type = QmlWidget;
 public:
     explicit TimerPlayback(QObject *parent = nullptr,bool isInit = true);
+    ~TimerPlayback();
     void setDuration(std::chrono::milliseconds duration);
 
     QQmlListProperty<RuleLine> ruleLines();
@@ -28,12 +30,16 @@ public:
     double viewX() const;
     void setViewX(double value);
 
+    qint64 curPos() const;
+    void setCurPos(qint64 value);
+
     QQuickWidget* widget() const override;
 signals:
     void ruleLinesChanged();
     void ruleWidthChanged();
     void viewWidthChanged();
     void viewXChanged();
+    void curPosChanged();
 
 public slots:
     double typeDistance(RuleLine::RuleLineType type);

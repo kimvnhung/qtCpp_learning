@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 
 #include <QGridLayout>
+#include <QTime>
 #include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -28,11 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
     m_timerPlayback = new TimerPlayback(this);
     m_timerPlayback->setDuration(std::chrono::hours(7));
     ui->centralwidget->layout()->addWidget(m_timerPlayback->widget());
+    connect(m_timerPlayback,&TimerPlayback::curPosChanged,[this](){
+        QTime time = QTime(0,0).addMSecs(m_timerPlayback->curPos());
+        ui->curPosLb->setText(time.toString("hh:mm:ss"));
+    });
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    qDebug()<<__FUNCTION__;
 }
 
 void MainWindow::on_increaseSpeedBtn_clicked()

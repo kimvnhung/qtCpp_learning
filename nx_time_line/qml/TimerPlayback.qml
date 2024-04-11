@@ -5,7 +5,7 @@ import models 1.0
 
 Item {
     onWidthChanged: {
-        instance.ruleWidth = background.width
+        // instance.ruleWidth = background.width
         // instance.viewWidth = background.width
     }
 
@@ -20,40 +20,47 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPositionChanged: {
+                instance.curPos = rule.getCurPosFromMouseX(mouseX)
             }
 
             onWheel: {
+
                 if(wheel.angleDelta.y < 0 && rule.width <= parent.width){
                     return
                 }
 
+                if(wheel.angleDelta.y > 0 && rule.isMaximumScale())
+                    return
+
                 //calculate new ruleSize
                 var ruleSize = rule.width
-                ruleSize *= 1 + wheel.angleDelta.y/1200
+                ruleSize *= Math.pow(1.2,wheel.angleDelta.y/120)
                 if(ruleSize <= parent.width){
                     ruleSize = 1
                 }
                 var scale = ruleSize/parent.width
                 if(ruleSize >= parent.width){
-                    instance.ruleWidth = ruleSize
+                    var previousX = rule.x
+                    rule.width = ruleSize
                     rule.x = mouseX*(1-scale)
+
                 }else {
-                    instance.ruleWidth = parent.width
+                    rule.width = parent.width
                     rule.x = 0
                 }
 
+                instance.curPos = rule.getCurPosFromMouseX(mouseX)
 
                 //calculate scrollbar size
                 var scrollSize = 1/scale
                 scrollbar.size = scrollSize<=0.1 ? 0.1:scrollSize
-
                 scrollbar.position = (mouseX-x)/rule.width-scrollbar.size/2
             }
         }
 
         Rule {
             id: rule
-            width: instance.ruleWidth
+            width: parent.width
             onXChanged: {
                 // instance.viewX = Math.abs(x)
             }
@@ -91,7 +98,7 @@ Item {
 
             onPositionChanged: {
                 var maxPos = 1 - size
-                rule.x = position*(rule.width-parent.width)/maxPos
+                // rule.x = position*(rule.width-parent.width)/maxPos
             }
         }
 
