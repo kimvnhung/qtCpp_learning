@@ -23,6 +23,12 @@ DelegateChooser{
                 width: (modelData.value==60000)?1:0
             }
 
+            onXChanged: {
+                if(modelData.value === 60000){
+                    console.log("leaf: lineType: "+modelData.lineType+"; x: "+x)
+                }
+            }
+
             RuleLineEdge{
                 anchors{
                     top: parent.top
@@ -45,6 +51,12 @@ DelegateChooser{
             lineType: modelData.lineType
             delegate: chooser
             model: modelData.children
+            onXChanged: {
+                if(unit === 60000){
+                    console.log(" node : lineType: "+lineType+"; x: "+x)
+                    console.log(JSON.stringify(modelData,null,4))
+                }
+            }
         }
     }
 }

@@ -24,7 +24,6 @@ Item {
             }
 
             onWheel: {
-                console.log("mouseX:"+mouseX)
                 var cachedMouseX = mouseX
                 if(wheel.angleDelta.y < 0 && rule.width <= parent.width){
                     return

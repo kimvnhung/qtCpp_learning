@@ -74,18 +74,18 @@ Rectangle{
 
     onWidthChanged: {
         if(x===0){
-            console.log("updateOnWidth width : "+width)
+            // console.log("updateOnWidth width : "+width)
             update()
         }
     }
 
     onInitWidthChanged: {
-        console.log("updateOnInitWidth initWidth : "+initWidth)
+        // console.log("updateOnInitWidth initWidth : "+initWidth)
         update()
     }
 
     onXChanged: {
-        console.log("updateOnXChanged x : "+x)
+        // console.log("updateOnXChanged x : "+x)
         update()
     }
 
@@ -94,32 +94,34 @@ Rectangle{
         var widthPerMillis = width/totalInput
         const HIGHEST_VISIBLE_W = 200
 
-        for(var i=0; i<msLevels.length-1;i++){
-            console.log("widthPerMilis: "+widthPerMillis+"; i : "+i+"; msLevel: "+msLevels[i]+"; widthPerMili*msLevel[i]: "+(widthPerMillis*msLevels[i]))
+        var i = 0;
+        for(i=0; i<msLevels.length-1;i++){
+            // console.log("widthPerMilis: "+widthPerMillis+"; i : "+i+"; msLevel: "+msLevels[i]+"; widthPerMili*msLevel[i]: "+(widthPerMillis*msLevels[i]))
             if(widthPerMillis*msLevels[i] < HIGHEST_VISIBLE_W &&  HIGHEST_VISIBLE_W < widthPerMillis*msLevels[i+1]){
                 rHighestUnit = msLevels[i+1]
-                console.log("i: "+i+" break")
+                // console.log("i: "+i+" break")
                 break
             }
-            console.log("gan i+1: "+(i+1))
+            // console.log("gan i+1: "+(i+1))
             rHighestUnit = msLevels[0]
         }
 
-        console.log("rHighestUnit : "+rHighestUnit)
-
         rHighestUnitWidth = rHighestUnit*widthPerMillis
+        // console.log("rHighestUnit : "+rHighestUnit+"; highestUnitWidth: "+rHighestUnitWidth+"; nextLeveWidth:"+(widthPerMillis*msLevels[i+2]))
 
-        console.log("padding : abs(x):"+Math.abs(x)+": ")
+
+
+        // console.log("padding : abs(x):"+Math.abs(x)+": ")
         var missingLeftUnit = Math.floor(Math.abs(x)/rHighestUnitWidth)
-        console.log("paddingVisible : missingLeftUinit:"+missingLeftUnit+"; rHighestUnitWidth:"+rHighestUnitWidth)
+        // console.log("paddingVisible : missingLeftUinit:"+missingLeftUnit+"; rHighestUnitWidth:"+rHighestUnitWidth)
         rPaddingVisible = missingLeftUnit*rHighestUnitWidth
 
         rVisibleModel = Math.floor(initWidth/rHighestUnitWidth)+2
 
         rVisibleOffset = missingLeftUnit*rHighestUnit
 
-        console.log("widthPerMili :"+widthPerMillis+"; highestUnit:"+rHighestUnit+"; highestUnitWdith:"+rHighestUnitWidth+"; missingLeftUnit: "+missingLeftUnit+"; paddingVisible:"+rPaddingVisible)
-        console.log("rVisibbleModel: "+rVisibleModel+"; rVisibleOfsset: "+rVisibleOffset)
+        // console.log("widthPerMili :"+widthPerMillis+"; highestUnit:"+rHighestUnit+"; highestUnitWdith:"+rHighestUnitWidth+"; missingLeftUnit: "+missingLeftUnit+"; paddingVisible:"+rPaddingVisible)
+        // console.log("rVisibbleModel: "+rVisibleModel+"; rVisibleOfsset: "+rVisibleOffset)
     }
 
     function getCurPosFromMouseX(parentMouseX){

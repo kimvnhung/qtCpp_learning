@@ -28,6 +28,11 @@ Rectangle {
         delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
     }
 
+    onXChanged: {
+        if(offset==0)
+            console.log("RuleLineStateItem : x"+x)
+    }
+
     onDelegateStateChanged: {
         delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
     }
@@ -78,10 +83,11 @@ Rectangle {
             height: parent.height
         }
         model: []
-        onModelChanged: {
-            // if(root.offset==10000){
-            //     console.log(JSON.stringify(model,null,4))
-            // }
+        onXChanged: {
+            if(unit === 60000){
+                console.log("root: lineType: "+lineType+"; x: "+x)
+
+            }
         }
     }
 

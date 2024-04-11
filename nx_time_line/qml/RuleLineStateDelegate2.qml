@@ -16,7 +16,7 @@ Rectangle{
 
     onXChanged: {
         if(unit===60000){
-            console.log("width:"+width+"; x: "+x+"; lineType:"+lineType)
+            // console.log("width:"+width+"; x: "+x+"; lineType:"+lineType)
         }
     }
 
