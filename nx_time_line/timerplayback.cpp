@@ -50,6 +50,7 @@ public:
 TimerPlayback::~TimerPlayback()
 {
     qDebug()<<__FUNCTION__;
+    d.clear();
 }
 
 TimerPlayback::TimerPlayback(QObject *parent, bool isInit) : base_type(QUrl("qrc:/qml/TimerPlayback.qml"), parent),

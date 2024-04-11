@@ -24,7 +24,8 @@ Item {
             }
 
             onWheel: {
-
+                console.log("mouseX:"+mouseX)
+                var cachedMouseX = mouseX
                 if(wheel.angleDelta.y < 0 && rule.width <= parent.width){
                     return
                 }
@@ -33,37 +34,36 @@ Item {
                     return
 
                 //calculate new ruleSize
-                var ruleSize = rule.width
-                ruleSize *= Math.pow(1.2,wheel.angleDelta.y/120)
-                if(ruleSize <= parent.width){
-                    ruleSize = 1
+                //fomule: xn = alphaN*xn_1+mouseX*(1-alphaN)
+                //with: xn_1 is last x of rule
+                //    : alphaN = newWidth/oldWidth
+                var wn_1 = rule.width
+                var xn_1 = rule.x
+                var wn = wn_1*Math.pow(1.2,wheel.angleDelta.y/120)
+                if(wn <= parent.width){
+                    wn = 1
                 }
-                var scale = ruleSize/parent.width
-                if(ruleSize >= parent.width){
-                    var previousX = rule.x
-                    rule.width = ruleSize
-                    rule.x = mouseX*(1-scale)
-
+                var alphaN = wn/wn_1
+                if(wn >= parent.width){
+                    rule.width = wn
+                    rule.x = alphaN*xn_1+mouseX*(1-alphaN)
                 }else {
                     rule.width = parent.width
                     rule.x = 0
                 }
 
-                instance.curPos = rule.getCurPosFromMouseX(mouseX)
+                instance.curPos = rule.getCurPosFromMouseX(cachedMouseX)
 
                 //calculate scrollbar size
-                var scrollSize = 1/scale
-                scrollbar.size = scrollSize<=0.1 ? 0.1:scrollSize
-                scrollbar.position = (mouseX-x)/rule.width-scrollbar.size/2
+                // var scrollSize = 1/scale
+                // scrollbar.size = scrollSize<=0.1 ? 0.1:scrollSize
+                // scrollbar.position = (cachedMouseX-x)/rule.width-scrollbar.size/2
             }
         }
 
         Rule {
             id: rule
             width: parent.width
-            onXChanged: {
-                // instance.viewX = Math.abs(x)
-            }
         }
 
         ScrollBar {

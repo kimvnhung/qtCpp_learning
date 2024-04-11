@@ -97,7 +97,7 @@ Rectangle{
     }
 
     function isMaximumScale(){
-        return getHighestUnit() === 5000 && getHighestUnitWidth() > 400
+        return getHighestUnit() === 5000 && getHighestUnitWidth() > 800
     }
 
     function getHighestUnit(){
