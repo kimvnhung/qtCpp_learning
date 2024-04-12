@@ -114,6 +114,10 @@ Rectangle {
         delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
     }
 
+    onOffsetChanged: {
+        delegateItem.model = generateObjectFromArray(delegateState,0,ms,offset,width)
+    }
+
     states: [
         State{
             name:"1s"

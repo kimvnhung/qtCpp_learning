@@ -54,7 +54,7 @@ DelegateChooser{
             onXChanged: {
                 if(unit === 60000){
                     console.log(" node : lineType: "+lineType+"; x: "+x)
-                    console.log(JSON.stringify(modelData,null,4))
+                    // console.log(JSON.stringify(modelData,null,4))
                 }
             }
         }
