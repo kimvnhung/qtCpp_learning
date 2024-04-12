@@ -36,9 +36,10 @@ Item {
                 //fomule: xn = alphaN*xn_1+mouseX*(1-alphaN)
                 //with: xn_1 is last x of rule
                 //    : alphaN = newWidth/oldWidth
+                var alpha0 = Math.pow(1.2,wheel.angleDelta.y/120)
                 var wn_1 = rule.width
                 var xn_1 = rule.x
-                var wn = wn_1*Math.pow(1.2,wheel.angleDelta.y/120)
+                var wn = wn_1*alpha0
                 if(wn <= parent.width){
                     wn = 1
                 }
@@ -54,13 +55,17 @@ Item {
                 instance.curPos = rule.getCurPosFromMouseX(cachedMouseX)
 
                 //calculate scrollbar size
-                // var scrollSize = 1/scale
-                // scrollbar.size = scrollSize<=0.1 ? 0.1:scrollSize
-                // scrollbar.position = (cachedMouseX-x)/rule.width-scrollbar.size/2
+                if(wn/width > 100)
+                    scrollbar.size = 0.01
+                else
+                    scrollbar.size = width/wn
+
+                scrollbar.position = Math.abs(rule.x/rule.width)
+
             }
         }
 
-        Rule {
+        Rule2 {
             id: rule
             width: parent.width
         }
@@ -96,9 +101,10 @@ Item {
             }
 
             onPositionChanged: {
-                var maxPos = 1 - size
-                // rule.x = position*(rule.width-parent.width)/maxPos
+                rule.x = -position*rule.width
             }
+
+
         }
 
 

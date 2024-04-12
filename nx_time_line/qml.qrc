@@ -32,5 +32,10 @@
         <file>qml/RuleLineStateDelegate.qml</file>
         <file>qml/RuleStateDelegateChooser.qml</file>
         <file>qml/RuleLineStateDelegate2.qml</file>
+        <file>qml/Rule2.qml</file>
+        <file>qml/RuleLineDurationItem.qml</file>
+        <file>qml/RuleLineDurationDelegateChooser.qml</file>
+        <file>qml/Rule3.qml</file>
+        <file>qml/Rule4.qml</file>
     </qresource>
 </RCC>

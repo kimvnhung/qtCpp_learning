@@ -61,12 +61,8 @@ Rectangle{
                 width: rule.rHighestUnitWidth
                 ms: rule.rHighestUnit
                 offset: index*rule.rHighestUnit+rule.rVisibleOffset
-                onWidthChanged: {
-                    if(index==0){
-                        console.log("width "+width+"; ms: "+ms+"; offset:"+offset+"; padingVisible: "+rule.rPaddingVisible)
-                    }
-                }
             }
+
 
         }
     }

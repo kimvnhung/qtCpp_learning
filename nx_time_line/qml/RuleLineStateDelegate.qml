@@ -46,22 +46,6 @@ Rectangle{
             model: [
                 {}
             ]
-            // Loader{
-            //     sourceComponent: root.component
-            //     // source: loaded ? null:"RuleLineStateDelegate.qml"
-            //     width: root.width/repeater.count
-            //     height: root.height
-            //     onLoaded: {
-            //         if(root.lineType != RuleLine.SMALLEST){
-            //             loaded = true
-            //         }
-
-            //         item.unit = root.unit/root.getSubCount()
-            //         item.index = index
-            //         item.lineType = root.lineType+1
-            //         item.offset = root.offset+index*item.unit
-            //     }
-            // }
             delegate: RuleStateDelegateChooser{
             }
         }

@@ -12,6 +12,7 @@ class TimerPlayback : public QmlWidget
     Q_PROPERTY(QQmlListProperty<RuleLine> ruleLines READ ruleLines NOTIFY ruleLinesChanged FINAL)
     Q_PROPERTY(double ruleWidth READ ruleWidth WRITE setRuleWidth NOTIFY ruleWidthChanged FINAL)
     Q_PROPERTY(double viewWidth READ viewWidth WRITE setViewWidth NOTIFY viewWidthChanged FINAL)
+    Q_PROPERTY(double ruleX READ ruleX WRITE setRuleX NOTIFY ruleXChanged FINAL)
     Q_PROPERTY(double viewX READ viewX WRITE setViewX NOTIFY viewXChanged FINAL)
     Q_PROPERTY(qint64 curPos READ curPos WRITE setCurPos NOTIFY curPosChanged FINAL)
     using base_type = QmlWidget;
@@ -23,6 +24,9 @@ public:
     QQmlListProperty<RuleLine> ruleLines();
     double ruleWidth() const;
     void setRuleWidth(double width);
+
+    double ruleX() const;
+    void setRuleX(double value);
 
     double viewWidth() const;
     void setViewWidth(double value);
@@ -40,6 +44,7 @@ signals:
     void viewWidthChanged();
     void viewXChanged();
     void curPosChanged();
+    void ruleXChanged();
 
 public slots:
     double typeDistance(RuleLine::RuleLineType type);

@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
         timerplayback.h timerplayback.cpp
         models/timerplaybackmodel.h models/timerplaybackmodel.cpp
         models/ruleline.h models/ruleline.cpp
+        models/linedata.h models/linedata.cpp
+        models/ruler.h models/ruler.cpp
         qml.qrc
 )
 

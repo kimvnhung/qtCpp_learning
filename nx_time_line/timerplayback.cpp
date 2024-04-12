@@ -1,5 +1,6 @@
 #include "timerplayback.h"
 #include "models/ruleline.h"
+#include "models/ruler.h"
 
 #include <QQmlContext>
 #include <QQuickItem>
@@ -20,6 +21,7 @@ public:
         viewWidth(0),
         viewX(0),
         curPos(0),
+        ruler(new Ruler(parent)),
         duration(std::chrono::milliseconds(0))
     {
         // demo init
@@ -33,6 +35,7 @@ public:
     double viewWidth;
     double viewX;
     qint64 curPos;
+    Ruler *ruler;
 
     QList<RuleLine *> ruleLines;
     std::chrono::milliseconds duration;
