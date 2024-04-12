@@ -96,32 +96,21 @@ Rectangle{
 
         var i = 0;
         for(i=0; i<msLevels.length-1;i++){
-            // console.log("widthPerMilis: "+widthPerMillis+"; i : "+i+"; msLevel: "+msLevels[i]+"; widthPerMili*msLevel[i]: "+(widthPerMillis*msLevels[i]))
             if(widthPerMillis*msLevels[i] < HIGHEST_VISIBLE_W &&  HIGHEST_VISIBLE_W < widthPerMillis*msLevels[i+1]){
                 rHighestUnit = msLevels[i+1]
-                // console.log("i: "+i+" break")
                 break
             }
-            // console.log("gan i+1: "+(i+1))
             rHighestUnit = msLevels[0]
         }
 
         rHighestUnitWidth = rHighestUnit*widthPerMillis
-        // console.log("rHighestUnit : "+rHighestUnit+"; highestUnitWidth: "+rHighestUnitWidth+"; nextLeveWidth:"+(widthPerMillis*msLevels[i+2]))
 
-
-
-        // console.log("padding : abs(x):"+Math.abs(x)+": ")
         var missingLeftUnit = Math.floor(Math.abs(x)/rHighestUnitWidth)
-        // console.log("paddingVisible : missingLeftUinit:"+missingLeftUnit+"; rHighestUnitWidth:"+rHighestUnitWidth)
         rPaddingVisible = missingLeftUnit*rHighestUnitWidth
 
         rVisibleModel = Math.floor(initWidth/rHighestUnitWidth)+2
 
         rVisibleOffset = missingLeftUnit*rHighestUnit
-
-        // console.log("widthPerMili :"+widthPerMillis+"; highestUnit:"+rHighestUnit+"; highestUnitWdith:"+rHighestUnitWidth+"; missingLeftUnit: "+missingLeftUnit+"; paddingVisible:"+rPaddingVisible)
-        // console.log("rVisibbleModel: "+rVisibleModel+"; rVisibleOfsset: "+rVisibleOffset)
     }
 
     function getCurPosFromMouseX(parentMouseX){
