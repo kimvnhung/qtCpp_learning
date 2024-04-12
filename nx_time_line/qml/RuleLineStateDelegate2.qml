@@ -9,16 +9,16 @@ Rectangle{
     property alias model: repeater.model
     property Component delegate: Item{}
 
-    border{
-        color: (unit===60000 )?"red":"transparent"
-        width: (unit===60000)?1:0
-    }
+    // border{
+    //     color: (unit===60000 )?"red":"transparent"
+    //     width: (unit===60000)?1:0
+    // }
 
-    onXChanged: {
-        if(unit===60000){
-            // console.log("width:"+width+"; x: "+x+"; lineType:"+lineType)
-        }
-    }
+    // onXChanged: {
+    //     if(unit===60000){
+    //         // console.log("width:"+width+"; x: "+x+"; lineType:"+lineType)
+    //     }
+    // }
 
     color: "transparent"
 

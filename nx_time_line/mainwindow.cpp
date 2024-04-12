@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->centralwidget->layout()->addWidget(m_timerPlayback->widget());
     connect(m_timerPlayback,&TimerPlayback::curPosChanged,[this](){
         QTime time = QTime(0,0).addMSecs(m_timerPlayback->curPos());
-        ui->curPosLb->setText(time.toString("hh:mm:ss"));
+        ui->curPosLb->setText(time.toString("hh:mm:ss:zzz"));
     });
 }
 
