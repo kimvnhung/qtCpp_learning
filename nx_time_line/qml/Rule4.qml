@@ -24,32 +24,40 @@ Rectangle{
         color: "grey"
     }
 
-    Row{
-        anchors{
-            top: parent.top
-            left: parent.left
-        }
+    // Behavior on x {
+    //     PropertyAnimation{
+    //         duration: 500
+    //     }
+    // }
 
-        Repeater{
-            id: repeater
+    // Behavior on width {
+    //     enabled: targetValue >= parent.width
+    //     PropertyAnimation{
+    //         duration: 500
+    //     }
+    // }
 
-            model: instance.lineDatas
-            Rectangle{
-                width: modelData.position
-                height: 60
+    Repeater{
+        id: repeater
 
-                color: "transparent"
-
-                RuleLineEdge{
-                    anchors{
-                        top: parent.top
-                        right: parent.right
-                    }
-
-                    value: modelData.value
-                    lineType: modelData.lineType
-                }
+        model: instance.lineDatas
+        RuleLineEdge{
+            anchors{
+                top: parent.top
             }
+
+            x: modelData.position
+
+            value: modelData.value
+            lineType: modelData.lineType
+
+            // Behavior on x{
+            //     enabled: targetValue > targetProperty.object[targetProperty.name]
+            //     PropertyAnimation{
+            //         duration: 300
+            //         easing.type: Easing.OutCirc
+            //     }
+            // }
         }
     }
 

@@ -20,11 +20,12 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPositionChanged: {
-                instance.curPos = rule.getCurPosFromMouseX(mouseX)
+                // instance.curPos = rule.getCurPosFromMouseX(mouseX)
+                instance.mouseX = mouseX
             }
 
             onWheel: {
-                var cachedMouseX = mouseX
+                // var cachedMouseX = mouseX
                 if(wheel.angleDelta.y < 0 && rule.width <= parent.width){
                     return
                 }
@@ -52,7 +53,7 @@ Item {
                     rule.x = 0
                 }
 
-                instance.curPos = rule.getCurPosFromMouseX(cachedMouseX)
+                // instance.curPos = rule.getCurPosFromMouseX(cachedMouseX)
 
                 //calculate scrollbar size
                 if(wn/width > 100)

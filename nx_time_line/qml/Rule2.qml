@@ -77,7 +77,7 @@ Rectangle{
                 highestUnit = msLevels[i+1]
                 break
             }
-            if(i==msLevels.length-1)
+            if(i==msLevels.length-2)
                 highestUnit = msLevels[0]
         }
     }

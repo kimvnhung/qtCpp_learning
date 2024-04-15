@@ -4,7 +4,7 @@ LineData::LineData(QObject *parent, RuleLine::RuleLineType lineType, qint64 valu
     QObject{parent},
     m_lineType(lineType),
     m_value(value),
-    m_visible(visible)
+    m_visible(true)
 {
 
 }
@@ -19,7 +19,15 @@ void LineData::setLineType(int value)
     if(((int)m_lineType) == value)
         return;
 
-    m_lineType = (RuleLine::RuleLineType)value;
+    if(value >= (int)RuleLine::RuleLineType::UNDEFINED)
+    {
+        m_lineType = RuleLine::RuleLineType::UNDEFINED;
+    }else if(value <= 0){
+        m_lineType = RuleLine::RuleLineType::HIGHEST;
+    }else{
+        m_lineType = (RuleLine::RuleLineType)value;
+    }
+
     if(m_visible)
         emit lineTypeChanged();
 }

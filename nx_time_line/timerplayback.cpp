@@ -7,7 +7,30 @@
 
 using namespace std::chrono;
 
-double HIGHEST_VISABLE_W = 50;
+double HIGHEST_VISABLE_W = 200;
+qint64 MS_LEVELS[] = {
+    5000,//5s
+    10000,//10s
+    30000,
+    60000,
+    300000,
+    600000,
+    1800000,
+    3600000,
+    10800000
+};
+
+int MS_LEVELS_SIZE = sizeof(MS_LEVELS)/sizeof(qint64);
+
+int DELEGATE_STATES[][3] = {
+    {2,5,10}, // 1s
+    {2,3,2}, // 1any
+    {5,2,5}, // 5s
+    {5,2,3}, // 5min
+    {2,5,2}, //10any
+    {3,2,5}, //30any
+    {3,2,3} // 3h
+};
 
 class TimerPlayback::Private
 {
@@ -21,9 +44,11 @@ public:
         viewWidth(0),
         viewX(0),
         curPos(0),
+        mouseX(0),
         duration(std::chrono::milliseconds(0)),
-        totalTime(10000),
-        widthPerMili(0)
+        totalTime(25200000),
+        widthPerMili(0),
+        delegateState(DELEGATE_STATES[0])
     {
         // demo init
     }
@@ -36,12 +61,15 @@ public:
     double viewWidth;
     double viewX;
     qint64 curPos;
+    double mouseX;
 
     QList<RuleLine *> ruleLines;
-    QList<LineData *> lineDatas;
+    QVector<LineData *> lineDatas;
     std::chrono::milliseconds duration;
     qint64 totalTime;
     double widthPerMili;
+    qint64 highestUnit,normalUnit,smallUnit,smallestUnit;
+    int *delegateState;
 
     template <typename Rep, typename Period>
     bool is_round(const std::chrono::duration<Rep, Period> &duration, std::chrono::duration<Rep, Period> unit);
@@ -52,6 +80,9 @@ public:
     bool setViewWidth(double value);
     bool setViewX(double value);
     bool setCurPos(qint64 value);
+    bool setMouseX(double value);
+    void refreshDelegateState();
+    void updatePosition();
 };
 
 TimerPlayback::~TimerPlayback()
@@ -132,6 +163,7 @@ QQmlListProperty<LineData> TimerPlayback::lineDatas()
 }
 
 
+
 double TimerPlayback::viewWidth() const
 {
     return d->viewWidth;
@@ -163,6 +195,17 @@ void TimerPlayback::setCurPos(qint64 value)
 qint64 TimerPlayback::curPos() const
 {
     return d->curPos;
+}
+
+double TimerPlayback::mouseX() const
+{
+    return d->mouseX;
+}
+
+void TimerPlayback::setMouseX(double value)
+{
+    if(d->setMouseX(value))
+        emit mouseXChanged();
 }
 
 bool TimerPlayback::Private::setWidth(double w)
@@ -217,6 +260,16 @@ bool TimerPlayback::Private::setCurPos(qint64 value)
         return false;
 
     curPos = value;
+    return true;
+}
+
+bool TimerPlayback::Private::setMouseX(double value)
+{
+    if(mouseX == value)
+        return  false;
+
+    mouseX = value;
+    q->setCurPos((abs(viewX)+mouseX)/widthPerMili);
     return true;
 }
 
@@ -359,6 +412,38 @@ void TimerPlayback::Private::updateRuleLines()
     emit q->ruleLinesChanged();
 }
 
+bool isRoundedBy(qint64 target, qint64 unit)
+{
+    return target%unit==0;
+}
+
+qint64 roundedBy(qint64 target, qint64 unit){
+    return target-(target%unit);
+}
+
+void TimerPlayback::Private::refreshDelegateState()
+{
+    int secs = highestUnit/1000;
+    int mins = highestUnit/60000;
+    int hours = highestUnit/(3600000);
+
+    if(secs == 1) {
+        delegateState = DELEGATE_STATES[0];
+    }else if(secs == 5) {
+        delegateState = DELEGATE_STATES[2];
+    }else if(mins == 5) {
+        delegateState = DELEGATE_STATES[3];
+    }else if(hours == 3) {
+        delegateState = DELEGATE_STATES[6];
+    }else if(secs == 10 || mins == 10 || hours == 10){
+        delegateState = DELEGATE_STATES[4];
+    }else if(secs == 30 || mins == 30 || hours == 30){
+        delegateState = DELEGATE_STATES[5];
+    }else if(mins == 1 || hours == 1){
+        delegateState = DELEGATE_STATES[1];
+    }
+}
+
 void TimerPlayback::Private::updateLineDatas()
 {
     qDebug()<<"totalTime: "<<totalTime<<"ruleWidth: "<<width<<"; viewWidth: "<<viewWidth<<"; viewX: "<<viewX;
@@ -368,15 +453,176 @@ void TimerPlayback::Private::updateLineDatas()
     if(!viewWidth)
         return;
 
+    if(width < viewWidth)
+        return;
+
     widthPerMili = width/totalTime;
 
-    lineDatas.append(new LineData(q,RuleLine::RuleLineType::HIGHEST,1000,true));
-    emit q->lineDatasChanged();
+    //calculate highestUnit
+    qint64 lastestHighestUnit = highestUnit;
 
-    for(int i=0; i < lineDatas.length(); i++){
-        lineDatas[i]->setPosition(widthPerMili*lineDatas[i]->value());
+    for(int i=0;i<MS_LEVELS_SIZE-1; i++){
+        qDebug()<<"widthPerMili*MS_LEVE"<<widthPerMili*MS_LEVELS[i];
+        if(widthPerMili*MS_LEVELS[i] < HIGHEST_VISABLE_W
+            && HIGHEST_VISABLE_W < widthPerMili*MS_LEVELS[i+1]){
+            highestUnit = MS_LEVELS[i+1];
+            break;
+        }
+
+        if(i==MS_LEVELS_SIZE-2)
+            highestUnit = MS_LEVELS[0];
     }
 
+    //TODO:improve performance...
+    refreshDelegateState();
+    int delegate0 = *(delegateState);
+    int delegate1 = *(delegateState+1);
+    int delegate2 = *(delegateState+2);
+
+
+    smallestUnit = highestUnit/(delegate0*delegate1*delegate2);
+    smallUnit = highestUnit/(delegate0*delegate1);
+    normalUnit = highestUnit/(delegate0);
+
+    //calculate visible range
+    qint64 startedValue = roundedBy(abs(viewX)/widthPerMili,highestUnit);
+    qint64 stopedValue = roundedBy((abs(viewX)+viewWidth)/widthPerMili,highestUnit)+highestUnit;
+
+    qDebug()<<"startValue "<<startedValue<<"; stopedValue "<<stopedValue;
+
+    if(lineDatas.empty()){
+        qDebug()<<"init data";
+
+
+        qint64 value = 0;
+        while(value <= totalTime){
+            for(int n = 0;n<delegate0;n++){
+                for(int sm = 0; sm < delegate1;sm++){
+                    for(int sml = 0; sml < delegate2; sml++){
+                        if(sml)
+                            lineDatas.append(new LineData(q,RuleLine::RuleLineType::SMALLEST,value,startedValue < value && value < stopedValue));
+
+                        value += smallestUnit;
+                    }
+                    if(sm != delegate1-1)
+                        lineDatas.append(new LineData(q,RuleLine::RuleLineType::SMALL,value,startedValue < value && value < stopedValue));
+                }
+                if(n != delegate0-1)
+                    lineDatas.append(new LineData(q,RuleLine::RuleLineType::NORMAL,value,startedValue < value && value < stopedValue));
+                else
+                    lineDatas.append(new LineData(q,RuleLine::RuleLineType::HIGHEST,value,startedValue < value && value < stopedValue));
+            }
+        }
+        updatePosition();
+        emit q->lineDatasChanged();
+    }else if(lastestHighestUnit < highestUnit){
+        //zoom in
+        //downgrade linetype
+        updatePosition();
+
+        for(int i=0; i<lineDatas.length();i++){
+            if(startedValue < lineDatas[i]->value() && lineDatas[i]->value() < stopedValue){
+                lineDatas[i]->setVisible(true);
+                if(isRoundedBy(lineDatas[i]->value(),highestUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::HIGHEST);
+                }else if(isRoundedBy(lineDatas[i]->value(),normalUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::NORMAL);
+                }else if(isRoundedBy(lineDatas[i]->value(),smallUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::SMALL);
+                }else if(isRoundedBy(lineDatas[i]->value(),smallestUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::SMALLEST);
+                }else {
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::UNDEFINED);
+                }
+            }
+        }
+
+        // //add new highest
+        // qint64 value = 0;
+        // while(value <= totalTime){
+        //     value += highestUnit;
+        //     lineDatas.append(new LineData(q,RuleLine::RuleLineType::HIGHEST,value,startedValue < value && value < stopedValue));
+        // }
+
+    }else if (lastestHighestUnit > highestUnit){
+        //zoom out
+        //update size
+        updatePosition();
+
+        // increase linetype
+        int firstHighest = 0;
+        for(int i=0; i<lineDatas.length();i++){
+            if(startedValue < lineDatas[i]->value() && lineDatas[i]->value() < stopedValue){
+                lineDatas[i]->setVisible(true);
+                if(isRoundedBy(lineDatas[i]->value(),highestUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::HIGHEST);
+                }else if(isRoundedBy(lineDatas[i]->value(),normalUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::NORMAL);
+                }else if(isRoundedBy(lineDatas[i]->value(),smallUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::SMALL);
+                }else if(isRoundedBy(lineDatas[i]->value(),smallestUnit)){
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::SMALLEST);
+                }else {
+                    lineDatas[i]->setLineType((int)RuleLine::RuleLineType::UNDEFINED);
+                }
+            }
+        }
+
+        if(lineDatas[0]->value() != smallestUnit){
+            qDebug()<<"before add "<<lineDatas.length();
+
+            //add new smallest
+            qint64 value = 0;
+            while(value <= totalTime){
+                if(value < startedValue)
+                {
+                    value += highestUnit;
+                    continue;
+                }
+                for(int n = 0;n<delegate0;n++){
+                    for(int sm = 0; sm < delegate1;sm++){
+                        for(int sml = 0; sml < delegate2; sml++){
+                            if(sml)
+                            {
+                                for (int i = 0; i<lineDatas.length(); i++) {
+                                    if(startedValue < lineDatas[i]->value() && lineDatas[i]->value() < stopedValue){
+                                        if(value == lineDatas[i]->value())
+                                            lineDatas[i]->setLineType((int)RuleLine::RuleLineType::SMALLEST);
+                                    }
+                                    if(i == lineDatas.length()-1){
+                                        lineDatas.append(new LineData(q,RuleLine::RuleLineType::SMALLEST,value,startedValue < value && value < stopedValue));
+                                    }
+                                }
+                            }
+
+                            value += smallestUnit;
+                        }
+                    }
+                }
+
+                if(value >= stopedValue)
+                    break;
+            }
+            emit q->lineDatasChanged();
+
+            qDebug()<<"after add "<<lineDatas.length();
+        }
+    }
+
+    updatePosition();
+
+
+}
+
+void TimerPlayback::Private::updatePosition()
+{
+    for(int i=0;i< lineDatas.length();i++){
+        lineDatas[i]->setPosition(lineDatas[i]->value()*widthPerMili);
+        if(lineDatas[i]->value() == 25200000)
+            qDebug()<<"post of "<<lineDatas[i]->value()<<" "<<lineDatas[i]->position();
+    }
+
+    qDebug()<<"lastPos "<<lineDatas.last()->position();
 }
 
 double TimerPlayback::typeDistance(RuleLine::RuleLineType type)
