@@ -32,6 +32,7 @@ set(PROJECT_SOURCES
         models/ruleline.h models/ruleline.cpp
         models/linedata.h models/linedata.cpp
         models/ruler.h models/ruler.cpp
+        models/timestep.h models/timestep.cpp
         qml.qrc
 )
 
@@ -39,7 +40,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(nx_time_line
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
     )
 
 # Define target properties for Android with Qt 6 as:

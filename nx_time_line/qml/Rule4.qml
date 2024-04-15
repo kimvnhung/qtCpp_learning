@@ -30,12 +30,12 @@ Rectangle{
     //     }
     // }
 
-    // Behavior on width {
-    //     enabled: targetValue >= parent.width
-    //     PropertyAnimation{
-    //         duration: 500
-    //     }
-    // }
+    Behavior on width {
+        enabled: targetValue >= parent.width && parent.width > 0
+        PropertyAnimation{
+            duration: 500
+        }
+    }
 
     Repeater{
         id: repeater
@@ -51,13 +51,7 @@ Rectangle{
             value: modelData.value
             lineType: modelData.lineType
 
-            // Behavior on x{
-            //     enabled: targetValue > targetProperty.object[targetProperty.name]
-            //     PropertyAnimation{
-            //         duration: 300
-            //         easing.type: Easing.OutCirc
-            //     }
-            // }
+
         }
     }
 

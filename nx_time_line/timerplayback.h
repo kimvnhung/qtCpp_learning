@@ -6,6 +6,7 @@
 #include "qmlwidget.h"
 
 #include <QObject>
+#include <QThread>
 
 class TimerPlayback : public QmlWidget
 {
@@ -64,6 +65,7 @@ signals:
 
 public slots:
     double typeDistance(RuleLine::RuleLineType type);
+    void generateLineData();
 
     // QmlWidget interface
 protected:
@@ -74,6 +76,7 @@ protected:
 private:
     class Private;
     QSharedPointer<Private> d;
+    QThread background;
 };
 
 #endif // TIMERPLAYBACK_H

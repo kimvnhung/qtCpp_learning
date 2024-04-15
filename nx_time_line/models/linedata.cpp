@@ -1,10 +1,11 @@
 #include "linedata.h"
 
-LineData::LineData(QObject *parent, RuleLine::RuleLineType lineType, qint64 value, bool visible):
+LineData::LineData(QObject *parent, RuleLine::RuleLineType lineType, qint64 value, bool visible, int level):
     QObject{parent},
     m_lineType(lineType),
     m_value(value),
-    m_visible(true)
+    m_visible(true),
+    m_level(level)
 {
 
 }
@@ -75,4 +76,8 @@ void LineData::setPosition(double value)
     emit positionChanged();
 }
 
+int LineData::level() const
+{
+    return m_level;
+}
 

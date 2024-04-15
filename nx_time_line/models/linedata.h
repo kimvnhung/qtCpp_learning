@@ -15,7 +15,8 @@ public:
     explicit LineData(QObject *parent = nullptr,
                       RuleLine::RuleLineType lineType = RuleLine::RuleLineType::UNDEFINED,
                       qint64 value = 0,
-                      bool visible = false);
+                      bool visible = false,
+                      int level = 0);
 
     int lineType() const;
     void setLineType(int value);
@@ -27,6 +28,8 @@ public:
 
     double position() const;
     void setPosition(double value);
+
+    int level() const;
 signals:
     void lineTypeChanged();
     void valueChanged();
@@ -36,6 +39,7 @@ private:
     qint64 m_value;
     double m_position;
     bool m_visible;
+    int m_level;
 };
 
 #endif // LINEDATA_H
