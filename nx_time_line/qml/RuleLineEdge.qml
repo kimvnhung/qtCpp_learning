@@ -15,7 +15,7 @@ Column {
     }
 
     Text {
-        width: 15
+        width: 1
         height: 15
         text: convertMillisecondsToString(value)
         color: root.lineType != RuleLine.SMALLEST? "white":"transparent"

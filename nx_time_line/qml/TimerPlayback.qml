@@ -61,13 +61,22 @@ Item {
                     scrollbar.size = width/wn
 
                 scrollbar.position = Math.abs(rule.x/rule.width)
-
             }
         }
 
-        Rule2 {
+        onWidthChanged: {
+            instance.viewWidth = width
+        }
+
+        Rule4 {
             id: rule
             width: parent.width
+            onWidthChanged: {
+                instance.ruleWidth = width
+            }
+            onXChanged: {
+                instance.viewX = x
+            }
         }
 
         ScrollBar {

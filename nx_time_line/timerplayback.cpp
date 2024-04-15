@@ -21,8 +21,9 @@ public:
         viewWidth(0),
         viewX(0),
         curPos(0),
-        ruler(new Ruler(parent)),
-        duration(std::chrono::milliseconds(0))
+        duration(std::chrono::milliseconds(0)),
+        totalTime(10000),
+        widthPerMili(0)
     {
         // demo init
     }
@@ -35,15 +36,18 @@ public:
     double viewWidth;
     double viewX;
     qint64 curPos;
-    Ruler *ruler;
 
     QList<RuleLine *> ruleLines;
+    QList<LineData *> lineDatas;
     std::chrono::milliseconds duration;
+    qint64 totalTime;
+    double widthPerMili;
 
     template <typename Rep, typename Period>
     bool is_round(const std::chrono::duration<Rep, Period> &duration, std::chrono::duration<Rep, Period> unit);
 
     void updateRuleLines();
+    void updateLineDatas();
     bool setWidth(double width);
     bool setViewWidth(double value);
     bool setViewX(double value);
@@ -73,6 +77,7 @@ void TimerPlayback::setDuration(std::chrono::milliseconds duration)
 
 void TimerPlayback::registerQmlType()
 {
+    qmlRegisterType<Ruler>("models",1,0,"Ruler");
     qmlRegisterUncreatableType<RuleLine>("models", 1, 0, "RuleLine", "Cannot create RuleLine in QML");
     widget()->rootContext()->setContextProperty(QString("instance"), this);
 }
@@ -109,6 +114,23 @@ void TimerPlayback::setRuleWidth(double width)
     if (d->setWidth(width))
         emit ruleWidthChanged();
 }
+
+// double TimerPlayback::ruleX() const
+// {
+//     return d->ruler->x();
+// }
+
+// void TimerPlayback::setRuleX(double value)
+// {
+//     d->ruler->setX(value);
+//     emit ruleXChanged();
+// }
+
+QQmlListProperty<LineData> TimerPlayback::lineDatas()
+{
+    return QQmlListProperty<LineData>(this,&d->lineDatas);
+}
+
 
 double TimerPlayback::viewWidth() const
 {
@@ -155,7 +177,8 @@ bool TimerPlayback::Private::setWidth(double w)
         return false;
 
     width = w;
-    updateRuleLines();
+    // updateRuleLines();
+    updateLineDatas();
     return true;
 }
 
@@ -168,7 +191,8 @@ bool TimerPlayback::Private::setViewWidth(double value)
         return false;
 
     viewWidth = value;
-    updateRuleLines();
+    // updateRuleLines();
+    updateLineDatas();
     return true;
 }
 
@@ -182,7 +206,8 @@ bool TimerPlayback::Private::setViewX(double value)
         return false;
 
     viewX = value;
-    updateRuleLines();
+    // updateRuleLines();
+    updateLineDatas();
     return true;
 }
 
@@ -194,6 +219,11 @@ bool TimerPlayback::Private::setCurPos(qint64 value)
     curPos = value;
     return true;
 }
+
+// Ruler* TimerPlayback::ruler() const
+// {
+//     return d->ruler;
+// }
 
 std::chrono::milliseconds roundByUnit(std::chrono::milliseconds duration, std::chrono::milliseconds unit)
 {
@@ -327,6 +357,26 @@ void TimerPlayback::Private::updateRuleLines()
         // case alread initialized
     }
     emit q->ruleLinesChanged();
+}
+
+void TimerPlayback::Private::updateLineDatas()
+{
+    qDebug()<<"totalTime: "<<totalTime<<"ruleWidth: "<<width<<"; viewWidth: "<<viewWidth<<"; viewX: "<<viewX;
+    if(!width)
+        return;
+
+    if(!viewWidth)
+        return;
+
+    widthPerMili = width/totalTime;
+
+    lineDatas.append(new LineData(q,RuleLine::RuleLineType::HIGHEST,1000,true));
+    emit q->lineDatasChanged();
+
+    for(int i=0; i < lineDatas.length(); i++){
+        lineDatas[i]->setPosition(widthPerMili*lineDatas[i]->value());
+    }
+
 }
 
 double TimerPlayback::typeDistance(RuleLine::RuleLineType type)

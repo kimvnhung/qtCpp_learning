@@ -53,4 +53,18 @@ void LineData::setVisible(bool visible)
     }
 }
 
+double LineData::position() const
+{
+    return m_position;
+}
+
+void LineData::setPosition(double value)
+{
+    if(m_position == value)
+        return;
+
+    m_position = value;
+    emit positionChanged();
+}
+
 
