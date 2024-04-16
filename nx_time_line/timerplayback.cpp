@@ -491,6 +491,8 @@ QVector<qint64> TimerPlayback::Private::existedValueAt(qint64 start,qint64 stop,
 void TimerPlayback::Private::updateLineDatas()
 {
     qDebug() << "totalTime: " << totalTime << "ruleWidth: " << width << "; viewWidth: " << viewWidth << "; viewX: " << viewX;
+    QElapsedTimer timer;
+    qint64 start = timer.elapsed();
     if (!width)
         return;
 
@@ -518,6 +520,8 @@ void TimerPlayback::Private::updateLineDatas()
             highestUnit = MS_LEVELS[0];
     }
 
+    qDebug()<<"time to get highestUnit :"<< timer.elapsed()-start;
+    start = timer.elapsed();
     // TODO:improve performance...
     refreshDelegateState();
     int delegate0 = *(delegateState);
@@ -537,7 +541,8 @@ void TimerPlayback::Private::updateLineDatas()
     qint64 stopedValue = roundedBy((abs(viewX) + viewWidth) / widthPerMili, highestUnit) + highestUnit;
 
     qDebug() << "startValue " << QTime(0,0).addMSecs(startedValue).toString("hh:mm:ss:zzz") << "; stopedValue " << QTime(0,0).addMSecs(stopedValue).toString("hh:mm:ss:zzz");
-
+    qDebug()<<"time to get units :"<< timer.elapsed()-start;
+    start = timer.elapsed();
 
     if (lineDatas.empty())
     {
@@ -569,7 +574,8 @@ void TimerPlayback::Private::updateLineDatas()
         updatePosition();
         emit q->lineDatasChanged();
     }
-
+    qDebug()<<"time to init first lineData :"<< timer.elapsed()-start;
+    start = timer.elapsed();
     // zoom in
     // downgrade linetype
     updatePosition();
@@ -602,35 +608,46 @@ void TimerPlayback::Private::updateLineDatas()
         }
     }
 
-    if (lastestHighestUnit > highestUnit)
-    {
-        // add new smallest
-        int lengthBefore = lineDatas.length();
-        qint64 value = 0;
+    qDebug()<<"time to update lineType :"<< timer.elapsed()-start;
+    start = timer.elapsed();
+
+    int lengthBefore = lineDatas.length();
+    qint64 value = 0;
+    if(indexShouldBeAdded(startedValue+smallestUnit) != -1 || indexShouldBeAdded(stopedValue-smallestUnit) != -1){
         while(value <= totalTime){
             if(value < startedValue)
             {
                 value += highestUnit;
                 continue;
             }
+
+            int index = 0;
             for(int n = 0;n<delegate0;n++){
+                if(index == -1)
+                    break;
                 for(int sm = 0; sm < delegate1;sm++){
+                    if(index == -1)
+                        break;
                     for(int sml = 0; sml < delegate2; sml++){
                         if(sml)
                         {
-                            int index = indexShouldBeAdded(value);
+                            index = indexShouldBeAdded(value);
                             if(index != -1){
                                 if(index == lineDatas.length())
                                     lineDatas.append(new LineData(q,RuleLine::RuleLineType::SMALLEST,value,startedValue <= value && value <= stopedValue));
                                 else
                                     lineDatas.insert(index,new LineData(q,RuleLine::RuleLineType::SMALLEST,value,startedValue <= value && value <= stopedValue));
-                            }
+                            }else
+                                break;
                         }
 
                         value += smallestUnit;
                     }
                 }
             }
+
+            if(index == -1)
+                break;
 
             if(value > stopedValue)
                 break;
@@ -639,6 +656,10 @@ void TimerPlayback::Private::updateLineDatas()
         if(lineDatas.length() != lengthBefore)
             emit q->lineDatasChanged();
     }
+
+    qDebug()<<"time to add new smallest :"<< timer.elapsed()-start;
+    start = timer.elapsed();
+
 
     updatePosition();
 }
