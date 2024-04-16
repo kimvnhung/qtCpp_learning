@@ -18,16 +18,11 @@ Rectangle{
         }
     }
 
-    Behavior on x {
-        PropertyAnimation{
-            easing.type: Easing.Linear
-        }
-    }
-
-    Behavior on width {
-        PropertyAnimation{
-            easing.type: Easing.Linear
-        }
+    PropertyAnimation{
+        target: root
+        property: "width,x"
+        duration: 500
+        running: true
     }
 
     function getCurPosFromMouseX(parentMouseX){

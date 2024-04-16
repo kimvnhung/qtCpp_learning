@@ -6,6 +6,7 @@
 #include "sampleview.h"
 #include "timemarker.h"
 #include "timerplayback.h"
+#include "timerplayback2.h"
 
 #include <QMainWindow>
 
@@ -39,5 +40,6 @@ private:
     BubbleToolTip2 *m_bubble = NULL;
     TimeMarker *m_timeMarker = NULL;
     TimerPlayback *m_timerPlayback = NULL;
+    TimerPlayback2 *m_timerPlayback2 = NULL;
 };
 #endif // MAINWINDOW_H

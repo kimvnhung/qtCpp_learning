@@ -81,3 +81,17 @@ int LineData::level() const
     return m_level;
 }
 
+double LineData::relativePosition() const
+{
+    return m_relativePosition;
+}
+
+void LineData::setRelativePosition(double value)
+{
+    if(m_relativePosition == value)
+        return;
+
+    m_relativePosition = value;
+    emit relativePositionChanged();
+}
+

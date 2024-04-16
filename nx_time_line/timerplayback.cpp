@@ -639,36 +639,31 @@ void TimerPlayback::Private::updateLineDatas()
             }
         }
 
-        if (lineDatas[0]->value() != smallestUnit)
-        {
-            qDebug() << "before add " << lineDatas.length();
-            int nextLevel = lineDatas[0]->level()+1;
-            // add new smallest
-            qint64 value = 0;
-            while(value <= totalTime){
-                if(value < startedValue)
-                {
-                    value += highestUnit;
-                    continue;
-                }
-                for(int n = 0;n<delegate0;n++){
-                    for(int sm = 0; sm < delegate1;sm++){
-                        for(int sml = 0; sml < delegate2; sml++){
-                            if(sml)
-                                lineDatas.append(new LineData(q,RuleLine::RuleLineType::SMALLEST,value,startedValue < value && value < stopedValue));
+        qDebug() << "before add " << lineDatas.length();
+        int nextLevel = lineDatas[0]->level()+1;
+        // add new smallest
+        qint64 value = 0;
+        while(value <= totalTime){
+            if(value < startedValue)
+            {
+                value += highestUnit;
+                continue;
+            }
+            for(int n = 0;n<delegate0;n++){
+                for(int sm = 0; sm < delegate1;sm++){
+                    for(int sml = 0; sml < delegate2; sml++){
+                        if(sml)
+                            lineDatas.append(new LineData(q,RuleLine::RuleLineType::SMALLEST,value,startedValue < value && value < stopedValue));
 
-                            value += smallestUnit;
-                        }
+                        value += smallestUnit;
                     }
                 }
-
-                if(value >= stopedValue)
-                    break;
             }
-            emit q->lineDatasChanged();
 
-            qDebug() << "after add " << lineDatas.length();
+            if(value >= stopedValue)
+                break;
         }
+        emit q->lineDatasChanged();
     }
 
     updatePosition();

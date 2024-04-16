@@ -38,5 +38,6 @@
         <file>qml/Rule3.qml</file>
         <file>qml/Rule4.qml</file>
         <file>qml/AnimationDemo.qml</file>
+        <file>qml/TimerPlayback2.qml</file>
     </qresource>
 </RCC>

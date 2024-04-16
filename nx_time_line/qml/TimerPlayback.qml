@@ -69,7 +69,7 @@ Item {
             instance.viewWidth = width
         }
 
-        Rule4 {
+        AnimationDemo {
             id: rule
             width: parent.width
             onWidthChanged: {
