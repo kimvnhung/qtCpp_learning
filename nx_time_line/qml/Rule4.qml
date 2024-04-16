@@ -24,18 +24,21 @@ Rectangle{
         color: "grey"
     }
 
-    // Behavior on x {
+    // Behavior on width {
+    //     enabled: targetValue >= parent.width && parent.width > 0
     //     PropertyAnimation{
-    //         duration: 500
+    //         duration: 200
+    //         easing.type: Easing.Linear
     //     }
     // }
 
-    Behavior on width {
-        enabled: targetValue >= parent.width && parent.width > 0
-        PropertyAnimation{
-            duration: 500
-        }
-    }
+    // Behavior on x {
+    //     enabled: x < 0
+    //     PropertyAnimation{
+    //         duration: 200
+    //         easing.type: Easing.Linear
+    //     }
+    // }
 
     Repeater{
         id: repeater
@@ -50,8 +53,6 @@ Rectangle{
 
             value: modelData.value
             lineType: modelData.lineType
-
-
         }
     }
 

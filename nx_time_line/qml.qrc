@@ -37,5 +37,6 @@
         <file>qml/RuleLineDurationDelegateChooser.qml</file>
         <file>qml/Rule3.qml</file>
         <file>qml/Rule4.qml</file>
+        <file>qml/AnimationDemo.qml</file>
     </qresource>
 </RCC>
