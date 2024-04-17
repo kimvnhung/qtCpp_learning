@@ -3,6 +3,7 @@
 
 #include "models/ruleline.h"
 #include "models/ruler.h"
+#include "models/timestep.h"
 #include "qmlwidget.h"
 
 #include <QObject>
@@ -20,6 +21,8 @@ class TimerPlayback : public QmlWidget
     // Q_PROPERTY(Ruler ruler READ ruler NOTIFY rulerChanged FINAL)
     Q_PROPERTY(double mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged FINAL)
     Q_PROPERTY(QQmlListProperty<LineData> lineDatas READ lineDatas NOTIFY lineDatasChanged FINAL)
+    Q_PROPERTY(QQmlListProperty<TimeStep> timeSteps READ timeSteps NOTIFY timeStepsChanged FINAL)
+
     using base_type = QmlWidget;
 public:
     explicit TimerPlayback(QObject *parent = nullptr,bool isInit = true);
@@ -28,6 +31,7 @@ public:
 
     QQmlListProperty<RuleLine> ruleLines();
     QQmlListProperty<LineData> lineDatas();
+    QQmlListProperty<TimeStep> timeSteps();
 
     double mouseX() const;
     void setMouseX(double value);
@@ -62,6 +66,7 @@ signals:
     // void rulerChanged();
     void lineDatasChanged();
     void mouseXChanged();
+    void timeStepsChanged();
 
 public slots:
     double typeDistance(RuleLine::RuleLineType type);

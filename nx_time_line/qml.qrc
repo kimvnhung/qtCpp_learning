@@ -39,5 +39,8 @@
         <file>qml/Rule4.qml</file>
         <file>qml/AnimationDemo.qml</file>
         <file>qml/TimerPlayback2.qml</file>
+        <file>qml/RuleContext.qml</file>
+        <file>qml/TimeStepItem.qml</file>
+        <file>qml/TimeStepItemChooser.qml</file>
     </qresource>
 </RCC>

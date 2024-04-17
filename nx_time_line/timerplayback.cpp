@@ -49,7 +49,8 @@ public:
                                      totalTime(25200000),
                                      widthPerMili(0),
                                      delegateState(DELEGATE_STATES[0]),
-                                     isGenerated(false)
+                                     isGenerated(false),
+        ctx(new RulerContext(parent,120000))
     {
         // demo init
     }
@@ -89,7 +90,46 @@ public:
     QVector<qint64> existedValueAt(qint64 start, qint64 stop, int level);
     int curMissingLevel();
     int indexShouldBeAdded(qint64 newValue, int startIdx = 0, int endIdx = 0);
+
+
+    /*
+     * using context
+     *
+    */
+
+    RulerContext* ctx;
+    QVector<TimeStep*> timeSteps;
+    void updateContext();
 };
+
+void TimerPlayback::Private::updateContext()
+{
+    qDebug()<<__FUNCTION__;
+    if(width == 0 || viewWidth == 0)
+        return;
+
+    ctx->setWidth(width);
+    ctx->setX(viewX);
+    ctx->setVisibleWidth(viewWidth);
+
+
+    if(timeSteps.empty())
+    {
+        int highestCount = ctx->totalTime()/ctx->highestUnit();
+        for(int i=0;i<highestCount+1;i++)
+        {
+            TimeStep *step = new TimeStep(ctx,0,ctx->highestUnit(),RuleLine::RuleLineType::HIGHEST);
+            timeSteps.append(step);
+
+        }
+        emit q->timeStepsChanged();
+    }
+}
+
+QQmlListProperty<TimeStep> TimerPlayback::timeSteps()
+{
+    return QQmlListProperty<TimeStep>(this,&d->timeSteps);
+}
 
 TimerPlayback::~TimerPlayback()
 {
@@ -121,6 +161,8 @@ void TimerPlayback::setDuration(std::chrono::milliseconds duration)
 
 void TimerPlayback::registerQmlType()
 {
+    qmlRegisterType<RulerContext>("models",1,0,"RulerContext");
+    qmlRegisterType<TimeStep>("models",1,0,"TimeStep");
     qmlRegisterType<Ruler>("models", 1, 0, "Ruler");
     qmlRegisterUncreatableType<RuleLine>("models", 1, 0, "RuleLine", "Cannot create RuleLine in QML");
     widget()->rootContext()->setContextProperty(QString("instance"), this);
@@ -238,7 +280,8 @@ bool TimerPlayback::Private::setWidth(double w)
 
     width = w;
     // updateRuleLines();
-    updateLineDatas();
+    // updateLineDatas();
+    updateContext();
     return true;
 }
 
@@ -252,7 +295,8 @@ bool TimerPlayback::Private::setViewWidth(double value)
 
     viewWidth = value;
     // updateRuleLines();
-    updateLineDatas();
+    // updateLineDatas();
+    updateContext();
     return true;
 }
 
@@ -267,7 +311,8 @@ bool TimerPlayback::Private::setViewX(double value)
 
     viewX = value;
     // updateRuleLines();
-    updateLineDatas();
+    // updateLineDatas();
+    updateContext();
     return true;
 }
 
