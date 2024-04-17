@@ -26,16 +26,16 @@ MainWindow::MainWindow(QWidget *parent)
     // m_timeMarker->show();
 
 
-    // m_timerPlayback = new TimerPlayback(this);
-    // m_timerPlayback->setDuration(std::chrono::hours(7));
-    // ui->centralwidget->layout()->addWidget(m_timerPlayback->widget());
-    // connect(m_timerPlayback,&TimerPlayback::curPosChanged,[this](){
-    //     QTime time = QTime(0,0).addMSecs(m_timerPlayback->curPos());
-    //     ui->curPosLb->setText(time.toString("hh:mm:ss:zzz"));
-    // });
+    m_timerPlayback = new TimerPlayback(this);
+    m_timerPlayback->setDuration(std::chrono::hours(7));
+    ui->centralwidget->layout()->addWidget(m_timerPlayback->widget());
+    connect(m_timerPlayback,&TimerPlayback::curPosChanged,[this](){
+        QTime time = QTime(0,0).addMSecs(m_timerPlayback->curPos());
+        ui->curPosLb->setText(time.toString("hh:mm:ss:zzz"));
+    });
 
-    m_timerPlayback2 = new TimerPlayback2(this);
-    ui->centralwidget->layout()->addWidget(m_timerPlayback2->widget());
+    // m_timerPlayback2 = new TimerPlayback2(this);
+    // ui->centralwidget->layout()->addWidget(m_timerPlayback2->widget());
 }
 
 MainWindow::~MainWindow()

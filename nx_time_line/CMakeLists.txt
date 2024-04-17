@@ -34,6 +34,8 @@ set(PROJECT_SOURCES
         models/ruler.h models/ruler.cpp
         models/timestep.h models/timestep.cpp
         timerplayback2.h timerplayback2.cpp
+        models/rulercontext.h models/rulercontext.cpp
+        models/basecontextobject.h models/basecontextobject.cpp
         qml.qrc
 )
 
@@ -41,6 +43,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(nx_time_line
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
+
 
     )
 
