@@ -12,11 +12,11 @@ Rectangle{
     height: 15
     color: "transparent"
 
-    // Behavior on width {
-    //     PropertyAnimation{
-    //         duration: 500
-    //     }
-    // }
+    Behavior on width {
+        PropertyAnimation{
+            duration: 300
+        }
+    }
 
     Row{
         anchors {
@@ -37,7 +37,7 @@ Rectangle{
 
         lineType: model.lineType
         value: model.value
-        visible: !model.isDisableText
+        visible: !model.isDisableText && root.width > 0
 
     }
 }

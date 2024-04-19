@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls.Basic
 
 import models 1.0
+import "math_utils.js" as MMath
 
 Item {
 
@@ -39,20 +40,14 @@ Item {
                 var wn_1 = ruleWidth
                 var xn_1 = ruleX
                 var wn = wn_1*alpha0
-                if(wn <= parent.width){
+                if(MMath.differentPercent(wn,parent.width) < 15){
                     wn = 1
-                }
-                var alphaN = wn/wn_1
-                if(wn >= parent.width){
-                    // rule.width = wn
-                    // rule.x = alphaN*xn_1+mouseX*(1-alphaN)
+                    instance.ruleWidth = parent.width
+                    instance.viewX = 0
+                }else {//over 20%
+                    var alphaN = wn/wn_1
                     instance.ruleWidth = wn
                     instance.viewX = alphaN*xn_1+mouseX*(1-alphaN)
-                }else {
-                    // rule.width = parent.width
-                    // rule.x = 0
-                    instance.ruleWidth = parent.width
-                    instance.viewX = 0;
                 }
 
                 // instance.curPos = rule.getCurPosFromMouseX(cachedMouseX)
@@ -61,7 +56,7 @@ Item {
                 if(wn/width > 100)
                     scrollbar.size = 0.01
                 else
-                    scrollbar.size = width/wn
+                    scrollbar.size = parent.width/wn
 
                 scrollbar.position = Math.abs(instance.viewX/instance.ruleWidth)
             }

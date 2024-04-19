@@ -78,3 +78,8 @@ function visualNormalized180(degrees) //< Angle, normalized in [-180.0, 180.0] r
         ? normalized180(degrees)
         : degrees
 }
+
+function differentPercent(a,b)
+{
+    return (a/b -1)*100
+}

@@ -184,8 +184,9 @@ double TimeStep::relativeWidth() const
 
     if(d->offset == d->context->startValueByUnit(unit()))
     {
-        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili());
-
+        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit
+                 <<"width"<<width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili())
+                 <<"(x,startValueByUnit,widthPerMili)"<<d->context->x()<<d->context->startValueByUnit(unit())<<d->context->widthPerMili();
         return width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili());
     }
 

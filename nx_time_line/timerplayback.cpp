@@ -240,8 +240,8 @@ double TimerPlayback::viewX() const
 
 void TimerPlayback::setViewX(double value)
 {
-    if (!d->isGenerated)
-        background.start();
+    // if (!d->isGenerated)
+    //     background.start();
     if (d->setViewX(value))
         emit viewXChanged();
 }
@@ -304,9 +304,6 @@ bool TimerPlayback::Private::setViewWidth(double value)
 bool TimerPlayback::Private::setViewX(double value)
 {
     qDebug() << __FUNCTION__ << "x : " << value;
-    if (value == 0)
-        return false;
-
     if (viewX == value)
         return false;
 
