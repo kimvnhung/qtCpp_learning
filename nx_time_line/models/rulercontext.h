@@ -70,6 +70,7 @@ private:
     bool isRoundedBy(qint64 target, qint64 unit);
 
     qint64 roundedBy(qint64 target, qint64 unit);
+    void refreshVisibleRange();
 
 };
 

@@ -23,12 +23,6 @@ Column {
         opacity: 1-parent.lineType*0.25
     }
 
-    onValueChanged: {
-        if(value === 11000){
-            console.log("value:"+value+"; convertMiliToString: "+convertMillisecondsToString(value))
-        }
-    }
-
     function getHeightFromType(type) : real {
         switch(type){
         case RuleLine.HIGHEST:

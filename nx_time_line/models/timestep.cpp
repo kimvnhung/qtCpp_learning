@@ -37,12 +37,14 @@ bool TimeStep::Private::isVisible()
 {
     return context->isVisible(offset+unit);
 }
-
 void TimeStep::Private::updateSubItems()
 {
-    int subCount = getSubCount();
-    if(subItems.empty() && subCount > 0)
+    if(subItems.empty())
     {
+        int subCount = getSubCount();
+        if(subCount == 0)
+            return;
+
         qint64 subUnit = unit/subCount;
         for(int i=0;i<subCount;i++){
             RuleLine::RuleLineType subLineType = RuleLine::RuleLineType::UNDEFINED;
@@ -55,10 +57,8 @@ void TimeStep::Private::updateSubItems()
             subItems.append(step);
         }
 
+        emit owner->subItemsChanged();
     }
-
-    emit owner->subItemsChanged();
-
 }
 
 int TimeStep::Private::getSubCount()
@@ -70,7 +70,9 @@ int TimeStep::Private::getSubCount()
     int mins = unit / 60000;
     int hours = unit / (3600000);
 
-    if (secs == 1)
+    if(unit == 500){
+        return 5;
+    }else if (secs == 1)
     {
         return 2;
     }
@@ -112,7 +114,6 @@ TimeStep::TimeStep(RulerContext* context, qint64 offset, qint64 unit, RuleLine::
 
 void TimeStep::onHighestUnitChanged()
 {
-    qDebug()<<__FUNCTION__;
     if(!d->isVisible())
         return;
 

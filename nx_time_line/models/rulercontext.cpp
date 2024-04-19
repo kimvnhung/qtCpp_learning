@@ -2,7 +2,7 @@
 
 #include <QDebug>
 
-double CHIGHEST_VISABLE_W = 200;
+double CHIGHEST_VISABLE_W = 250;
 qint64 CMS_LEVELS[] = {
     5000,  // 5s
     10000, // 10s
@@ -53,6 +53,7 @@ void RulerContext::setWidthPerMili(double value)
 
     m_widthPerMili = value;
     updateUnits();
+    refreshVisibleRange();
     emit widthPerMiliChanged();
 }
 
@@ -96,6 +97,7 @@ void RulerContext::setX(double newX)
         return;
 
     m_x = newX;
+    refreshVisibleRange();
     emit xChanged();
 }
 
@@ -137,6 +139,7 @@ qint64 RulerContext::highestUnit() const
 void RulerContext::setHighestUnit(qint64 newHighestUnit)
 {
     m_highestUnit = newHighestUnit;
+    refreshVisibleRange();
 }
 
 double RulerContext::visibleWidth() const
@@ -157,6 +160,11 @@ qint64 RulerContext::roundedBy(qint64 target, qint64 unit)
 void RulerContext::setVisibleWidth(double newVisibleWidth)
 {
     m_visibleWidth = newVisibleWidth;
+    refreshVisibleRange();
+}
+
+void RulerContext::refreshVisibleRange()
+{
     qint64 startedValue = roundedBy(abs(m_x) / widthPerMili(), highestUnit());
     qint64 stopedValue = roundedBy((abs(m_x) + m_visibleWidth) / widthPerMili(), highestUnit()) + highestUnit();
     m_visibleRange[0] = startedValue;

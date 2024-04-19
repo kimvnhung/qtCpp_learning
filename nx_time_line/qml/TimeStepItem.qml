@@ -10,9 +10,11 @@ Rectangle{
     height: 15
     color: "transparent"
 
-    onWidthChanged: {
-        console.log("width "+width)
-    }
+    // Behavior on width {
+    //     PropertyAnimation{
+    //         duration: 500
+    //     }
+    // }
 
     Row{
         anchors {
@@ -35,8 +37,5 @@ Rectangle{
         value: model.value
         visible: !model.isDisableText
 
-        onValueChanged: {
-            console.log("value "+value+"; lineType : "+lineType)
-        }
     }
 }
