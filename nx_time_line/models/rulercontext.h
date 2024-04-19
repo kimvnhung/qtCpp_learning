@@ -1,6 +1,8 @@
 #ifndef RULERCONTEXT_H
 #define RULERCONTEXT_H
 
+#include "ruleline.h"
+
 #include <QMutex>
 #include <QObject>
 
@@ -46,6 +48,14 @@ public:
 
     bool isVisible(qint64 value);
 
+    double relativeWidth(qint64 value);
+    qint64 startValueByUnit(qint64 unit);
+    qint64 stopValueByUnit(qint64 unit);
+    qint64 absoluteStart() const;
+    qint64 absoluteStop() const;
+    double startPosition() const;
+    double stopPosition() const;
+
 signals:
     void widthPerMiliChanged();
     void widthChanged();
@@ -65,6 +75,7 @@ private:
     double m_x;
     double m_visibleWidth;
     qint64 m_visibleRange[2];
+    qint64 m_absoluteVisibleRange[2];
 
     void updateUnits();
     bool isRoundedBy(qint64 target, qint64 unit);

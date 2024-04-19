@@ -50,7 +50,7 @@ public:
                                      widthPerMili(0),
                                      delegateState(DELEGATE_STATES[0]),
                                      isGenerated(false),
-        ctx(new RulerContext(parent,120000))
+        ctx(new RulerContext(parent,5000))
     {
         // demo init
     }
@@ -115,8 +115,6 @@ void TimerPlayback::Private::updateContext()
 
     if(timeSteps.empty())
     {
-        QElapsedTimer timer;
-        qint64 start = timer.elapsed();
         int highestCount = ctx->totalTime()/ctx->highestUnit();
         qDebug()<<"highestCount : "<<highestCount;
         for(int i=0;i<highestCount+1;i++)
@@ -126,7 +124,6 @@ void TimerPlayback::Private::updateContext()
 
         }
         emit q->timeStepsChanged();
-        qDebug()<<"time to add steps : "<<(timer.elapsed()-start);
     }
 }
 

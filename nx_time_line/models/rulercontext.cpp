@@ -169,11 +169,58 @@ void RulerContext::refreshVisibleRange()
     qint64 stopedValue = roundedBy((abs(m_x) + m_visibleWidth) / widthPerMili(), highestUnit()) + highestUnit();
     m_visibleRange[0] = startedValue;
     m_visibleRange[1] = stopedValue;
+    m_absoluteVisibleRange[0] = abs(m_x)/widthPerMili();
+    m_absoluteVisibleRange[1] = (abs(m_x)+m_visibleWidth)/widthPerMili() + 1;
+    qDebug()<<"visible range: "<<m_visibleRange[0]<<m_visibleRange[1]<<"x: "<<m_x<<"width: "<<m_width;
 }
 
 bool RulerContext::isVisible(qint64 value)
 {
     return m_visibleRange[0] <= value && value <= m_visibleRange[1];
+}
+
+double RulerContext::relativeWidth(qint64 value)
+{
+    if(value < m_visibleRange[0] || value > m_visibleRange[1])
+        return 0;
+
+    if(value-m_visibleRange[0] < highestUnit())
+        return (value-m_absoluteVisibleRange[0])*widthPerMili();
+
+    if(m_visibleRange[1] - value < highestUnit())
+        return (m_absoluteVisibleRange[1] - value)*widthPerMili();
+
+    return highestUnit()*widthPerMili();
+}
+
+qint64 RulerContext::startValueByUnit(qint64 unit)
+{
+    return roundedBy(abs(m_x) / widthPerMili(), unit);
+}
+
+qint64 RulerContext::stopValueByUnit(qint64 unit)
+{
+    return roundedBy((abs(m_x)+m_visibleWidth) / widthPerMili(), unit)+unit;
+}
+
+qint64 RulerContext::absoluteStart() const
+{
+    return m_absoluteVisibleRange[0];
+}
+
+qint64 RulerContext::absoluteStop() const
+{
+    return m_absoluteVisibleRange[1];
+}
+
+double RulerContext::startPosition() const
+{
+    return m_visibleRange[0]*widthPerMili();
+}
+
+double RulerContext::stopPosition() const
+{
+    return m_visibleRange[1]*widthPerMili();
 }
 
 void RulerContext::updateUnits()

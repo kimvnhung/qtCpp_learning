@@ -42,5 +42,6 @@
         <file>qml/RuleContext.qml</file>
         <file>qml/TimeStepItem.qml</file>
         <file>qml/TimeStepItemChooser.qml</file>
+        <file>qml/RuleContextCapturedView.qml</file>
     </qresource>
 </RCC>

@@ -109,6 +109,9 @@ TimeStep::TimeStep(RulerContext* context, qint64 offset, qint64 unit, RuleLine::
     d(new Private(this,context,offset,unit,lineType))
 {
     connect(context,&RulerContext::unitsChanged,this,&TimeStep::onHighestUnitChanged);
+    connect(context,&RulerContext::unitsChanged,this,&TimeStep::contextChanged);
+    connect(context,&RulerContext::xChanged,this,&TimeStep::contextChanged);
+    connect(context,&RulerContext::widthChanged,this,&TimeStep::contextChanged);
 }
 
 
@@ -171,7 +174,32 @@ double TimeStep::width() const
     return context()->widthPerMili()*unit();
 }
 
+double TimeStep::relativeWidth() const
+{
+    if(d->offset < d->context->startValueByUnit(unit()) || value() > d->context->stopValueByUnit(unit()))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<0;
+        return 0;
+    }
+
+    if(d->offset == d->context->startValueByUnit(unit()))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili());
+
+        return width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili());
+    }
+
+    if(value() == d->context->stopValueByUnit(unit()))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<width()-(d->context->stopValueByUnit(unit())*d->context->widthPerMili()-abs(d->context->x())-d->context->visibleWidth());
+        return width()-(d->context->stopValueByUnit(unit())*d->context->widthPerMili()-abs(d->context->x())-d->context->visibleWidth());
+    }
+
+    // qDebug()<<__FUNCTION__<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<width();
+    return width();
+}
+
 bool TimeStep::isDisableText() const
 {
-    return (value()%d->context->normalUnit() == 0 && d->lineType != RuleLine::RuleLineType::NORMAL);
+    return (value()%d->context->normalUnit() == 0 && d->lineType != RuleLine::RuleLineType::NORMAL) || relativeWidth() == 0;
 }

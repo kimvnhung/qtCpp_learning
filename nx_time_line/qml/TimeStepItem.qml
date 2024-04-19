@@ -4,9 +4,11 @@ import models 1.0
 Rectangle{
     id: root
     required property TimeStep model
+    required property bool isRelative
+
     property Component delegate: Item{}
 
-    width: model.unit*model.context.widthPerMili
+    width: isRelative?modelData.relativeWidth:model.unit*model.context.widthPerMili
     height: 15
     color: "transparent"
 

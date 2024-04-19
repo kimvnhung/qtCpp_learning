@@ -4,10 +4,6 @@ import QtQuick.Controls.Basic
 import models 1.0
 
 Item {
-    onWidthChanged: {
-        // instance.ruleWidth = background.width
-        // instance.viewWidth = background.width
-    }
 
     Rectangle {
         id: background
@@ -25,8 +21,10 @@ Item {
             }
 
             onWheel: {
+                var ruleWidth = instance.ruleWidth
+                var ruleX = instance.viewX
                 // var cachedMouseX = mouseX
-                if(wheel.angleDelta.y < 0 && rule.width <= parent.width){
+                if(wheel.angleDelta.y < 0 && ruleWidth <= parent.width){
                     return
                 }
 
@@ -38,19 +36,23 @@ Item {
                 //with: xn_1 is last x of rule
                 //    : alphaN = newWidth/oldWidth
                 var alpha0 = Math.pow(1.2,wheel.angleDelta.y/120)
-                var wn_1 = rule.width
-                var xn_1 = rule.x
+                var wn_1 = ruleWidth
+                var xn_1 = ruleX
                 var wn = wn_1*alpha0
                 if(wn <= parent.width){
                     wn = 1
                 }
                 var alphaN = wn/wn_1
                 if(wn >= parent.width){
-                    rule.width = wn
-                    rule.x = alphaN*xn_1+mouseX*(1-alphaN)
+                    // rule.width = wn
+                    // rule.x = alphaN*xn_1+mouseX*(1-alphaN)
+                    instance.ruleWidth = wn
+                    instance.viewX = alphaN*xn_1+mouseX*(1-alphaN)
                 }else {
-                    rule.width = parent.width
-                    rule.x = 0
+                    // rule.width = parent.width
+                    // rule.x = 0
+                    instance.ruleWidth = parent.width
+                    instance.viewX = 0;
                 }
 
                 // instance.curPos = rule.getCurPosFromMouseX(cachedMouseX)
@@ -61,7 +63,7 @@ Item {
                 else
                     scrollbar.size = width/wn
 
-                scrollbar.position = Math.abs(rule.x/rule.width)
+                scrollbar.position = Math.abs(instance.viewX/instance.ruleWidth)
             }
         }
 
@@ -69,16 +71,15 @@ Item {
             instance.viewWidth = width
         }
 
-        RuleContext {
+        RuleContextCapturedView {
             id: rule
             width: parent.width
             onWidthChanged: {
                 instance.ruleWidth = width
-            }
-            onXChanged: {
-                instance.viewX = x
+                instance.viewX = 0
             }
         }
+
 
         ScrollBar {
             id: scrollbar
@@ -111,7 +112,7 @@ Item {
             }
 
             onPositionChanged: {
-                rule.x = -position*rule.width
+                // rule.x = -position*rule.width
             }
 
 
