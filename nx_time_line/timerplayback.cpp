@@ -50,7 +50,7 @@ public:
                                      widthPerMili(0),
                                      delegateState(DELEGATE_STATES[0]),
                                      isGenerated(false),
-        ctx(new RulerContext(parent,123000))
+        ctx(new RulerContext(parent,12300000))
     {
         // demo init
     }

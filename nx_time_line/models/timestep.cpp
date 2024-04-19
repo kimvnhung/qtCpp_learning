@@ -53,7 +53,7 @@ void TimeStep::Private::updateSubItems()
             }
 
             TimeStep *step = new TimeStep(context,offset+i*subUnit,subUnit,subLineType);
-            connect(context,&RulerContext::unitsChanged,step, &TimeStep::onHighestUnitChanged);
+            connect(context,&RulerContext::unitsChanged,step, &TimeStep::onContextChanged);
             subItems.append(step);
         }
 
@@ -108,20 +108,16 @@ TimeStep::TimeStep(RulerContext* context, qint64 offset, qint64 unit, RuleLine::
     QObject{context},
     d(new Private(this,context,offset,unit,lineType))
 {
-    connect(context,&RulerContext::unitsChanged,this,&TimeStep::onHighestUnitChanged);
-    connect(context,&RulerContext::unitsChanged,this,&TimeStep::contextChanged);
     connect(context,&RulerContext::xChanged,this,&TimeStep::contextChanged);
     connect(context,&RulerContext::widthChanged,this,&TimeStep::contextChanged);
+    connect(this,&TimeStep::contextChanged,this,&TimeStep::onContextChanged);
 }
 
 
-void TimeStep::onHighestUnitChanged()
+void TimeStep::onContextChanged()
 {
     if(!d->isVisible())
         return;
-
-    d->updateSubItems();
-
 
     if(unit() == context()->highestUnit())
         setLineType((int)RuleLine::RuleLineType::HIGHEST);
@@ -133,6 +129,8 @@ void TimeStep::onHighestUnitChanged()
         setLineType((int)RuleLine::RuleLineType::SMALLEST);
     else
         setLineType((int)RuleLine::RuleLineType::UNDEFINED);
+
+    d->updateSubItems();
 }
 
 void TimeStep::setLineType(int value)

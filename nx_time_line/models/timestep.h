@@ -48,7 +48,7 @@ signals:
     void isDisableTextChanged();
 
 public slots:
-    void onHighestUnitChanged();
+    void onContextChanged();
 
 private:
     class Private;
