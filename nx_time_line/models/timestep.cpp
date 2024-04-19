@@ -202,5 +202,5 @@ double TimeStep::relativeWidth() const
 
 bool TimeStep::isDisableText() const
 {
-    return (value()%d->context->normalUnit() == 0 && d->lineType != RuleLine::RuleLineType::NORMAL) || relativeWidth() == 0;
+    return (value()%d->context->normalUnit() == 0 && d->lineType != RuleLine::RuleLineType::NORMAL) || (d->context->stopValueByUnit(unit()) == value());
 }
