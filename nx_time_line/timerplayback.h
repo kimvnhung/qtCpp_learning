@@ -19,6 +19,7 @@ class TimerPlayback : public QmlWidget
     Q_PROPERTY(double viewX READ viewX WRITE setViewX NOTIFY viewXChanged FINAL)
     Q_PROPERTY(qint64 curPos READ curPos WRITE setCurPos NOTIFY curPosChanged FINAL)
     // Q_PROPERTY(Ruler ruler READ ruler NOTIFY rulerChanged FINAL)
+    Q_PROPERTY(bool isMaximumScale READ isMaximumScale NOTIFY isMaximumScaleChanged FINAL)
     Q_PROPERTY(double mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged FINAL)
     Q_PROPERTY(QQmlListProperty<LineData> lineDatas READ lineDatas NOTIFY lineDatasChanged FINAL)
     Q_PROPERTY(QQmlListProperty<TimeStep> timeSteps READ timeSteps NOTIFY timeStepsChanged FINAL)
@@ -54,6 +55,7 @@ public:
     // Ruler* ruler() const;
 
     QQuickWidget* widget() const override;
+    bool isMaximumScale() const;
 
 
 signals:
@@ -67,6 +69,7 @@ signals:
     void lineDatasChanged();
     void mouseXChanged();
     void timeStepsChanged();
+    void isMaximumScaleChanged();
 
 public slots:
     double typeDistance(RuleLine::RuleLineType type);

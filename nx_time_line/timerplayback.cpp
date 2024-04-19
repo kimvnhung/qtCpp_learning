@@ -50,7 +50,7 @@ public:
                                      widthPerMili(0),
                                      delegateState(DELEGATE_STATES[0]),
                                      isGenerated(false),
-        ctx(new RulerContext(parent,5000))
+        ctx(new RulerContext(parent,123000))
     {
         // demo init
     }
@@ -179,6 +179,11 @@ void TimerPlayback::setUpQmlUrl(const QUrl &componentUrl)
 QQuickWidget *TimerPlayback::widget() const
 {
     return d->widget.get();
+}
+
+bool TimerPlayback::isMaximumScale() const
+{
+    return d->ctx->isMaximumScale();
 }
 
 QObject *TimerPlayback::rootObject() const

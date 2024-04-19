@@ -14,6 +14,7 @@ class TimeStep : public QObject
     Q_PROPERTY(int lineType READ lineType NOTIFY lineTypeChanged FINAL)
     Q_PROPERTY(qint64 value READ value NOTIFY valueChanged FINAL)
     Q_PROPERTY(qint64 unit READ unit NOTIFY unitChanged FINAL)
+    Q_PROPERTY(double width READ width NOTIFY widthChanged FINAL)
     Q_PROPERTY(double relativeWidth READ relativeWidth NOTIFY contextChanged FINAL)
     Q_PROPERTY(bool isDisableText READ isDisableText NOTIFY isDisableTextChanged FINAL)
     Q_PROPERTY(QQmlListProperty<TimeStep> subItems READ subItems NOTIFY subItemsChanged FINAL)

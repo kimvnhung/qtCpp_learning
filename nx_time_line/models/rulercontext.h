@@ -56,6 +56,8 @@ public:
     double startPosition() const;
     double stopPosition() const;
 
+    bool isMaximumScale() const;
+
 signals:
     void widthPerMiliChanged();
     void widthChanged();

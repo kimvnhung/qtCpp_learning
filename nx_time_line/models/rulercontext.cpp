@@ -3,6 +3,7 @@
 #include <QDebug>
 
 double CHIGHEST_VISABLE_W = 250;
+double CMAXIMUM_SCALE_W = 800;
 qint64 CMS_LEVELS[] = {
     5000,  // 5s
     10000, // 10s
@@ -221,6 +222,11 @@ double RulerContext::startPosition() const
 double RulerContext::stopPosition() const
 {
     return m_visibleRange[1]*widthPerMili();
+}
+
+bool RulerContext::isMaximumScale() const
+{
+    return m_highestUnit==CMS_LEVELS[0] && m_highestUnit*m_widthPerMili > CMAXIMUM_SCALE_W;
 }
 
 void RulerContext::updateUnits()

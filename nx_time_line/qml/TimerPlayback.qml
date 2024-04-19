@@ -5,7 +5,7 @@ import models 1.0
 import "math_utils.js" as MMath
 
 Item {
-
+    id: root
     Rectangle {
         id: background
         width: parent.width
@@ -24,12 +24,14 @@ Item {
             onWheel: {
                 var ruleWidth = instance.ruleWidth
                 var ruleX = instance.viewX
+
                 // var cachedMouseX = mouseX
+
                 if(wheel.angleDelta.y < 0 && ruleWidth <= parent.width){
                     return
                 }
 
-                if(wheel.angleDelta.y > 0 && rule.isMaximumScale())
+                if(wheel.angleDelta.y > 0 && instance.isMaximumScale)
                     return
 
                 //calculate new ruleSize
@@ -107,7 +109,7 @@ Item {
             }
 
             onPositionChanged: {
-                // rule.x = -position*rule.width
+                instance.viewX = -position*instance.ruleWidth
             }
 
 

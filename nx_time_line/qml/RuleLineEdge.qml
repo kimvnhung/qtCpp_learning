@@ -12,6 +12,13 @@ Column {
         height: getHeightFromType(lineType)
         color: "white"
         opacity: 1-parent.lineType*0.25
+
+        Behavior on height {
+            PropertyAnimation{
+                duration: 200
+                easing.type: Easing.InOutQuad
+            }
+        }
     }
 
     Text {
@@ -21,6 +28,13 @@ Column {
         color: root.lineType != RuleLine.SMALLEST? "white":"transparent"
         horizontalAlignment: Text.AlignHCenter
         opacity: 1-parent.lineType*0.25
+
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 200
+                easing.type: Easing.InOutQuad
+            }
+        }
     }
 
     function getHeightFromType(type) : real {

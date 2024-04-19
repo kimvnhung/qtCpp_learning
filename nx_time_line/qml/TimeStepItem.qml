@@ -13,6 +13,7 @@ Rectangle{
     color: "transparent"
 
     Behavior on width {
+        // enabled: model.relativeWidth == model.width
         PropertyAnimation{
             duration: 300
         }
