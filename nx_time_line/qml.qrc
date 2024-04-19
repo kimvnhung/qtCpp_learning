@@ -43,5 +43,6 @@
         <file>qml/TimeStepItem.qml</file>
         <file>qml/TimeStepItemChooser.qml</file>
         <file>qml/RuleContextCapturedView.qml</file>
+        <file>qml/MediaCursor.qml</file>
     </qresource>
 </RCC>

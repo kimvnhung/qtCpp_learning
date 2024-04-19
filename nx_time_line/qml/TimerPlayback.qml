@@ -20,6 +20,21 @@ Item {
             onPositionChanged: {
                 // instance.curPos = rule.getCurPosFromMouseX(mouseX)
                 instance.mouseX = mouseX
+                if(pressed){
+                    if(mouseX > mediaCursor.x)
+                        mediaCursor.width = mouseX-mediaCursor.x
+                    else
+                    {
+                        var oldWidth = mediaCursor.width
+                        mediaCursor.width = mediaCursor.x-mouseX+oldWidth
+                        mediaCursor.x = mouseX
+                    }
+                }
+            }
+
+            onPressed: {
+                mediaCursor.width = 2
+                mediaCursor.x = mouseX
             }
 
             onWheel: {
@@ -129,11 +144,12 @@ Item {
                 //     background.x = -100
                 // }
             }
-
-
         }
 
-
+        MediaCursor{
+            id: mediaCursor
+            width: 100
+        }
     }
 
 
