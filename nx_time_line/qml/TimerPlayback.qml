@@ -13,6 +13,7 @@ Item {
         color: "black"
         clip: true
 
+
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
@@ -91,6 +92,8 @@ Item {
             }
 
 
+
+
             contentItem: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: 15
@@ -110,6 +113,21 @@ Item {
 
             onPositionChanged: {
                 instance.viewX = -position*instance.ruleWidth
+                // if(position == 0)
+                //     background.x = 0
+                // else if(position == 1-size && size !== 1)
+                //     background.x = -200
+            }
+
+            onSizeChanged: {
+                // if(size === 1)
+                // {
+                //     background.width = root.width
+                //     background.x = 0
+                // }else{
+                //     background.width = root.width+200
+                //     background.x = -100
+                // }
             }
 
 
