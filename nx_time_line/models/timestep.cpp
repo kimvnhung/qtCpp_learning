@@ -177,26 +177,13 @@ double TimeStep::width() const
 double TimeStep::relativeWidth() const
 {
     if(d->offset < d->context->startValueByUnit(unit()) || value() > d->context->stopValueByUnit(unit()))
-    {
-        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<0;
         return 0;
-    }
 
     if(d->offset == d->context->startValueByUnit(unit()))
-    {
-        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit
-                 <<"width"<<width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili())
-                 <<"(x,startValueByUnit,widthPerMili)"<<d->context->x()<<d->context->startValueByUnit(unit())<<d->context->widthPerMili();
         return width() - (abs(d->context->x())-d->context->startValueByUnit(unit())*d->context->widthPerMili());
-    }
-
     if(value() == d->context->stopValueByUnit(unit()))
-    {
-        qDebug()<<__FUNCTION__<<__LINE__<<"actualWidth:"<<width()<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<width()-(d->context->stopValueByUnit(unit())*d->context->widthPerMili()-abs(d->context->x())-d->context->visibleWidth());
         return width()-(d->context->stopValueByUnit(unit())*d->context->widthPerMili()-abs(d->context->x())-d->context->visibleWidth());
-    }
 
-    // qDebug()<<__FUNCTION__<<"offset:"<<d->offset<<"unit:"<<d->unit<<"width"<<width();
     return width();
 }
 
