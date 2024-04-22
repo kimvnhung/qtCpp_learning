@@ -105,6 +105,8 @@ public:
 void TimerPlayback::Private::updateContext()
 {
     qDebug()<<__FUNCTION__;
+    QElapsedTimer timer;
+    qint64 start = timer.elapsed();
     if(width == 0 || viewWidth == 0)
         return;
 
@@ -119,12 +121,15 @@ void TimerPlayback::Private::updateContext()
         qDebug()<<"highestCount : "<<highestCount;
         for(int i=0;i<highestCount+1;i++)
         {
+            qint64 start2 = timer.elapsed();
             TimeStep *step = new TimeStep(ctx,i*ctx->highestUnit(),ctx->highestUnit(),RuleLine::RuleLineType::HIGHEST);
             timeSteps.append(step);
+            qDebug()<<"time to create one step: "<<(timer.elapsed()-start2);
 
         }
         emit q->timeStepsChanged();
     }
+    qDebug()<<"time to init step: "<<(timer.elapsed()-start);
 }
 
 QQmlListProperty<TimeStep> TimerPlayback::timeSteps()
