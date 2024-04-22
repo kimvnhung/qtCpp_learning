@@ -9,19 +9,15 @@ Rectangle{
 
     color: "transparent"
 
-    anchors{
-        top: parent.top
-    }
-
     Rectangle {
         id: ruleHeader
         width: parent.width
-        height: 40
+        height: 20
         anchors{
             top: parent.top
             left: parent.left
         }
-        color: "grey"
+        color: "#404040"
     }
 
 

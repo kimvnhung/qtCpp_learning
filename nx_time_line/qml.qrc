@@ -44,5 +44,7 @@
         <file>qml/TimeStepItemChooser.qml</file>
         <file>qml/RuleContextCapturedView.qml</file>
         <file>qml/MediaCursor.qml</file>
+        <file>qml/TimeZoneRuler.qml</file>
+        <file>qml/TimePositionBubble.qml</file>
     </qresource>
 </RCC>

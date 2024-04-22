@@ -18,23 +18,34 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPositionChanged: {
-                // instance.curPos = rule.getCurPosFromMouseX(mouseX)
+                hoverCursor.x = mouseX
+
                 instance.mouseX = mouseX
                 if(pressed){
-                    if(mouseX > mediaCursor.x)
-                        mediaCursor.width = mouseX-mediaCursor.x
+                    if(mouseX > runningCusor.x)
+                        runningCusor.width = mouseX-runningCusor.x
                     else
                     {
-                        var oldWidth = mediaCursor.width
-                        mediaCursor.width = mediaCursor.x-mouseX+oldWidth
-                        mediaCursor.x = mouseX
+                        var oldWidth = runningCusor.width
+                        runningCusor.width = runningCusor.x-mouseX+oldWidth
+                        runningCusor.x = mouseX
                     }
                 }
+
+
             }
 
             onPressed: {
-                mediaCursor.width = 2
-                mediaCursor.x = mouseX
+                runningCusor.width = 2
+                runningCusor.x = mouseX
+            }
+
+            onEntered: {
+                hoverCursor.visible = true
+            }
+
+            onExited: {
+                hoverCursor.visible = false
             }
 
             onWheel: {
@@ -87,12 +98,26 @@ Item {
         RuleContextCapturedView {
             id: rule
             width: parent.width
+            height: 55
+
+            anchors{
+                bottom: timeZone.top
+                left: parent.left
+            }
+
             onWidthChanged: {
                 instance.ruleWidth = width
                 instance.viewX = 0
             }
         }
 
+        TimeZoneRuler{
+            id: timeZone
+            anchors{
+                bottom: scrollbar.top
+                left: parent.left
+            }
+        }
 
         ScrollBar {
             id: scrollbar
@@ -112,7 +137,7 @@ Item {
             contentItem: Rectangle {
                 implicitWidth: parent.width
                 implicitHeight: 15
-                color: scrollbar.pressed ? "#81e889" : "#c2f4c6"
+                color: scrollbar.pressed ? "#606060" : (scrollbar.hovered ? "#686868" : "#585858")
                 // Hide the ScrollBar when it's not needed.
                 opacity: scrollbar.policy === ScrollBar.AlwaysOn || (scrollbar.active && scrollbar.size < 1.0) ? 0.75 : 0
 
@@ -147,8 +172,29 @@ Item {
         }
 
         MediaCursor{
-            id: mediaCursor
-            width: 100
+            id: runningCusor
+
+            anchors{
+                top: rule.top
+                bottom: parent.bottom
+            }
+        }
+
+        MediaCursor {
+            id: hoverCursor
+
+            anchors{
+                top: rule.top
+                bottom:  parent.bottom
+            }
+        }
+
+        TimePositionBubble{
+            id: positionBubble
+            anchors{
+                bottom: rule.top
+                left: runningCusor.right
+            }
         }
     }
 

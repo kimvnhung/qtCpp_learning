@@ -1,20 +1,22 @@
 import QtQuick 2.15
 
 Rectangle{
-    id: mediaCursor
+    id: root
 
     width: 2
     height: parent.height
     color: "transparent"
     x: 100
 
+    property color cursorColor: "white"
+
 
     Rectangle{
         id: selectedArea
         anchors.fill: parent
 
-        opacity: 0.3
-        color: "blue"
+        opacity: 0.5
+        color: "#79b8d5"
     }
 
     Rectangle {
@@ -27,7 +29,7 @@ Rectangle{
         Rectangle {
             width: parent.width
             height: 1
-            color: "white"
+            color: root.cursorColor
 
             anchors{
                 top: parent.top
@@ -38,7 +40,7 @@ Rectangle{
         Rectangle{
             width: 1
             height: parent.height
-            color: "white"
+            color: root.cursorColor
 
             anchors{
                 top: parent.top
@@ -49,7 +51,7 @@ Rectangle{
         Rectangle{
             width: parent.width
             height: 1
-            color: "white"
+            color: root.cursorColor
 
             anchors{
                 bottom: parent.bottom
@@ -73,7 +75,7 @@ Rectangle{
         Rectangle {
             width: parent.width
             height: 1
-            color: "white"
+            color: root.cursorColor
 
             anchors{
                 top: parent.top
@@ -84,7 +86,7 @@ Rectangle{
         Rectangle{
             width: 1
             height: parent.height
-            color: "white"
+            color: root.cursorColor
 
             anchors{
                 top: parent.top
@@ -95,7 +97,7 @@ Rectangle{
         Rectangle{
             width: parent.width
             height: 1
-            color: "white"
+            color: root.cursorColor
 
             anchors{
                 bottom: parent.bottom

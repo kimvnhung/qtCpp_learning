@@ -116,8 +116,6 @@ TimeStep::TimeStep(RulerContext* context, qint64 offset, qint64 unit, RuleLine::
 
 void TimeStep::onContextChanged()
 {
-    QElapsedTimer timer;
-    qint64 start = timer.elapsed();
     if(!d->isVisible())
         return;
 
@@ -133,7 +131,6 @@ void TimeStep::onContextChanged()
         setLineType((int)RuleLine::RuleLineType::UNDEFINED);
 
     d->updateSubItems();
-    qDebug()<<"time to update time step :"<<(timer.elapsed()-start);
 }
 
 void TimeStep::setLineType(int value)

@@ -10,7 +10,7 @@ Column {
         id: line
         width: 1
         height: getHeightFromType(lineType)
-        color: "white"
+        color: "#b8b8b8"
         opacity: 1-parent.lineType*0.25
 
         Behavior on height {
@@ -25,7 +25,7 @@ Column {
         width: 1
         height: 15
         text: convertMillisecondsToString(value)
-        color: root.lineType != RuleLine.SMALLEST? "white":"transparent"
+        color: root.lineType != RuleLine.SMALLEST? "#b8b8b8":"transparent"
         horizontalAlignment: Text.AlignHCenter
         opacity: 1-parent.lineType*0.25
 

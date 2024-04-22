@@ -21,7 +21,7 @@ Rectangle{
                 Rectangle {
                     width: 1
                     height: parent.height/2
-                    color: "green"
+                    color: "#787878"
                     anchors.centerIn: parent
                 }
             }
