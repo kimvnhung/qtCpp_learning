@@ -15,7 +15,13 @@ Item {
 
 
         MouseArea{
-            anchors.fill: parent
+            anchors{
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                top: rule.top
+            }
+
             hoverEnabled: true
             onPositionChanged: {
                 hoverCursor.x = mouseX
@@ -41,6 +47,7 @@ Item {
             }
 
             onEntered: {
+                hoverCursor.x = mouseX
                 hoverCursor.visible = true
             }
 
