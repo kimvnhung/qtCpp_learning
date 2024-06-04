@@ -19,3 +19,6 @@
 [submodule "QtAVPlayerCMakeDemo/QtAVPlayer"]
 	path = QtAVPlayerCMakeDemo/QtAVPlayer
 	url = https://github.com/kimvnhung/QtAVPlayerCMake.git
+[submodule "ffmpeg"]
+	path = ffmpeg
+	url = https://gitlab.ai-vlab.com/gpstech/vms/lib_ffmpeg.git
