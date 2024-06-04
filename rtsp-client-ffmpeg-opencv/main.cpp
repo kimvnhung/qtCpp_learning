@@ -35,10 +35,6 @@ void processFrame(AVFrame *frame) {
         }
     }
 
-    Mat image2(frame->height, frame->width, CV_8UC3,frame->data[0],frame->linesize[0]);
-    imshow("windowName", image2);
-    waitKey(1);
-
     // Allocate memory for the QImage.
     QImage image(frame->width, frame->height, QImage::Format_RGB888);
 
@@ -53,6 +49,7 @@ void processFrame(AVFrame *frame) {
         memcpy(destData[0], frame->data[0], frame->linesize[0] * frame->height);
     }
 
+
     image.save("image_"+QString::number(QDateTime::currentMSecsSinceEpoch())+".png");
 
     // Cleanup the SwsContext if created.
@@ -62,6 +59,15 @@ void processFrame(AVFrame *frame) {
 
     // Now you can use the 'image' object as needed.
     // For example, display it in a QLabel or save it to a file.
+    // Show AVFrame using imshow from OpenCV continously
+    static bool showed = false;
+    if(!showed){
+        // clone data from frame to new Mat
+        Mat img(frame->height, frame->width, CV_8UC3, image.bits(), image.bytesPerLine());
+        imshow("Frame", img);
+        showed = true;
+    }
+
 }
 
 int main() {

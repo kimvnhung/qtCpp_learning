@@ -19,6 +19,3 @@
 [submodule "QtAVPlayerCMakeDemo/QtAVPlayer"]
 	path = QtAVPlayerCMakeDemo/QtAVPlayer
 	url = https://github.com/kimvnhung/QtAVPlayerCMake.git
-[submodule "OpenGLTutorials/ffmpeg"]
-	path = OpenGLTutorials/ffmpeg
-	url = https://github.com/kimvnhung/ffmpeg.git

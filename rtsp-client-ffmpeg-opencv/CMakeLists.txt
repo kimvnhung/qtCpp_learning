@@ -19,6 +19,16 @@ set(WITH_GFLAGS OFF CACHE BOOL "Use gflags")
 # add_subdirectory(glog EXCLUDE_FROM_ALL)
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
+
+
+if(WIN32)
+    # Set OpenCV_DIR to Qt_SOURCE/opencv/build
+    set(OpenCV_DIR "C:/Qt/opencv/build")
+endif()
+
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 add_executable(${PROJECT_NAME}
   main.cpp
   defer.h
@@ -30,23 +40,15 @@ set(
     FFMPEG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg"
 )
 
-set(
-    OPENCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opencv"
-)
-
-set(OPENCV_INCLUDES "${OPENCV_DIR}/include")
 set(FFMPEG_INCLUDES "${FFMPEG_DIR}/include")
 set(FMT_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/fmt/include")
 # set(GLOG_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/glog/src")
 
 # Include the include directory
-target_include_directories(${PROJECT_NAME} PRIVATE ${OPENCV_INCLUDES} ${FFMPEG_INCLUDES} ${FMT_INCLUDES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDES} ${FMT_INCLUDES})
 
 file(GLOB FFMPEG_LIBS "${FFMPEG_DIR}/lib/*.lib")
-file(GLOB OPENCV_LIBS "${OPENCV_DIR}/lib/*.lib")
 
-message(STATUS "FFMPEG_LIBS: ${FFMPEG_LIBS}")
-message(STATUS "OPENCV_LIBS: ${OPENCV_LIBS}")
 
 # Link against the DLL (assuming Windows)
 target_link_libraries(${PROJECT_NAME}
@@ -56,7 +58,7 @@ target_link_libraries(${PROJECT_NAME}
         Qt${QT_VERSION_MAJOR}::Widgets
     PUBLIC
         ${FFMPEG_LIBS}
-        ${OPENCV_LIBS}
+        ${OpenCV_LIBS}
         # glog::glog
         fmt::fmt
 )
