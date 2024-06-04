@@ -19,10 +19,8 @@ set(WITH_GFLAGS OFF CACHE BOOL "Use gflags")
 # add_subdirectory(glog EXCLUDE_FROM_ALL)
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
-add_executable(rtsp-client-ffmpeg-opencv
+add_executable(${PROJECT_NAME}
   main.cpp
-
-
   defer.h
   # logger.h
 )
@@ -42,24 +40,21 @@ set(FMT_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/fmt/include")
 # set(GLOG_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/glog/src")
 
 # Include the include directory
-target_include_directories(rtsp-client-ffmpeg-opencv PRIVATE ${OPENCV_INCLUDES} ${FFMPEG_INCLUDES} ${FMT_INCLUDES})
-
-
-file(GLOB_RECURSE DLL_FILES "${CMAKE_CURRENT_SOURCE_DIR}/.*dll")
-foreach(DLL_FILE ${DLL_FILES})
-    configure_file(${DLL_FILE} ${CMAKE_BINARY_DIR} COPYONLY)
-endforeach()
-
+target_include_directories(${PROJECT_NAME} PRIVATE ${OPENCV_INCLUDES} ${FFMPEG_INCLUDES} ${FMT_INCLUDES})
 
 file(GLOB FFMPEG_LIBS "${FFMPEG_DIR}/lib/*.lib")
 file(GLOB OPENCV_LIBS "${OPENCV_DIR}/lib/*.lib")
 
+message(STATUS "FFMPEG_LIBS: ${FFMPEG_LIBS}")
+message(STATUS "OPENCV_LIBS: ${OPENCV_LIBS}")
+
 # Link against the DLL (assuming Windows)
-target_link_libraries(rtsp-client-ffmpeg-opencv
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Widgets
+    PUBLIC
         ${FFMPEG_LIBS}
         ${OPENCV_LIBS}
         # glog::glog

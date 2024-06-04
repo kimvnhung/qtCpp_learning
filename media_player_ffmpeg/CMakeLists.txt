@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.18)
+cmake_policy(VERSION 3.18)
+
+# Set CPP standard to C++17 minimum
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+# Set the project name
+get_filename_component(ROOT_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+project(${ROOT_PROJECT_NAME} LANGUAGES CXX)
+
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets REQUIRED)
+
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+file(GLOB_RECURSE SOURCES ${SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE HEADERS ${SOURCE_DIR}/*.h)
+file(GLOB_RECURSE UI_FILES ${SOURCE_DIR}/*.ui)
+file(GLOB_RECURSE RESOURCES ${SOURCE_DIR}/*.qrc)
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${UI_FILES} ${RESOURCES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core)

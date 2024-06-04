@@ -5,6 +5,12 @@ extern "C" {
 #include <libavutil/imgutils.h>
 }
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+
+using namespace cv;
+
 #include <QImage>
 #include <QDebug>
 #include <QDateTime>
@@ -28,6 +34,10 @@ void processFrame(AVFrame *frame) {
             return;
         }
     }
+
+    Mat image2(frame->height, frame->width, CV_8UC3,frame->data[0],frame->linesize[0]);
+    imshow("windowName", image2);
+    waitKey(1);
 
     // Allocate memory for the QImage.
     QImage image(frame->width, frame->height, QImage::Format_RGB888);
@@ -108,6 +118,7 @@ int main() {
             while (avcodec_receive_frame(pCodecContext, pFrame) >= 0) {
                 // Process the frame here (e.g., save it to an image file)
                 // ...
+                // qDebug()<<"Frame received";
                 processFrame(pFrame);
                 av_frame_unref(pFrame);
             }
