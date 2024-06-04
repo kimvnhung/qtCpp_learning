@@ -36,19 +36,13 @@ add_executable(${PROJECT_NAME}
 )
 
 
-set(
-    FFMPEG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg"
-)
+include(../ffmpeg/ffmpeg.cmake)
 
-set(FFMPEG_INCLUDES "${FFMPEG_DIR}/include")
 set(FMT_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/fmt/include")
 # set(GLOG_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/glog/src")
 
 # Include the include directory
 target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDES} ${FMT_INCLUDES})
-
-file(GLOB FFMPEG_LIBS "${FFMPEG_DIR}/lib/*.lib")
-
 
 # Link against the DLL (assuming Windows)
 target_link_libraries(${PROJECT_NAME}
