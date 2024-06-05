@@ -22,6 +22,9 @@ protected:
     void paintGL() override;
 
 signals:
+private:
+    class Private;
+    QSharedPointer<Private> d;
 };
 
 #endif // GLWIDGET_H

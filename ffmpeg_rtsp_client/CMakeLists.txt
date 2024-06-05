@@ -12,8 +12,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent OpenGL OpenGLWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Concurrent OpenGL OpenGLWidgets)
 
 # Include OpenCV
 if(WIN32)
@@ -29,17 +29,19 @@ include(../ffmpeg/ffmpeg.cmake)
 
 set(PROJECT_SOURCES
         main.cpp
+        log.h
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
         ui/glwidget.h
         ui/glwidget.cpp
-        models/framequeue.h
-        models/framequeue.cpp
+        models/asyncqueue.h
         models/frameconsumer.h
         models/frameconsumer.cpp
         models/frameproducer.h
         models/frameproducer.cpp
+        player.h
+        player.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -70,10 +72,12 @@ target_link_libraries(${PROJECT_NAME}
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::OpenGL
         Qt${QT_VERSION_MAJOR}::OpenGLWidgets
+        Qt${QT_VERSION_MAJOR}::Concurrent
         ${OpenCV_LIBS}
         ${FFMPEG_LIBS}
 )
 
+message("FFMPEG_INCLUDES: ${FFMPEG_INCLUDES}")
 target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDES})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
