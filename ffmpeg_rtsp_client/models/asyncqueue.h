@@ -29,9 +29,14 @@ public:
         }
 
         queue.enqueue(frame);
-        condition.wakeOne();
+        condition.wakeAll();
     }
 
+    int count()
+    {
+        QMutexLocker locker(&mutex);
+        return queue.size();
+    }
 
     T dequeue()
     {

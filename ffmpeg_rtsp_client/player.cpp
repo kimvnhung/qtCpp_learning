@@ -15,8 +15,9 @@ extern "C" {
 
 #include <QFuture>
 #include <QtConcurrent>
+#include <QDateTime>
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 
 class Player::Private
 {
@@ -167,8 +168,8 @@ void Player::Private::demux()
             while (avcodec_receive_frame(avcCtx, avFrame) >= 0 && !isTerminate) {
                 // Process the frame here (e.g., save it to an image file)
                 // ...
-                DBG("Frame received");
                 frameQueue.enqueue(avFrame);
+                DBG(QString("Frame received count: %1").arg(frameQueue.count()));
             }
         }
 
@@ -180,57 +181,63 @@ void Player::Private::demux()
 void Player::Private::play()
 {
     while (!isTerminate) {
-        // AVFrame *frame = frameQueue.dequeue();
-        // if (frame == nullptr) {
-        //     DBG("Frame is null");
-        //     break;
-        // }
+        DBG("");
+        AVFrame *frame = frameQueue.dequeue();
+        DBG("");
+        if (frame == nullptr) {
+            DBG("Frame is null");
+            continue;
+        }
 
-        // // Determine the format of the AVFrame (e.g., AV_PIX_FMT_YUV420P).
-        // const AVPixelFormat pixelFormat = static_cast<AVPixelFormat>(frame->format);
+        DBG("");
+        // Determine the format of the AVFrame (e.g., AV_PIX_FMT_YUV420P).
+        const AVPixelFormat pixelFormat = static_cast<AVPixelFormat>(frame->format);
 
-        // // Create a SwsContext for converting pixel format if necessary.
-        // SwsContext *swsContext = nullptr;
+        // Create a SwsContext for converting pixel format if necessary.
+        SwsContext *swsContext = nullptr;
 
-        // // Example: Convert AVFrame to QImage (Assuming RGB format).
-        // if (pixelFormat != AV_PIX_FMT_RGB24) {
-        //     swsContext = sws_getContext(frame->width, frame->height, pixelFormat,
-        //                                 frame->width, frame->height, AV_PIX_FMT_RGB24,
-        //                                 SWS_BILINEAR, nullptr, nullptr, nullptr);
-        //     if (!swsContext) {
-        //         qDebug() << "Error creating SwsContext";
-        //         return;
-        //     }
-        // }
+        DBG("");
+        // Example: Convert AVFrame to QImage (Assuming RGB format).
+        if (pixelFormat != AV_PIX_FMT_RGB24) {
+            DBG("");
+            swsContext = sws_getContext(frame->width, frame->height, pixelFormat,
+                                        frame->width, frame->height, AV_PIX_FMT_RGB24,
+                                        SWS_BILINEAR, nullptr, nullptr, nullptr);
+            DBG("");
+            if (!swsContext) {
+                DBG("Error creating SwsContext");
+                continue;
+            }
+        }
 
-        // // Allocate memory for the QImage.
-        // QImage image(frame->width, frame->height, QImage::Format_RGB888);
+        DBG("");
+        // Allocate memory for the QImage.
+        QImage image(frame->width, frame->height, QImage::Format_RGB888);
 
-        // // Set the data pointer of the QImage.
-        // uint8_t *destData[1] = {image.bits()};
-        // int destLinesize[1] = {static_cast<int>(image.bytesPerLine())};
-        // if (swsContext) {
-        //     sws_scale(swsContext, frame->data, frame->linesize,
-        //               0, frame->height, destData, destLinesize);
-        // } else {
-        //     // If pixel format is already RGB, just copy the data.
-        //     memcpy(destData[0], frame->data[0], frame->linesize[0] * frame->height);
-        // }
+        // Set the data pointer of the QImage.
+        uint8_t *destData[1] = {image.bits()};
+        int destLinesize[1] = {static_cast<int>(image.bytesPerLine())};
+        if (swsContext) {
+            sws_scale(swsContext, frame->data, frame->linesize,
+                      0, frame->height, destData, destLinesize);
+        } else {
+            // If pixel format is already RGB, just copy the data.
+            memcpy(destData[0], frame->data[0], frame->linesize[0] * frame->height);
+        }
+        DBG("");
 
+        image.save("image_"+QString::number(QDateTime::currentMSecsSinceEpoch())+".png");
 
-        // image.save("image_"+QString::number(QDateTime::currentMSecsSinceEpoch())+".png");
+        // Cleanup the SwsContext if created.
+        if (swsContext) {
+            sws_freeContext(swsContext);
+        }
 
-        // // Cleanup the SwsContext if created.
-        // if (swsContext) {
-        //     sws_freeContext(swsContext);
-        // }
-
-        // // Now you can use the 'image' object as needed.
-        // // For example, display it in a QLabel or save it to a file.
-        // // Show AVFrame using imshow from OpenCV continously
-
-        // av_frame_unref(frame);
-        // av_frame_free(&frame);
+        // Now you can use the 'image' object as needed.
+        // For example, display it in a QLabel or save it to a file.
+        // Show AVFrame using imshow from OpenCV continously
+        DBG("");
+        av_frame_unref(frame);
     }
 }
 
