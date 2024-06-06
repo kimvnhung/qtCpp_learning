@@ -1,6 +1,8 @@
 #include "player.h"
 #include "log.h"
 #include "models/asyncqueue.h"
+#include "models/qavhwdevice_d3d11_p.h"
+#include "models/qavhwdevice_p.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -62,7 +64,7 @@ public:
     QFuture<void> playerFuture;
 
     void load();
-    void setupVideoCodec();
+    void detectHardwareDevice();
     void demux();
     void play();
     void terminate();
@@ -84,15 +86,10 @@ void Player::Private::terminate()
         return;
 
     isTerminate = true;
-    DBG("");
     frameQueue.terminate();
-    DBG("");
     loadFuture.waitForFinished();
-    DBG("");
     demuxerFuture.waitForFinished();
-    DBG("");
     playerFuture.waitForFinished();
-    DBG("");
 }
 
 void Player::Private::setMediaStatus(MediaStatus status, ErrorData error)
@@ -125,11 +122,11 @@ void Player::Private::load()
     avfCtx = avformat_alloc_context();
 
     DBG(QString("options : ") << options);
-    AVDictionary *opts = nullptr;
+    AVDictionary *avFormatOptions = nullptr;
     for (const auto & key: options.keys())
-        av_dict_set(&opts, key.toUtf8().constData(), options[key].toUtf8().constData(), 0);
+        av_dict_set(&avFormatOptions, key.toUtf8().constData(), options[key].toUtf8().constData(), 0);
 
-    if (avformat_open_input(&avfCtx, url.toStdString().c_str(), nullptr, &opts) != 0) {
+    if (avformat_open_input(&avfCtx, url.toStdString().c_str(), nullptr, &avFormatOptions) != 0) {
         fprintf(stderr, "Error opening RTSP stream\n");
         setState(State::StoppedState, {ResourceError, "Error opening RTSP stream"});
     }
@@ -153,6 +150,8 @@ void Player::Private::load()
     }
 
     avcCtx = avcodec_alloc_context3(nullptr);
+    detectHardwareDevice();
+
     avcodec_parameters_to_context(avcCtx, avfCtx->streams[videoStreamIndex]->codecpar);
     const AVCodec *pCodec = avcodec_find_decoder(avcCtx->codec_id);
 
@@ -168,6 +167,29 @@ void Player::Private::load()
     }
 
     setState(State::PlayingState);
+}
+
+void Player::Private::detectHardwareDevice()
+{
+    // AVHWDeviceType type = AV_HWDEVICE_TYPE_NONE;
+    // AVBufferRef *hwDeviceCtx = nullptr;
+
+    // while ((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE) {
+    //     if (av_hwdevice_ctx_create(&hwDeviceCtx, type, nullptr, nullptr, 0) >= 0) {
+    //         // Hardware device found
+    //         break;
+    //     }
+    // }
+
+    // if (hwDeviceCtx) {
+    //     // Use the hardware device for decoding
+    //     avcCtx->hw_device_ctx = av_buffer_ref(hwDeviceCtx);
+    //     avcCtx->get_format = qavhwdevice_get_format;
+    //     avcCtx->opaque = new QAVHWDevicePrivate(hwDeviceCtx);
+    // } else {
+    //     // No hardware device found, use software decoding
+    //     avcCtx->hw_device_ctx = nullptr;
+    // }
 }
 
 void Player::Private::demux()
@@ -270,7 +292,7 @@ Player::Player(QObject *parent)
     : QObject{parent}
     , d{new Private{this}}
 {
-
+    av_log_set_level(AV_LOG_ERROR);
 }
 
 Player::~Player()
