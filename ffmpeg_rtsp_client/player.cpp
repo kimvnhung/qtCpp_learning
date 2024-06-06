@@ -24,8 +24,16 @@ class Player::Private
 public:
     Private(Player *owner)
         :owner{owner}
+        , avfCtx{nullptr}
+        , avcCtx{nullptr}
+        , avCodec{nullptr}
+        , avPacket{nullptr}
+        , avFrame{nullptr}
         , videoStreamIndex{-1}
+        , frameQueue{AsyncQueue<AVFrame*>(owner, BUFFER_SIZE)}
         , videoOutput{nullptr}
+        , url{""}
+        , options{}
         , threadPool{new QThreadPool(owner)}
         , isTerminate{false}
         , state{StoppedState}
@@ -41,7 +49,7 @@ public:
     AVPacket *avPacket;
     AVFrame *avFrame;
     int videoStreamIndex;
-    AsyncQueue<AVFrame*> frameQueue = AsyncQueue<AVFrame*>(owner, BUFFER_SIZE);
+    AsyncQueue<AVFrame*> frameQueue;
     GLWidget *videoOutput;
 
     //preset
@@ -54,12 +62,12 @@ public:
     QFuture<void> playerFuture;
 
     void load();
+    void setupVideoCodec();
     void demux();
     void play();
     void terminate();
 
     QMutex mutex;
-    QMutex videoOutputMutex;
 
     bool isTerminate;
     State state;
@@ -77,13 +85,6 @@ void Player::Private::terminate()
 
     isTerminate = true;
     DBG("");
-
-    // if(clean)
-    // {
-    //     QMutexLocker locker(&videoOutputMutex);
-    //     videoOutput = NULL;
-    // }
-
     frameQueue.terminate();
     DBG("");
     loadFuture.waitForFinished();
@@ -193,7 +194,7 @@ void Player::Private::demux()
                 // add clone data to enqueue
                 AVFrame *frame = av_frame_clone(avFrame);
                 frameQueue.enqueue(frame);
-                DBG(QString("Frame received count: %1").arg(frameQueue.count()));
+                // DBG(QString("Frame received count: %1").arg(frameQueue.count()));
             }
         }
 
@@ -254,15 +255,13 @@ void Player::Private::play()
         // For example, display it in a QLabel or save it to a file.
         // Show AVFrame using imshow from OpenCV continously
         DBG("Playing");
+        if(videoOutput)
         {
-            QMutexLocker locker(&videoOutputMutex);
-            if(videoOutput)
-            {
-                videoOutput->setRGBParameters(image.width(),image.height());
-                videoOutput->setImage(image);
-            }
+            videoOutput->setRGBParameters(image.width(),image.height());
+            videoOutput->setImage(image);
         }
         av_frame_unref(frame);
+        av_frame_free(&frame);
         DBG("Playing");
     }
 }
@@ -278,11 +277,20 @@ Player::~Player()
 {
     DBG("");
     d->terminate();
-    av_packet_unref(d->avPacket);
-    av_packet_free(&d->avPacket);
-    av_frame_free(&d->avFrame);
-    avcodec_free_context(&d->avcCtx);
-    avformat_close_input(&d->avfCtx);
+    if(d->avPacket)
+    {
+        av_packet_unref(d->avPacket);
+        av_packet_free(&d->avPacket);
+    }
+    if(d->avFrame)
+        av_frame_free(&d->avFrame);
+
+    if(d->avcCtx)
+        avcodec_free_context(&d->avcCtx);
+
+    if(d->avfCtx)
+        avformat_close_input(&d->avfCtx);
+
     d.clear();
 }
 
