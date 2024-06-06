@@ -1,6 +1,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+#include <QMutex>
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 #include <QWidget>
@@ -49,6 +50,7 @@ signals:
 private:
     class Private;
     QSharedPointer<Private> d;
+    QMutex mutex;
 };
 
 #endif // GLWIDGET_H

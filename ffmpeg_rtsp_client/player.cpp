@@ -1,6 +1,8 @@
 #include "player.h"
 #include "log.h"
 #include "models/asyncqueue.h"
+#include "models/qavhwdevice_d3d11_p.h"
+#include "models/qavhwdevice_p.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -24,8 +26,16 @@ class Player::Private
 public:
     Private(Player *owner)
         :owner{owner}
+        , avfCtx{nullptr}
+        , avcCtx{nullptr}
+        , avCodec{nullptr}
+        , avPacket{nullptr}
+        , avFrame{nullptr}
         , videoStreamIndex{-1}
+        , frameQueue{AsyncQueue<AVFrame*>(owner, BUFFER_SIZE)}
         , videoOutput{nullptr}
+        , url{""}
+        , options{}
         , threadPool{new QThreadPool(owner)}
         , isTerminate{false}
         , state{StoppedState}
@@ -41,7 +51,7 @@ public:
     AVPacket *avPacket;
     AVFrame *avFrame;
     int videoStreamIndex;
-    AsyncQueue<AVFrame*> frameQueue = AsyncQueue<AVFrame*>(owner, BUFFER_SIZE);
+    AsyncQueue<AVFrame*> frameQueue;
     GLWidget *videoOutput;
 
     //preset
@@ -54,12 +64,12 @@ public:
     QFuture<void> playerFuture;
 
     void load();
+    void detectHardwareDevice();
     void demux();
     void play();
     void terminate();
 
     QMutex mutex;
-    QMutex videoOutputMutex;
 
     bool isTerminate;
     State state;
@@ -76,22 +86,10 @@ void Player::Private::terminate()
         return;
 
     isTerminate = true;
-    DBG("");
-
-    // if(clean)
-    // {
-    //     QMutexLocker locker(&videoOutputMutex);
-    //     videoOutput = NULL;
-    // }
-
     frameQueue.terminate();
-    DBG("");
     loadFuture.waitForFinished();
-    DBG("");
     demuxerFuture.waitForFinished();
-    DBG("");
     playerFuture.waitForFinished();
-    DBG("");
 }
 
 void Player::Private::setMediaStatus(MediaStatus status, ErrorData error)
@@ -124,11 +122,11 @@ void Player::Private::load()
     avfCtx = avformat_alloc_context();
 
     DBG(QString("options : ") << options);
-    AVDictionary *opts = nullptr;
+    AVDictionary *avFormatOptions = nullptr;
     for (const auto & key: options.keys())
-        av_dict_set(&opts, key.toUtf8().constData(), options[key].toUtf8().constData(), 0);
+        av_dict_set(&avFormatOptions, key.toUtf8().constData(), options[key].toUtf8().constData(), 0);
 
-    if (avformat_open_input(&avfCtx, url.toStdString().c_str(), nullptr, &opts) != 0) {
+    if (avformat_open_input(&avfCtx, url.toStdString().c_str(), nullptr, &avFormatOptions) != 0) {
         fprintf(stderr, "Error opening RTSP stream\n");
         setState(State::StoppedState, {ResourceError, "Error opening RTSP stream"});
     }
@@ -152,6 +150,8 @@ void Player::Private::load()
     }
 
     avcCtx = avcodec_alloc_context3(nullptr);
+    detectHardwareDevice();
+
     avcodec_parameters_to_context(avcCtx, avfCtx->streams[videoStreamIndex]->codecpar);
     const AVCodec *pCodec = avcodec_find_decoder(avcCtx->codec_id);
 
@@ -167,6 +167,29 @@ void Player::Private::load()
     }
 
     setState(State::PlayingState);
+}
+
+void Player::Private::detectHardwareDevice()
+{
+    // AVHWDeviceType type = AV_HWDEVICE_TYPE_NONE;
+    // AVBufferRef *hwDeviceCtx = nullptr;
+
+    // while ((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE) {
+    //     if (av_hwdevice_ctx_create(&hwDeviceCtx, type, nullptr, nullptr, 0) >= 0) {
+    //         // Hardware device found
+    //         break;
+    //     }
+    // }
+
+    // if (hwDeviceCtx) {
+    //     // Use the hardware device for decoding
+    //     avcCtx->hw_device_ctx = av_buffer_ref(hwDeviceCtx);
+    //     avcCtx->get_format = qavhwdevice_get_format;
+    //     avcCtx->opaque = new QAVHWDevicePrivate(hwDeviceCtx);
+    // } else {
+    //     // No hardware device found, use software decoding
+    //     avcCtx->hw_device_ctx = nullptr;
+    // }
 }
 
 void Player::Private::demux()
@@ -193,7 +216,7 @@ void Player::Private::demux()
                 // add clone data to enqueue
                 AVFrame *frame = av_frame_clone(avFrame);
                 frameQueue.enqueue(frame);
-                DBG(QString("Frame received count: %1").arg(frameQueue.count()));
+                // DBG(QString("Frame received count: %1").arg(frameQueue.count()));
             }
         }
 
@@ -254,15 +277,13 @@ void Player::Private::play()
         // For example, display it in a QLabel or save it to a file.
         // Show AVFrame using imshow from OpenCV continously
         DBG("Playing");
+        if(videoOutput)
         {
-            QMutexLocker locker(&videoOutputMutex);
-            if(videoOutput)
-            {
-                videoOutput->setRGBParameters(image.width(),image.height());
-                videoOutput->setImage(image);
-            }
+            videoOutput->setRGBParameters(image.width(),image.height());
+            videoOutput->setImage(image);
         }
         av_frame_unref(frame);
+        av_frame_free(&frame);
         DBG("Playing");
     }
 }
@@ -271,18 +292,27 @@ Player::Player(QObject *parent)
     : QObject{parent}
     , d{new Private{this}}
 {
-
+    av_log_set_level(AV_LOG_ERROR);
 }
 
 Player::~Player()
 {
     DBG("");
     d->terminate();
-    av_packet_unref(d->avPacket);
-    av_packet_free(&d->avPacket);
-    av_frame_free(&d->avFrame);
-    avcodec_free_context(&d->avcCtx);
-    avformat_close_input(&d->avfCtx);
+    if(d->avPacket)
+    {
+        av_packet_unref(d->avPacket);
+        av_packet_free(&d->avPacket);
+    }
+    if(d->avFrame)
+        av_frame_free(&d->avFrame);
+
+    if(d->avcCtx)
+        avcodec_free_context(&d->avcCtx);
+
+    if(d->avfCtx)
+        avformat_close_input(&d->avfCtx);
+
     d.clear();
 }
 

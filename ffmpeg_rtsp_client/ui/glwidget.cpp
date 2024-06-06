@@ -127,13 +127,10 @@ public:
     GLuint tex[3];
     int u_MVP_matrix, u_colorMatrix, u_Texture[3];
     QOpenGLShaderProgram *program;
-    QMutex mutex;
     QMatrix4x4 mat;
 
     void setFrameData(const QByteArray& data)
     {
-        QMutexLocker lock(&mutex);
-        Q_UNUSED(lock);
         upload_tex = true;
         m_data = data;
         plane[0].data = (char*)m_data.constData();
@@ -146,8 +143,6 @@ public:
 
     void setImage(const QImage& img)
     {
-        QMutexLocker lock(&mutex);
-        Q_UNUSED(lock);
         upload_tex = true;
         m_image = img;
         plane[0].data = (char*)m_image.constBits();
@@ -156,18 +151,16 @@ public:
 
     void setRGBFrame(const char* data)
     {
-        QMutexLocker lock(&mutex);
-        Q_UNUSED(lock);
         upload_tex = true;
         // m_image = img;
-        strcpy(plane[0].data,data);
+        // using strcpy_s instead of strcpy for strcpy(plane[0].data,data);
+        strcpy_s(plane[0].data, strlen(data) + 1, data);
+
         q->update();
     }
 
     void setYUV420pParameters(int w, int h, int* strides)
     {
-        QMutexLocker lock(&mutex);
-        Q_UNUSED(lock);
         update_res = true;
         m_data.clear();
         m_image = QImage();
@@ -200,8 +193,6 @@ public:
 
     void setQImageParameters(QImage::Format fmt, int w, int h, int stride)
     {
-        QMutexLocker lock(&mutex);
-        Q_UNUSED(lock);
         update_res = true;
         m_data.clear();
         m_image = QImage();
@@ -236,8 +227,6 @@ public:
 
     void setRGBParameters(int w, int h)
     {
-        QMutexLocker lock(&mutex);
-        Q_UNUSED(lock);
         if(width == w && height == h){
             return;
         }
@@ -337,32 +326,50 @@ GLWidget::~GLWidget()
 //slot
 void GLWidget::setYUV420pParameters(int w, int h, int* strides)
 {
-    d->setYUV420pParameters(w, h, strides);
+    QMutexLocker locker(&mutex);
+    Q_UNUSED(locker);
+    if(d)
+        d->setYUV420pParameters(w, h, strides);
 }
 
 void GLWidget::setQImageParameters(QImage::Format fmt, int w, int h, int stride)
 {
-    d->setQImageParameters(fmt, w, h, stride);
+    QMutexLocker locker(&mutex);
+    Q_UNUSED(locker);
+    if(d)
+        d->setQImageParameters(fmt, w, h, stride);
 }
 
 void GLWidget::setRGBParameters(int w, int h)
 {
-    d->setRGBParameters(w, h);
+    QMutexLocker locker(&mutex);
+    Q_UNUSED(locker);
+    if(d)
+        d->setRGBParameters(w, h);
 }
 
 void GLWidget::setFrameData(const QByteArray& data)
 {
-    d->setFrameData(data);
+    QMutexLocker locker(&mutex);
+    Q_UNUSED(locker);
+    if(d)
+        d->setFrameData(data);
 }
 
 void GLWidget::setImage(const QImage& img)
 {
-    d->setImage(img);
+    QMutexLocker locker(&mutex);
+    Q_UNUSED(locker);
+    if(d)
+        d->setImage(img);
 }
 
 void GLWidget::setRGBFrame(const char* data)
 {
-    d->setRGBFrame(data);
+    QMutexLocker locker(&mutex);
+    Q_UNUSED(locker);
+    if(d)
+        d->setRGBFrame(data);
 }
 
 void GLWidget::bind()
@@ -439,7 +446,7 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::paintGL()
 {
-    QMutexLocker lock(&d->mutex);
+    QMutexLocker lock(&mutex);
     Q_UNUSED(lock);
     if(d->plane.size()==0){
         return;

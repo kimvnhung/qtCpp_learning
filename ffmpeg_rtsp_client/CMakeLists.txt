@@ -40,6 +40,9 @@ set(PROJECT_SOURCES
         models/frameconsumer.cpp
         models/frameproducer.h
         models/frameproducer.cpp
+        models/qavhwdevice_p.h
+        models/qavhwdevice_d3d11_p.h
+        models/qavhwdevice_d3d11.cpp
         player.h
         player.cpp
 )
