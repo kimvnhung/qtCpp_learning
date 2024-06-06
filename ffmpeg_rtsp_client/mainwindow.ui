@@ -16,19 +16,6 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <spacer name="horizontalSpacer_8">
@@ -92,7 +79,7 @@
       <item>
        <widget class="QLineEdit" name="urlEdt">
         <property name="text">
-         <string>rtsp://admin:abcd1234@192.168.1.250:554/1/1?transmode=unicast&amp;profile=vaom</string>
+         <string>rtsp://admin:abcd1234@116.97.240.172:554/Streaming/Channels/101/</string>
         </property>
        </widget>
       </item>

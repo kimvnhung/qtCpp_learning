@@ -25,6 +25,7 @@ public:
     Private(Player *owner)
         :owner{owner}
         , videoStreamIndex{-1}
+        , videoOutput{nullptr}
         , threadPool{new QThreadPool(owner)}
         , isTerminate{false}
         , state{StoppedState}
@@ -41,6 +42,7 @@ public:
     AVFrame *avFrame;
     int videoStreamIndex;
     AsyncQueue<AVFrame*> frameQueue = AsyncQueue<AVFrame*>(owner, BUFFER_SIZE);
+    GLWidget *videoOutput;
 
     //preset
     QString url;
@@ -57,6 +59,7 @@ public:
     void terminate();
 
     QMutex mutex;
+    QMutex videoOutputMutex;
 
     bool isTerminate;
     State state;
@@ -73,11 +76,22 @@ void Player::Private::terminate()
         return;
 
     isTerminate = true;
-    frameQueue.terminate();
-    loadFuture.waitForFinished();
-    demuxerFuture.waitForFinished();
-    playerFuture.waitForFinished();
+    DBG("");
 
+    // if(clean)
+    // {
+    //     QMutexLocker locker(&videoOutputMutex);
+    //     videoOutput = NULL;
+    // }
+
+    frameQueue.terminate();
+    DBG("");
+    loadFuture.waitForFinished();
+    DBG("");
+    demuxerFuture.waitForFinished();
+    DBG("");
+    playerFuture.waitForFinished();
+    DBG("");
 }
 
 void Player::Private::setMediaStatus(MediaStatus status, ErrorData error)
@@ -108,7 +122,13 @@ void Player::Private::load()
 {
     DBG("");
     avfCtx = avformat_alloc_context();
-    if (avformat_open_input(&avfCtx, url.toStdString().c_str(), nullptr, nullptr) != 0) {
+
+    DBG(QString("options : ") << options);
+    AVDictionary *opts = nullptr;
+    for (const auto & key: options.keys())
+        av_dict_set(&opts, key.toUtf8().constData(), options[key].toUtf8().constData(), 0);
+
+    if (avformat_open_input(&avfCtx, url.toStdString().c_str(), nullptr, &opts) != 0) {
         fprintf(stderr, "Error opening RTSP stream\n");
         setState(State::StoppedState, {ResourceError, "Error opening RTSP stream"});
     }
@@ -140,7 +160,8 @@ void Player::Private::load()
         setState(State::StoppedState, {ResourceError, "Error finding codec"});
     }
 
-    if (avcodec_open2(avcCtx, pCodec, nullptr) < 0) {
+
+    if (avcodec_open2(avcCtx, pCodec, NULL) < 0) {
         fprintf(stderr, "Error opening codec\n");
         setState(State::StoppedState, {ResourceError, "Error opening codec"});
     }
@@ -168,12 +189,15 @@ void Player::Private::demux()
             while (avcodec_receive_frame(avcCtx, avFrame) >= 0 && !isTerminate) {
                 // Process the frame here (e.g., save it to an image file)
                 // ...
-                frameQueue.enqueue(avFrame);
+                DBG("Frame received avFrameFormat : "+QString::number(avFrame->format));
+                // add clone data to enqueue
+                AVFrame *frame = av_frame_clone(avFrame);
+                frameQueue.enqueue(frame);
                 DBG(QString("Frame received count: %1").arg(frameQueue.count()));
             }
         }
 
-        av_packet_unref(avPacket);
+        // av_packet_unref(avPacket);
     }
 
 }
@@ -181,36 +205,32 @@ void Player::Private::demux()
 void Player::Private::play()
 {
     while (!isTerminate) {
-        DBG("");
+        DBG("Playing");
         AVFrame *frame = frameQueue.dequeue();
-        DBG("");
         if (frame == nullptr) {
             DBG("Frame is null");
             continue;
         }
+        DBG("frame.format : "+QString::number(frame->format));
 
-        DBG("");
         // Determine the format of the AVFrame (e.g., AV_PIX_FMT_YUV420P).
         const AVPixelFormat pixelFormat = static_cast<AVPixelFormat>(frame->format);
 
         // Create a SwsContext for converting pixel format if necessary.
         SwsContext *swsContext = nullptr;
 
-        DBG("");
+        DBG("pixelFormat: "+QString::number(pixelFormat));
         // Example: Convert AVFrame to QImage (Assuming RGB format).
         if (pixelFormat != AV_PIX_FMT_RGB24) {
-            DBG("");
             swsContext = sws_getContext(frame->width, frame->height, pixelFormat,
                                         frame->width, frame->height, AV_PIX_FMT_RGB24,
                                         SWS_BILINEAR, nullptr, nullptr, nullptr);
-            DBG("");
             if (!swsContext) {
                 DBG("Error creating SwsContext");
                 continue;
             }
         }
 
-        DBG("");
         // Allocate memory for the QImage.
         QImage image(frame->width, frame->height, QImage::Format_RGB888);
 
@@ -224,9 +244,6 @@ void Player::Private::play()
             // If pixel format is already RGB, just copy the data.
             memcpy(destData[0], frame->data[0], frame->linesize[0] * frame->height);
         }
-        DBG("");
-
-        image.save("image_"+QString::number(QDateTime::currentMSecsSinceEpoch())+".png");
 
         // Cleanup the SwsContext if created.
         if (swsContext) {
@@ -236,8 +253,17 @@ void Player::Private::play()
         // Now you can use the 'image' object as needed.
         // For example, display it in a QLabel or save it to a file.
         // Show AVFrame using imshow from OpenCV continously
-        DBG("");
+        DBG("Playing");
+        {
+            QMutexLocker locker(&videoOutputMutex);
+            if(videoOutput)
+            {
+                videoOutput->setRGBParameters(image.width(),image.height());
+                videoOutput->setImage(image);
+            }
+        }
         av_frame_unref(frame);
+        DBG("Playing");
     }
 }
 
@@ -270,13 +296,17 @@ void Player::setSource(const QString &source, QMap<QString, QString> options)
 
     d->terminate();
     d->isTerminate = false;
+    d->frameQueue.reset();
 
     d->loadFuture = QtConcurrent::run(d->threadPool, &Player::Private::load,d);
 }
 
 void Player::setVideoOutput(GLWidget *widget)
 {
-    Q_UNUSED(widget);
+    if(d->videoOutput == widget)
+        return;
+
+    d->videoOutput = widget;
 }
 
 Player::State Player::state() const

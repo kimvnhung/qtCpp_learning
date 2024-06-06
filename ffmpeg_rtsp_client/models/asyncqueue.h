@@ -24,42 +24,59 @@ public:
     void enqueue(const T &frame)
     {
         QMutexLocker locker(&mutex);
-        while (queue.size() >= m_bufferSize){
+        while (m_queue.size() >= m_bufferSize){
             condition.wait(&mutex);
         }
 
-        queue.enqueue(frame);
-        condition.wakeAll();
+        m_queue.enqueue(frame);
+        condition.wakeOne();
     }
 
     int count()
     {
         QMutexLocker locker(&mutex);
-        return queue.size();
+        return m_queue.size();
     }
 
     T dequeue()
     {
         QMutexLocker locker(&mutex);
-        while (queue.isEmpty()){
+        while (m_queue.isEmpty()){
+            if(m_isTerminate)
+                return NULL;
+            DBG("waiting for frame");
             condition.wait(&mutex);
         }
 
-        return queue.dequeue();
+        T frame = m_queue.dequeue();
+        condition.wakeOne();
+        return frame;
+    }
+
+    void reset()
+    {
+        DBG("reset queue");
+        m_isTerminate = false;
+        //clear all in queue
+        DBG("reset queue");
+        m_queue.clear();
+        DBG("reset queue");
+        condition.wakeAll();
     }
 
     void terminate()
     {
-        QMutexLocker locker(&mutex);
-        queue.clear();
+        m_isTerminate = true;
+        m_queue.clear();
         condition.wakeAll();
     }
 
 private:
-    QQueue<T> queue;
+    QQueue<T> m_queue;
     QMutex mutex;
     QWaitCondition condition;
     int m_bufferSize = 0;
+    bool m_isTerminate = false;
 };
 
 #endif // ASYNCQUEUE_H

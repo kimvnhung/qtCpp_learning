@@ -21,6 +21,7 @@ void processFrame(AVFrame *frame) {
     // Determine the format of the AVFrame (e.g., AV_PIX_FMT_YUV420P).
     const AVPixelFormat pixelFormat = static_cast<AVPixelFormat>(frame->format);
 
+    qDebug()<<"pixelFormat: "<<pixelFormat;
     // Create a SwsContext for converting pixel format if necessary.
     SwsContext *swsContext = nullptr;
 

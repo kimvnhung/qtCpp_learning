@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     widget = new GLWidget(this);
+    widget->setMinimumSize(400,600);
 
     ui->centralwidget->layout()->addWidget(widget);
     player = new Player(this);
@@ -46,7 +47,11 @@ void MainWindow::on_playPauseBtn_clicked()
         // Check if text is valid url
         QUrl url(ui->urlEdt->text());
         if(url.isValid()){
-            player->setSource(ui->urlEdt->text());
+            player->setSource(ui->urlEdt->text()
+                              ,{
+                                {"rtsp_transport","tcp"},
+                               }
+                            );
             player->play();
         }else
             DBG("Invalid URL");
