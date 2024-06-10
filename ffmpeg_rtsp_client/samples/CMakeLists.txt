@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.18)
+cmake_policy(VERSION 3.18)
+
+project(testPTSAVFrame)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME})
+
+file(GLOB_RECURSE SOURCE_FILES ${SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE HEADER_FILES ${SOURCE_DIR}/*.h)
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBS})

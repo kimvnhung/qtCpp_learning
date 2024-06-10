@@ -1,10 +1,6 @@
 #include "glwidget.h"
 
-#include <QWidget>
-#include <QOpenGLFunctions>
-#include <QOpenGLWidget>
-#include <QOpenGLShaderProgram>
-#include <QMutex>
+#include "../log.h"
 
 static const QMatrix4x4 yuv2rgb_bt601 =
     QMatrix4x4(
@@ -77,7 +73,6 @@ static const char kFragmentShader[] = glsl(
                                      1)
                              , 0.0, 1.0);
     });
-
 static const char kFragmentShaderRGB[] = glsl(
     uniform sampler2D u_Texture0;
     varying mediump vec2 v_TexCoords;
@@ -87,156 +82,222 @@ static const char kFragmentShaderRGB[] = glsl(
     });
 #undef glsl
 
-class GLWidget::Private
+GLWidget::GLWidget(QWidget *parent)
+    : QOpenGLWidget(parent)
+    , update_res(true)
+    , upload_tex(true)
+    , m_program(0)
 {
-public:
-    Private(GLWidget *parent, bool update_res, bool upload_tex, QOpenGLShaderProgram* program)
-        : q{parent}
-        , update_res{update_res}
-        , upload_tex{upload_tex}
-        , program{program}
-    {
-        memset(tex,0,3);
+    //    setAttribute(Qt::WA_OpaquePaintEvent);
+    //  setAttribute(Qt::WA_NoSystemBackground);
+    //default: swap in qpainter dtor. we should swap before QPainter.endNativePainting()
+    memset(tex, 0, 3);
+}
+
+/*
+ * For bining Python
+*/
+
+GLWidget::GLWidget(const GLWidget &other){
+    // assign(other);
+}
+
+GLWidget& GLWidget::operator=(const GLWidget &other){
+    if (this != &other) {
+
     }
+    return *this;
+}
 
-    GLWidget *q;
+GLWidget::GLWidget(GLWidget &&other){
 
-    bool update_res;
-    bool upload_tex;
-    int width;
-    int height;
-    float init_ratio;
+}
 
-    QByteArray m_data;
-    QImage m_image;
+GLWidget& GLWidget::operator=(GLWidget &&other){
+    return *this;
+}
 
-    typedef struct {
-        char* data;
-        int stride;
-        GLint internal_fmt;
-        GLenum fmt;
-        GLenum type;
-        int bpp;
-        QSize tex_size;
-        QSize upload_size;
-    } Plane;
+GLWidget::~GLWidget(){
 
-    QVector<Plane> plane;
+}
 
-    //QSize tex_size[3], tex_upload_size[3];
-    GLuint tex[3];
-    int u_MVP_matrix, u_colorMatrix, u_Texture[3];
-    QOpenGLShaderProgram *program;
-    QMatrix4x4 mat;
+GLWidget::GLWidget()
+    : QOpenGLWidget(NULL)
+    , update_res(true)
+    , upload_tex(true)
+    , m_program(0)
+{
+    //    setAttribute(Qt::WA_OpaquePaintEvent);
+    //  setAttribute(Qt::WA_NoSystemBackground);
+    //default: swap in qpainter dtor. we should swap before QPainter.endNativePainting()
+    memset(tex, 0, 3);
+}
 
-    void setFrameData(const QByteArray& data)
+/*
+ * Ending binding
+*/
+
+void GLWidget::setFrameData(const QByteArray &data)
+{
+    //QMutexLocker lock(&m_mutex);
+    //Q_UNUSED(lock);
+    upload_tex = true;
+    m_data = data;
+    plane[0].data = (char*)m_data.constData();
+    if (plane.size() > 1) {
+        plane[1].data = plane[0].data + plane[0].stride*height;
+        plane[2].data = plane[1].data + plane[1].stride*height/2;
+    }
+    update();
+}
+
+void GLWidget::setImage(const QImage &img)
+{
+    DBG("");
     {
-        upload_tex = true;
-        m_data = data;
-        plane[0].data = (char*)m_data.constData();
-        if (plane.size() > 1) {
-            plane[1].data = plane[0].data + plane[0].stride*height;
-            plane[2].data = plane[1].data + plane[1].stride*height/2;
+        //check null befor lock
+        if (img.isNull()) {
+            return;
         }
-        q->update();
-    }
-
-    void setImage(const QImage& img)
-    {
+        QMutexLocker lock(&m_mutex);
+        Q_UNUSED(lock);
         upload_tex = true;
         m_image = img;
         plane[0].data = (char*)m_image.constBits();
-        q->update();
     }
+    DBG("");
+    update();
+}
 
-    void setRGBFrame(const char* data)
-    {
-        upload_tex = true;
-        // m_image = img;
-        // using strcpy_s instead of strcpy for strcpy(plane[0].data,data);
-        strcpy_s(plane[0].data, strlen(data) + 1, data);
-
-        q->update();
+void GLWidget::bind()
+{
+    for (int i = 0; i < plane.size(); ++i) {
+        bindPlane((i + 1) % plane.size());
     }
+    upload_tex = false;
+}
 
-    void setYUV420pParameters(int w, int h, int* strides)
-    {
-        update_res = true;
-        m_data.clear();
-        m_image = QImage();
-        width = w;
-        height = h;
-        plane.resize(3);
-        Plane &p = plane[0];
-        p.data = 0;
-        p.stride = strides && strides[0] ? strides[0] : w;
+void GLWidget::bindPlane(int p)
+{
+    glActiveTexture(GL_TEXTURE0 + p);
+    glBindTexture(GL_TEXTURE_2D, tex[p]);
+    if (!upload_tex)
+        return;
+    // This is necessary for non-power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    const Plane &P = plane[p];
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, P.upload_size.width(), P.upload_size.height(), P.fmt, P.type, P.data);
+}
+
+void GLWidget::initTextures()
+{
+    glDeleteTextures(3, tex);
+    memset(tex, 0, 3);
+    glGenTextures(plane.size(), tex);
+    //qDebug("init textures...");
+    for (int i = 0; i < plane.size(); ++i) {
+        const Plane &P = plane[i];
+        //qDebug("tex[%d]: %u", i, tex[i]);
+        glBindTexture(GL_TEXTURE_2D, tex[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        // This is necessary for non-power-of-two textures
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, P.internal_fmt, P.tex_size.width(), P.tex_size.height(), 0/*border, ES not support*/, P.fmt, P.type, NULL);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+}
+
+void GLWidget::setYUV420pParameters(int w, int h, int *strides)
+{
+    //QMutexLocker lock(&m_mutex);
+    //Q_UNUSED(lock);
+    update_res = true;
+    m_data.clear();
+    m_image = QImage();
+    width = w;
+    height = h;
+    plane.resize(3);
+    Plane &p = plane[0];
+    p.data = 0;
+    p.stride = strides && strides[0] ? strides[0] : w;
+    p.tex_size.setWidth(p.stride);
+    p.upload_size.setWidth(p.stride);
+    p.tex_size.setHeight(h);
+    p.upload_size.setHeight(h);
+    p.internal_fmt = p.fmt = GL_LUMINANCE;
+    p.type = GL_UNSIGNED_BYTE;
+    p.bpp = 1;
+    for (int i = 1; i < plane.size(); ++i) {
+        Plane &p = plane[i];
+        p.stride = strides && strides[i] ? strides[i] : w/2;
         p.tex_size.setWidth(p.stride);
         p.upload_size.setWidth(p.stride);
-        p.tex_size.setHeight(h);
-        p.upload_size.setHeight(h);
+        p.tex_size.setHeight(h/2);
+        p.upload_size.setHeight(h/2);
         p.internal_fmt = p.fmt = GL_LUMINANCE;
         p.type = GL_UNSIGNED_BYTE;
         p.bpp = 1;
-        for (int i = 1; i < plane.size(); ++i) {
-            Plane &p = plane[i];
-            p.stride = strides && strides[i] ? strides[i] : w/2;
-            p.tex_size.setWidth(p.stride);
-            p.upload_size.setWidth(p.stride);
-            p.tex_size.setHeight(h/2);
-            p.upload_size.setHeight(h/2);
-            p.internal_fmt = p.fmt = GL_LUMINANCE;
-            p.type = GL_UNSIGNED_BYTE;
-            p.bpp = 1;
-            qDebug() << p.tex_size;
-        }
+        qDebug() << p.tex_size;
     }
+}
 
-    void setQImageParameters(QImage::Format fmt, int w, int h, int stride)
-    {
-        update_res = true;
-        m_data.clear();
-        m_image = QImage();
-        width = w;
-        height = h;
-        plane.resize(1);
-        Plane &p = plane[0];
-        p.data = 0;
-        p.stride = stride ? stride : QImage(w, h, fmt).bytesPerLine();
-        static const gl_fmt_entry_t fmts[] = {
-            { QImage::Format_RGB888, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, 3},
-            { QImage::Format_Invalid, 0, 0, 0, 0}
-        };
-        for (int i = 0; fmts[i].bpp; ++i) {
-            if (fmts[i].qfmt == fmt) {
-                Plane &p = plane[0];
-                p.internal_fmt = fmts[i].internal_fmt;
-                p.fmt = fmts[i].fmt;
-                p.type = fmts[i].type;
-                p.internal_fmt = fmts[i].internal_fmt;
-                p.bpp = fmts[i].bpp;
+void GLWidget::setQImageParameters(QImage::Format fmt, int w, int h, int stride)
+{
+    //QMutexLocker lock(&m_mutex);
+    //Q_UNUSED(lock);
+    update_res = true;
+    m_data.clear();
+    m_image = QImage();
+    width = w;
+    height = h;
+    plane.resize(1);
+    Plane &p = plane[0];
+    p.data = 0;
+    p.stride = stride ? stride : QImage(w, h, fmt).bytesPerLine();
+    static const gl_fmt_entry_t fmts[] = {
+        { QImage::Format_RGB888, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, 3},
+        { QImage::Format_Invalid, 0, 0, 0, 0}
+    };
+    for (int i = 0; fmts[i].bpp; ++i) {
+        if (fmts[i].qfmt == fmt) {
+            Plane &p = plane[0];
+            p.internal_fmt = fmts[i].internal_fmt;
+            p.fmt = fmts[i].fmt;
+            p.type = fmts[i].type;
+            p.internal_fmt = fmts[i].internal_fmt;
+            p.bpp = fmts[i].bpp;
 
-                p.tex_size.setWidth(p.stride/p.bpp);
-                p.upload_size.setWidth(p.stride/p.bpp);
-                p.tex_size.setHeight(h);
-                p.upload_size.setHeight(h);
-                return;
-            }
-        }
-        qFatal("Unsupported QImage format %d!", fmt);
-    }
-
-    void setRGBParameters(int w, int h)
-    {
-        if(width == w && height == h){
+            p.tex_size.setWidth(p.stride/p.bpp);
+            p.upload_size.setWidth(p.stride/p.bpp);
+            p.tex_size.setHeight(h);
+            p.upload_size.setHeight(h);
             return;
         }
+    }
+    qFatal("Unsupported QImage format %d!", fmt);
+}
+
+void GLWidget::setRGBParameters(int w, int h)
+{
+    if(width == w && height == h){
+        return;
+    }
+    DBG("");
+    {
+        QMutexLocker lock(&m_mutex);
         update_res = true;
-        m_data.clear();
-        m_image = QImage();
-        width = w;
-        height = h;
-        init_ratio = w*1.f/h;
-        mat.setToIdentity();
+    }
+    m_data.clear();
+    m_image = QImage();
+    width = w;
+    height = h;
+    init_ratio = w*1.f/h;
+    {
+        QMutexLocker lock(&m_mutex);
+        m_mat.setToIdentity();
         plane.resize(1);
         Plane &p = plane[0];
         p.data = 0;
@@ -262,160 +323,56 @@ public:
             }
         }
     }
-
-    void initializeShader()
-    {
-        if (program) {
-            program->release();
-            delete program;
-            program = 0;
-        }
-        program = new QOpenGLShaderProgram(q);
-
-        program->addShaderFromSourceCode(QOpenGLShader::Vertex, kVertexShader);
-        QByteArray frag;
-        if (plane.size() > 1)
-            frag = QByteArray(kFragmentShader);
-        else
-            frag = QByteArray(kFragmentShaderRGB);
-        frag.prepend("#ifdef GL_ES\n"
-                     "precision mediump int;\n"
-                     "precision mediump float;\n"
-                     "#else\n"
-                     "#define highp\n"
-                     "#define mediump\n"
-                     "#define lowp\n"
-                     "#endif\n");
-        program->addShaderFromSourceCode(QOpenGLShader::Fragment, frag);
-
-        char const *const *attr = attributes();
-        for (int i = 0; attr[i][0]; ++i) {
-            program->bindAttributeLocation(attr[i], i);
-        }
-        if (!program->link()) {
-            qWarning("QSGMaterialShader: Shader compilation failed:");
-            qWarning() << program->log();
-            qDebug("frag: %s", plane.size() > 1 ? kFragmentShader : kFragmentShaderRGB);
-        }
-
-        u_MVP_matrix = program->uniformLocation("u_MVP_matrix");
-        // fragment shader
-        u_colorMatrix = program->uniformLocation("u_colorMatrix");
-        for (int i = 0; i < plane.size(); ++i) {
-            QString tex_var = QString("u_Texture%1").arg(i);
-            u_Texture[i] = program->uniformLocation(tex_var);
-            // qDebug("glGetUniformLocation(\"%s\") = %d", tex_var.toUtf8().constData(), u_Texture[i]);
-        }
-        // qDebug("glGetUniformLocation(\"u_MVP_matrix\") = %d", u_MVP_matrix);
-        // qDebug("glGetUniformLocation(\"u_colorMatrix\") = %d", u_colorMatrix);
-    }
-};
-
-GLWidget::GLWidget(QWidget *parent)
-    : QOpenGLWidget{parent}
-    , d{new Private{this, true, true, 0}}
-{
-
-}
-
-GLWidget::~GLWidget()
-{
-    d.clear();
-}
-
-//slot
-void GLWidget::setYUV420pParameters(int w, int h, int* strides)
-{
-    QMutexLocker locker(&mutex);
-    Q_UNUSED(locker);
-    if(d)
-        d->setYUV420pParameters(w, h, strides);
-}
-
-void GLWidget::setQImageParameters(QImage::Format fmt, int w, int h, int stride)
-{
-    QMutexLocker locker(&mutex);
-    Q_UNUSED(locker);
-    if(d)
-        d->setQImageParameters(fmt, w, h, stride);
-}
-
-void GLWidget::setRGBParameters(int w, int h)
-{
-    QMutexLocker locker(&mutex);
-    Q_UNUSED(locker);
-    if(d)
-        d->setRGBParameters(w, h);
-}
-
-void GLWidget::setFrameData(const QByteArray& data)
-{
-    QMutexLocker locker(&mutex);
-    Q_UNUSED(locker);
-    if(d)
-        d->setFrameData(data);
-}
-
-void GLWidget::setImage(const QImage& img)
-{
-    QMutexLocker locker(&mutex);
-    Q_UNUSED(locker);
-    if(d)
-        d->setImage(img);
+    // qFatal("Unsupported QImage format %d!", fmt);
 }
 
 void GLWidget::setRGBFrame(const char* data)
 {
-    QMutexLocker locker(&mutex);
-    Q_UNUSED(locker);
-    if(d)
-        d->setRGBFrame(data);
+    //QMutexLocker lock(&m_mutex);
+    //Q_UNUSED(lock);
+    upload_tex = true;
+    // m_image = img;
+    // using strcpy_s instead of strcpy for
+    // strcpy(plane[0].data,data);
+    strcpy_s(plane[0].data, strlen(data), data);
+    update();
 }
 
-void GLWidget::bind()
+void GLWidget::paintGL()
 {
-    for (int i = 0; i < d->plane.size(); ++i) {
-        bindPlane((i + 1) % d->plane.size());
-    }
-    d->upload_tex = false;
-}
-
-void GLWidget::bindPlane(int p)
-{
-    glActiveTexture(GL_TEXTURE0 + p);
-    glBindTexture(GL_TEXTURE_2D, d->tex[p]);
-    if (!d->upload_tex)
+    QMutexLocker lock(&m_mutex);
+    Q_UNUSED(lock);
+    if(plane.size()==0){
         return;
-    // This is necessary for non-power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    const Private::Plane &P = d->plane[p];
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, P.upload_size.width(), P.upload_size.height(), P.fmt, P.type, P.data);
-}
-
-void GLWidget::initializedShader()
-{
-    d->initializeShader();
-}
-
-void GLWidget::initTexttures()
-{
-    glDeleteTextures(3, d->tex);
-    memset(d->tex, 0, 3);
-    glGenTextures(d->plane.size(), d->tex);
-    //qDebug("init textures...");
-    for (int i = 0; i < d->plane.size(); ++i) {
-        const Private::Plane &P = d->plane[i];
-        //qDebug("tex[%d]: %u", i, tex[i]);
-        glBindTexture(GL_TEXTURE_2D, d->tex[i]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        // This is necessary for non-power-of-two textures
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, P.internal_fmt, P.tex_size.width(), P.tex_size.height(), 0/*border, ES not support*/, P.fmt, P.type, NULL);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
+    if (!plane[0].data)
+        return;
+    if (update_res || !tex[0]) {
+        initializeShader();
+        initTextures();
+        update_res = false;
+    }
+    bind();
+    m_program->bind();
+    for (int i = 0; i < plane.size(); ++i) {
+        m_program->setUniformValue(u_Texture[i], (GLint)i);
+    }
+    m_program->setUniformValue(u_colorMatrix, yuv2rgb_bt601);
+    m_program->setUniformValue(u_MVP_matrix, m_mat);
+    // uniform end. attribute begin
+    // kVertices ...
+    // normalize?
+    m_program->setAttributeArray(0, GL_FLOAT, kVertices, 2);
+    m_program->setAttributeArray(1, GL_FLOAT, kTexCoords, 2);
+    char const *const *attr = attributes();
+    for (int i = 0; attr[i][0]; ++i) {
+        m_program->enableAttributeArray(i); //TODO: in setActiveShader
+    }
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    for (int i = 0; attr[i][0]; ++i) {
+        m_program->disableAttributeArray(i); //TODO: in setActiveShader
+    }
+    //update();
 }
 
 void GLWidget::initializeGL()
@@ -428,15 +385,15 @@ void GLWidget::resizeGL(int w, int h)
     glViewport(0, 0, w, h);
     float new_ratio = w*1.f/h;
     float scaleX,scaleY;
-    if(new_ratio > d->init_ratio){
-        scaleX = d->init_ratio/new_ratio;
+    if(new_ratio > init_ratio){
+        scaleX = init_ratio/new_ratio;
         scaleY = 1;
     }else {
         scaleX = 1;
-        scaleY = new_ratio/d->init_ratio;
+        scaleY = new_ratio/init_ratio;
     }
 
-    d->mat = QMatrix4x4(
+    m_mat = QMatrix4x4(
         scaleX,0.f,0.f,0.f,
         0.f,scaleY,0.f,0.f,
         0.f,0.f,1.f,0.f,
@@ -444,38 +401,49 @@ void GLWidget::resizeGL(int w, int h)
         );
 }
 
-void GLWidget::paintGL()
+void GLWidget::initializeShader()
 {
-    QMutexLocker lock(&mutex);
-    Q_UNUSED(lock);
-    if(d->plane.size()==0){
-        return;
+    if (m_program) {
+        m_program->release();
+        delete m_program;
+        m_program = 0;
     }
-    if (!d->plane[0].data)
-        return;
-    if (d->update_res || !d->tex[0]) {
-        initializedShader();
-        initTexttures();
-        d->update_res = false;
-    }
-    bind();
-    d->program->bind();
-    for (int i = 0; i < d->plane.size(); ++i) {
-        d->program->setUniformValue(d->u_Texture[i], (GLint)i);
-    }
-    d->program->setUniformValue(d->u_colorMatrix, yuv2rgb_bt601);
-    d->program->setUniformValue(d->u_MVP_matrix, d->mat);
-    // uniform end. attribute begin
-    // kVertices ...
-    // normalize?
-    d->program->setAttributeArray(0, GL_FLOAT, kVertices, 2);
-    d->program->setAttributeArray(1, GL_FLOAT, kTexCoords, 2);
+    m_program = new QOpenGLShaderProgram(this);
+
+    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, kVertexShader);
+    QByteArray frag;
+    if (plane.size() > 1)
+        frag = QByteArray(kFragmentShader);
+    else
+        frag = QByteArray(kFragmentShaderRGB);
+    frag.prepend("#ifdef GL_ES\n"
+                 "precision mediump int;\n"
+                 "precision mediump float;\n"
+                 "#else\n"
+                 "#define highp\n"
+                 "#define mediump\n"
+                 "#define lowp\n"
+                 "#endif\n");
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, frag);
+
     char const *const *attr = attributes();
     for (int i = 0; attr[i][0]; ++i) {
-        d->program->enableAttributeArray(i); //TODO: in setActiveShader
+        m_program->bindAttributeLocation(attr[i], i);
     }
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    for (int i = 0; attr[i][0]; ++i) {
-        d->program->disableAttributeArray(i); //TODO: in setActiveShader
+    if (!m_program->link()) {
+        qWarning("QSGMaterialShader: Shader compilation failed:");
+        qWarning() << m_program->log();
+        qDebug("frag: %s", plane.size() > 1 ? kFragmentShader : kFragmentShaderRGB);
     }
+
+    u_MVP_matrix = m_program->uniformLocation("u_MVP_matrix");
+    // fragment shader
+    u_colorMatrix = m_program->uniformLocation("u_colorMatrix");
+    for (int i = 0; i < plane.size(); ++i) {
+        QString tex_var = QString("u_Texture%1").arg(i);
+        u_Texture[i] = m_program->uniformLocation(tex_var);
+        // qDebug("glGetUniformLocation(\"%s\") = %d", tex_var.toUtf8().constData(), u_Texture[i]);
+    }
+    // qDebug("glGetUniformLocation(\"u_MVP_matrix\") = %d", u_MVP_matrix);
+    // qDebug("glGetUniformLocation(\"u_colorMatrix\") = %d", u_colorMatrix);
 }

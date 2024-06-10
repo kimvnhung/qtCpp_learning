@@ -53,6 +53,29 @@ public:
         return frame;
     }
 
+    void pop()
+    {
+        QMutexLocker locker(&mutex);
+        if(m_queue.isEmpty())
+            return;
+
+        m_queue.dequeue();
+        condition.wakeOne();
+    }
+
+    T front()
+    {
+        QMutexLocker locker(&mutex);
+        while (m_queue.isEmpty()){
+            if(m_isTerminate)
+                return NULL;
+            DBG("waiting for frame");
+            condition.wait(&mutex);
+        }
+
+        return m_queue.front();
+    }
+
     void reset()
     {
         DBG("reset queue");
