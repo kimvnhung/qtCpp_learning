@@ -212,27 +212,64 @@ void Player::Private::countClock()
     }
 }
 
+static enum AVPixelFormat get_hw_pix_fmt(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts) {
+    while (*pix_fmts != AV_PIX_FMT_NONE) {
+        if (*pix_fmts == AV_PIX_FMT_CUDA || *pix_fmts == AV_PIX_FMT_VAAPI || *pix_fmts == AV_PIX_FMT_DXVA2_VLD) {
+            return *pix_fmts;
+        }
+        pix_fmts++;
+    }
+    fprintf(stderr, "Failed to get HW surface format.\n");
+    return AV_PIX_FMT_NONE;
+}
+
+int init_hw_decoder(AVCodecContext *ctx, enum AVHWDeviceType type) {
+    int err;
+    AVBufferRef *hw_device_ctx = NULL;
+
+    if ((err = av_hwdevice_ctx_create(&hw_device_ctx, type, NULL, NULL, 0)) < 0) {
+        fprintf(stderr, "Failed to create specified HW device.\n");
+        return err;
+    }
+    ctx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+    av_buffer_unref(&hw_device_ctx);
+    return err;
+}
+
 void Player::Private::detectHardwareDevice()
 {
-    // AVHWDeviceType type = AV_HWDEVICE_TYPE_NONE;
-    // AVBufferRef *hwDeviceCtx = nullptr;
+    // Detect the hardware type
+    // enum AVHWDeviceType hw_type = AV_HWDEVICE_TYPE_NONE;
+    // const char *hw_type_name = NULL;
+    // while ((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE) {
+    //     hw_type_name = av_hwdevice_get_type_name(hw_type);
+    //     printf("Found hardware type: %s\n", hw_type_name);
 
-    // while ((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE) {
-    //     if (av_hwdevice_ctx_create(&hwDeviceCtx, type, nullptr, nullptr, 0) >= 0) {
-    //         // Hardware device found
+    //     // Break if the hardware type is suitable for current platform
+    //     if (hw_type == AV_HWDEVICE_TYPE_CUDA
+    //         || hw_type == AV_HWDEVICE_TYPE_VAAPI
+    //         || hw_type == AV_HWDEVICE_TYPE_DXVA2
+    //         || hw_type == AV_HWDEVICE_TYPE_D3D11VA
+    //         || hw_type == AV_HWDEVICE_TYPE_QSV
+    //         || hw_type == AV_HWDEVICE_TYPE_OPENCL
+    //         || hw_type == AV_HWDEVICE_TYPE_VULKAN) {
+    //         printf("Use hardware type: %s\n", hw_type_name);
     //         break;
     //     }
     // }
 
-    // if (hwDeviceCtx) {
-    //     // Use the hardware device for decoding
-    //     avcCtx->hw_device_ctx = av_buffer_ref(hwDeviceCtx);
-    //     avcCtx->get_format = qavhwdevice_get_format;
-    //     avcCtx->opaque = new QAVHWDevicePrivate(hwDeviceCtx);
-    // } else {
-    //     // No hardware device found, use software decoding
-    //     avcCtx->hw_device_ctx = nullptr;
+    // if (hw_type == AV_HWDEVICE_TYPE_NONE) {
+    //     fprintf(stderr, "No supported hardware device found.\n");
+    //     return;
     // }
+
+    // // Initialize hardware decoder
+    // if (init_hw_decoder(avcCtx, hw_type) < 0) {
+    //     fprintf(stderr, "Failed to initialize hardware decoder.\n");
+    //     return;
+    // }
+
+    // avcCtx->get_format = get_hw_pix_fmt;
 }
 
 void Player::Private::demux()
