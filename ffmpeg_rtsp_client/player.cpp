@@ -33,6 +33,7 @@ public:
         , avStream{nullptr}
         , avPacket{nullptr}
         , avFrame{nullptr}
+        , hw_type{AV_HWDEVICE_TYPE_NONE}
         , videoStreamIndex{-1}
         , frameQueue{AsyncQueue<AVFrame*>(owner, BUFFER_SIZE)}
         , videoOutput{nullptr}
@@ -54,6 +55,7 @@ public:
     AVStream *avStream;
     AVPacket *avPacket;
     AVFrame *avFrame;
+    enum AVHWDeviceType hw_type;
     int videoStreamIndex;
     AsyncQueue<AVFrame*> frameQueue;
     GLWidget *videoOutput;
@@ -214,12 +216,16 @@ void Player::Private::countClock()
 
 static enum AVPixelFormat get_hw_pix_fmt(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts) {
     while (*pix_fmts != AV_PIX_FMT_NONE) {
-        if (*pix_fmts == AV_PIX_FMT_CUDA || *pix_fmts == AV_PIX_FMT_VAAPI || *pix_fmts == AV_PIX_FMT_DXVA2_VLD) {
+#ifdef Q_OS_WIN
+        if (*pix_fmts == AV_PIX_FMT_CUDA)
             return *pix_fmts;
-        }
+#else
+         if (*pix_fmts == AV_PIX_FMT_CUDA || *pix_fmts == AV_PIX_FMT_VAAPI || *pix_fmts == AV_PIX_FMT_DXVA2_VLD)
+            return *pix_fmts;
+#endif
         pix_fmts++;
     }
-    fprintf(stderr, "Failed to get HW surface format.\n");
+    DBG("Failed to get HW surface format.\n");
     return AV_PIX_FMT_NONE;
 }
 
@@ -228,7 +234,7 @@ int init_hw_decoder(AVCodecContext *ctx, enum AVHWDeviceType type) {
     AVBufferRef *hw_device_ctx = NULL;
 
     if ((err = av_hwdevice_ctx_create(&hw_device_ctx, type, NULL, NULL, 0)) < 0) {
-        fprintf(stderr, "Failed to create specified HW device.\n");
+        DBG("Failed to create specified HW device.\n");
         return err;
     }
     ctx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
@@ -238,38 +244,43 @@ int init_hw_decoder(AVCodecContext *ctx, enum AVHWDeviceType type) {
 
 void Player::Private::detectHardwareDevice()
 {
+    DBG("Detecting hardware device");
     // Detect the hardware type
-    // enum AVHWDeviceType hw_type = AV_HWDEVICE_TYPE_NONE;
-    // const char *hw_type_name = NULL;
-    // while ((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE) {
-    //     hw_type_name = av_hwdevice_get_type_name(hw_type);
-    //     printf("Found hardware type: %s\n", hw_type_name);
+    hw_type = AV_HWDEVICE_TYPE_NONE;
+    const char *hw_type_name = NULL;
+    while ((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE) {
+        hw_type_name = av_hwdevice_get_type_name(hw_type);
+        DBG("HW type: " << hw_type_name);
 
-    //     // Break if the hardware type is suitable for current platform
-    //     if (hw_type == AV_HWDEVICE_TYPE_CUDA
-    //         || hw_type == AV_HWDEVICE_TYPE_VAAPI
-    //         || hw_type == AV_HWDEVICE_TYPE_DXVA2
-    //         || hw_type == AV_HWDEVICE_TYPE_D3D11VA
-    //         || hw_type == AV_HWDEVICE_TYPE_QSV
-    //         || hw_type == AV_HWDEVICE_TYPE_OPENCL
-    //         || hw_type == AV_HWDEVICE_TYPE_VULKAN) {
-    //         printf("Use hardware type: %s\n", hw_type_name);
-    //         break;
-    //     }
-    // }
+        // Break if the hardware type is suitable for current platform
+#ifdef Q_OS_WIN
+        if (hw_type == AV_HWDEVICE_TYPE_CUDA)
+            break;
+#endif
+    }
 
-    // if (hw_type == AV_HWDEVICE_TYPE_NONE) {
-    //     fprintf(stderr, "No supported hardware device found.\n");
-    //     return;
-    // }
+#ifdef Q_OS_WIN
+    if (hw_type != AV_HWDEVICE_TYPE_CUDA) {
+        DBG("D3D11VA hardware device not found.\n");
+        hw_type = AV_HWDEVICE_TYPE_NONE;
+        return;
+    }
+#else
+    if (hw_type == AV_HWDEVICE_TYPE_NONE) {
+        DBG("Hardware device not found.\n");
+        return;
+    }
+#endif
 
-    // // Initialize hardware decoder
-    // if (init_hw_decoder(avcCtx, hw_type) < 0) {
-    //     fprintf(stderr, "Failed to initialize hardware decoder.\n");
-    //     return;
-    // }
 
-    // avcCtx->get_format = get_hw_pix_fmt;
+    // Initialize hardware decoder
+    if (init_hw_decoder(avcCtx, hw_type) < 0) {
+        DBG("Failed to initialize hardware decoder.\n");
+        return;
+    }
+
+    avcCtx->get_format = get_hw_pix_fmt;
+    DBG("Hardware decoder initialized.\n");
 }
 
 void Player::Private::demux()
@@ -294,8 +305,27 @@ void Player::Private::demux()
                 // ...
                 // DBG("Frame received avFrameFormat : "+QString::number(avFrame->format));
                 // add clone data to enqueue
-                AVFrame *frame = av_frame_clone(avFrame);
-                frameQueue.enqueue(frame);
+                if(hw_type == AV_HWDEVICE_TYPE_NONE)
+                {
+                    AVFrame *frame = av_frame_clone(avFrame);
+                    frameQueue.enqueue(frame);
+                }
+                else
+                {
+                    AVFrame *frame = av_frame_alloc();
+                    if (!frame) {
+                        fprintf(stderr, "Error allocating an AVFrame\n");
+                        break;
+                    }
+
+                    if (av_hwframe_transfer_data(frame, avFrame, 0) < 0) {
+                        fprintf(stderr, "Error transferring data to frame\n");
+                        av_frame_free(&frame);
+                        break;
+                    }
+                    frame->pts = avFrame->pts;
+                    frameQueue.enqueue(frame);
+                }
                 // DBG(QString("Frame received count: %1").arg(frameQueue.count()));
             }
         }

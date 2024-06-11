@@ -341,7 +341,6 @@ void GLWidget::setRGBFrame(const char* data)
 
 void GLWidget::paintGL()
 {
-    DBG("");
     QMutexLocker lock(&m_mutex);
     Q_UNUSED(lock);
     if(plane.size()==0){
@@ -375,7 +374,6 @@ void GLWidget::paintGL()
         m_program->disableAttributeArray(i); //TODO: in setActiveShader
     }
     //update();
-    DBG("");
 }
 
 void GLWidget::initializeGL()
