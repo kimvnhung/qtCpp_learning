@@ -87,6 +87,7 @@ GLWidget::GLWidget(QWidget *parent)
     , update_res(true)
     , upload_tex(true)
     , m_program(0)
+    , m_isDestroyed(false)
 {
     //    setAttribute(Qt::WA_OpaquePaintEvent);
     //  setAttribute(Qt::WA_NoSystemBackground);
@@ -118,7 +119,8 @@ GLWidget& GLWidget::operator=(GLWidget &&other){
 }
 
 GLWidget::~GLWidget(){
-
+    DBG("");
+    m_isDestroyed = true;
 }
 
 GLWidget::GLWidget()
@@ -126,6 +128,7 @@ GLWidget::GLWidget()
     , update_res(true)
     , upload_tex(true)
     , m_program(0)
+    , m_isDestroyed(false)
 {
     //    setAttribute(Qt::WA_OpaquePaintEvent);
     //  setAttribute(Qt::WA_NoSystemBackground);
@@ -153,10 +156,9 @@ void GLWidget::setFrameData(const QByteArray &data)
 
 void GLWidget::setImage(const QImage &img)
 {
-    DBG("");
     {
         //check null befor lock
-        if (img.isNull()) {
+        if (img.isNull() || m_isDestroyed) {
             return;
         }
         QMutexLocker lock(&m_mutex);
@@ -165,7 +167,6 @@ void GLWidget::setImage(const QImage &img)
         m_image = img;
         plane[0].data = (char*)m_image.constBits();
     }
-    DBG("");
     update();
 }
 
@@ -328,8 +329,8 @@ void GLWidget::setRGBParameters(int w, int h)
 
 void GLWidget::setRGBFrame(const char* data)
 {
-    //QMutexLocker lock(&m_mutex);
-    //Q_UNUSED(lock);
+    QMutexLocker lock(&m_mutex);
+    Q_UNUSED(lock);
     upload_tex = true;
     // m_image = img;
     // using strcpy_s instead of strcpy for
@@ -340,6 +341,7 @@ void GLWidget::setRGBFrame(const char* data)
 
 void GLWidget::paintGL()
 {
+    DBG("");
     QMutexLocker lock(&m_mutex);
     Q_UNUSED(lock);
     if(plane.size()==0){
@@ -373,6 +375,7 @@ void GLWidget::paintGL()
         m_program->disableAttributeArray(i); //TODO: in setActiveShader
     }
     //update();
+    DBG("");
 }
 
 void GLWidget::initializeGL()

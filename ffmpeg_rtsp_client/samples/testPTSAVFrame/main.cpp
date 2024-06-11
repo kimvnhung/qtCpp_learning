@@ -51,6 +51,8 @@ int main(int argc, char *argv[]) {
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
 
+
+    int64_t lastTime = 0;
     while (av_read_frame(format_context, packet) >= 0) {
         if (packet->stream_index == video_stream_index) {
             if (avcodec_send_packet(codec_context, packet) >= 0) {
@@ -60,8 +62,9 @@ int main(int argc, char *argv[]) {
                         AVRational time_base = video_stream->time_base;
                         // Show pts and time_base raw value
                         printf("PTS: %" PRId64 " Time Base: %d/%d\n", pts, time_base.num, time_base.den);
-                        double time_in_seconds = pts * av_q2d(time_base);
-                        printf("Frame PTS: %" PRId64 " Time: %f seconds\n", pts, time_in_seconds);
+                        int64_t time_in_microseconds = pts * av_q2d(time_base)*1000000;
+                        // Show time in microseconds
+                        printf("Time in microseconds: %" PRId64 "\n", time_in_microseconds);
                     } else {
                         printf("Frame does not have a valid PTS\n");
                     }

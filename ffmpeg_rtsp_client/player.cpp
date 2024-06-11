@@ -9,6 +9,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/time.h>
 }
 
 #include <opencv2/core.hpp>
@@ -42,7 +43,7 @@ public:
         , isTerminate{false}
         , state{StoppedState}
     {
-        threadPool->setMaxThreadCount(4);
+        threadPool->setMaxThreadCount(5);
     }
 
     Player *owner;
@@ -69,6 +70,7 @@ public:
 
     void load();
     void countClock();
+    void setUpClock();
     qint64 ptsCounter;
     QMutex ptsMutex;
 
@@ -94,12 +96,17 @@ void Player::Private::terminate()
         return;
 
     isTerminate = true;
+    DBG("");
     frameQueue.terminate();
+    DBG("");
     loadFuture.waitForFinished();
+    DBG("");
     clockFuture.waitForFinished();
+    DBG("");
     demuxerFuture.waitForFinished();
+    DBG("");
     consumerFuture.waitForFinished();
-
+    DBG("");
 }
 
 void Player::Private::setMediaStatus(MediaStatus status, ErrorData error)
@@ -179,22 +186,29 @@ void Player::Private::countClock()
 {
     // Block until avStream is not NULL or return if isTerminate is true
     while (!isTerminate && avStream == nullptr) {
-        QThread::sleep(100);
+        QThread::sleep(std::chrono::milliseconds{100});
     }
-    // Calculate sleep duration based on stream time base to microsecond
-    int sleepDuration = av_q2d(avStream->time_base) * 1000000;
+    // Convert AVStream time_base to nanoseconds
+    int timeBase = av_q2d(avStream->time_base)*1000000*1000;
+
+
+    QElapsedTimer timer;
+    qint64 startTime = 0;
     while (!isTerminate) {
         if (state != PlayingState) {
-            QThread::sleep(100);
+            QThread::sleep(std::chrono::milliseconds{100});
             continue;
         }
 
+        if(ptsCounter==0)
+            startTime = timer.nsecsElapsed();
+
         {
             QMutexLocker locker(&ptsMutex);
-            ptsCounter += 1;
+            ptsCounter = (timer.nsecsElapsed()-startTime)/(timeBase);
         }
         //Sleep for the calculated duration
-        QThread::usleep(sleepDuration);
+        QThread::sleep(std::chrono::milliseconds{10});
     }
 }
 
@@ -241,7 +255,7 @@ void Player::Private::demux()
             while (avcodec_receive_frame(avcCtx, avFrame) >= 0 && !isTerminate) {
                 // Process the frame here (e.g., save it to an image file)
                 // ...
-                DBG("Frame received avFrameFormat : "+QString::number(avFrame->format));
+                // DBG("Frame received avFrameFormat : "+QString::number(avFrame->format));
                 // add clone data to enqueue
                 AVFrame *frame = av_frame_clone(avFrame);
                 frameQueue.enqueue(frame);
@@ -258,7 +272,6 @@ void Player::Private::play()
 {
     int lastWidth = 0, lastHeight = 0;
     while (!isTerminate) {
-        DBG("Playing");
         AVFrame *frame = frameQueue.front();
         if (frame == nullptr) {
             DBG("Frame is null");
@@ -271,14 +284,21 @@ void Player::Private::play()
             {
                 DBG("Frame pts is not valid");
             }
-            else if(frame->pts < ptsCounter)
+            else if(frame->pts > ptsCounter)
             {
-                DBG("Frame pts is smaller than ptsCounter");
+                // DBG(QString("Frame pts : %1, ptsCounter : %2").arg(frame->pts).arg(ptsCounter));
                 continue;
             }else {
+                // DBG(QString("Frame pts : %1, tempCounter : %2").arg(frame->pts).arg(ptsCounter));
+                //Calculate the pts in the second
+                // qint64 pts = frame->pts * av_q2d(avStream->time_base);
+                // DBG(QString("Frame pts : %1").arg(pts));
                 frameQueue.pop();
             }
         }
+
+        Q_EMIT owner->positionChanged(frame->pts*av_q2d(avStream->time_base)*1000);
+
 
         // Determine the format of the AVFrame (e.g., AV_PIX_FMT_YUV420P).
         const AVPixelFormat pixelFormat = static_cast<AVPixelFormat>(frame->format);
@@ -319,7 +339,6 @@ void Player::Private::play()
         // Now you can use the 'image' object as needed.
         // For example, display it in a QLabel or save it to a file.
         // Show AVFrame using imshow from OpenCV continously
-        DBG("Playing");
         if(videoOutput)
         {
             if(image.width() != lastWidth || image.height() != lastHeight)
@@ -332,7 +351,6 @@ void Player::Private::play()
         }
         av_frame_unref(frame);
         av_frame_free(&frame);
-        DBG("Playing");
     }
 }
 
@@ -347,6 +365,7 @@ Player::~Player()
 {
     DBG("");
     d->terminate();
+    DBG("");
     if(d->avPacket)
     {
         av_packet_unref(d->avPacket);
@@ -398,6 +417,7 @@ void Player::play()
     d->demuxerFuture = QtConcurrent::run(d->threadPool, &Player::Private::demux,d);
     d->consumerFuture = QtConcurrent::run(d->threadPool, &Player::Private::play,d);
     d->clockFuture = QtConcurrent::run(d->threadPool, &Player::Private::countClock,d);
+
 }
 
 void Player::pause()

@@ -85,6 +85,7 @@ private:
     QOpenGLShaderProgram *m_program;
     QMutex m_mutex;
     QMatrix4x4 m_mat;
+    bool m_isDestroyed;
 };
 
 #endif // GLWIDGET_H
