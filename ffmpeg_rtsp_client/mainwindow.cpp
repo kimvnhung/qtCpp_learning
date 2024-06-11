@@ -59,6 +59,7 @@ void MainWindow::on_playPauseBtn_clicked()
             player->setSource(ui->urlEdt->text()
                               ,{
                                 {"rtsp_transport","tcp"},
+                                {"preset","ultrafast"},
                                }
                             );
             player->play();

@@ -44,7 +44,7 @@ public:
         , isTerminate{false}
         , state{StoppedState}
     {
-        threadPool->setMaxThreadCount(5);
+        threadPool->setMaxThreadCount(4);
     }
 
     Player *owner;
@@ -198,7 +198,7 @@ void Player::Private::countClock()
     qint64 startTime = 0;
     while (!isTerminate) {
         if (state != PlayingState) {
-            QThread::sleep(std::chrono::milliseconds{100});
+            QThread::sleep(std::chrono::milliseconds{10});
             continue;
         }
 
@@ -217,7 +217,7 @@ void Player::Private::countClock()
 static enum AVPixelFormat get_hw_pix_fmt(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts) {
     while (*pix_fmts != AV_PIX_FMT_NONE) {
 #ifdef Q_OS_WIN
-        if (*pix_fmts == AV_PIX_FMT_CUDA)
+        if (*pix_fmts == AV_PIX_FMT_D3D11)
             return *pix_fmts;
 #else
          if (*pix_fmts == AV_PIX_FMT_CUDA || *pix_fmts == AV_PIX_FMT_VAAPI || *pix_fmts == AV_PIX_FMT_DXVA2_VLD)
@@ -254,13 +254,13 @@ void Player::Private::detectHardwareDevice()
 
         // Break if the hardware type is suitable for current platform
 #ifdef Q_OS_WIN
-        if (hw_type == AV_HWDEVICE_TYPE_CUDA)
+        if (hw_type == AV_HWDEVICE_TYPE_D3D11VA)
             break;
 #endif
     }
 
 #ifdef Q_OS_WIN
-    if (hw_type != AV_HWDEVICE_TYPE_CUDA) {
+    if (hw_type != AV_HWDEVICE_TYPE_D3D11VA) {
         DBG("D3D11VA hardware device not found.\n");
         hw_type = AV_HWDEVICE_TYPE_NONE;
         return;

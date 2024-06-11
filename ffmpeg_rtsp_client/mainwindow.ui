@@ -79,7 +79,7 @@
       <item>
        <widget class="QLineEdit" name="urlEdt">
         <property name="text">
-         <string>D:\Codes\NGS_documents\videoplayback.mp4</string>
+         <string>rtsp://admin:abcd1234@116.97.240.172:554/Streaming/Channels/101/</string>
         </property>
        </widget>
       </item>
