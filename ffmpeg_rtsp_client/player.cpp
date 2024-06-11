@@ -20,7 +20,7 @@ extern "C" {
 #include <QtConcurrent>
 #include <QDateTime>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 32
 
 class Player::Private
 {
