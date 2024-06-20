@@ -165,7 +165,7 @@ void Player::Private::load()
     }
 
     avStream = avfCtx->streams[videoStreamIndex];
-    detectHardwareDevice();
+    // detectHardwareDevice();
 
     avcodec_parameters_to_context(avcCtx, avStream->codecpar);
     avCodec = avcodec_find_decoder(avcCtx->codec_id);

@@ -17,6 +17,7 @@ add_executable(rtsp_server_qt_demo
   announceURL.hh
   announceURL.cpp
 )
+
 add_subdirectory(live555)
 
 if(WIN32)
