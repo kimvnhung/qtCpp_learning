@@ -51,6 +51,7 @@ public slots:
 signals:
     void error(ErrorData error);
     void stateChanged(State state);
+    void positionChanged(qint64 position);
 private:
     class Private;
     QSharedPointer<Private> d;

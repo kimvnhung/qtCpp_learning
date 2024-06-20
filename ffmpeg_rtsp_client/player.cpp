@@ -9,6 +9,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/time.h>
 }
 
 #include <opencv2/core.hpp>
@@ -19,7 +20,7 @@ extern "C" {
 #include <QtConcurrent>
 #include <QDateTime>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 32
 
 class Player::Private
 {
@@ -29,14 +30,17 @@ public:
         , avfCtx{nullptr}
         , avcCtx{nullptr}
         , avCodec{nullptr}
+        , avStream{nullptr}
         , avPacket{nullptr}
         , avFrame{nullptr}
+        , hw_type{AV_HWDEVICE_TYPE_NONE}
         , videoStreamIndex{-1}
         , frameQueue{AsyncQueue<AVFrame*>(owner, BUFFER_SIZE)}
         , videoOutput{nullptr}
         , url{""}
         , options{}
         , threadPool{new QThreadPool(owner)}
+        , ptsCounter{0}
         , isTerminate{false}
         , state{StoppedState}
     {
@@ -47,9 +51,11 @@ public:
 
     AVFormatContext *avfCtx;
     AVCodecContext *avcCtx;
-    AVCodec *avCodec;
+    const AVCodec *avCodec;
+    AVStream *avStream;
     AVPacket *avPacket;
     AVFrame *avFrame;
+    enum AVHWDeviceType hw_type;
     int videoStreamIndex;
     AsyncQueue<AVFrame*> frameQueue;
     GLWidget *videoOutput;
@@ -61,9 +67,15 @@ public:
     QThreadPool *threadPool;
     QFuture<void> loadFuture;
     QFuture<void> demuxerFuture;
-    QFuture<void> playerFuture;
+    QFuture<void> consumerFuture;
+    QFuture<void> clockFuture;
 
     void load();
+    void countClock();
+    void setUpClock();
+    qint64 ptsCounter;
+    QMutex ptsMutex;
+
     void detectHardwareDevice();
     void demux();
     void play();
@@ -86,10 +98,17 @@ void Player::Private::terminate()
         return;
 
     isTerminate = true;
+    DBG("");
     frameQueue.terminate();
+    DBG("");
     loadFuture.waitForFinished();
+    DBG("");
+    clockFuture.waitForFinished();
+    DBG("");
     demuxerFuture.waitForFinished();
-    playerFuture.waitForFinished();
+    DBG("");
+    consumerFuture.waitForFinished();
+    DBG("");
 }
 
 void Player::Private::setMediaStatus(MediaStatus status, ErrorData error)
@@ -136,32 +155,28 @@ void Player::Private::load()
         setState(State::StoppedState, {ResourceError, "Error finding stream information"});
     }
 
-    videoStreamIndex = -1;
-    for (unsigned int i = 0; i < avfCtx->nb_streams; i++) {
-        if (avfCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoStreamIndex = i;
-            break;
-        }
-    }
+    avcCtx = avcodec_alloc_context3(nullptr);
+
+    videoStreamIndex = av_find_best_stream(avfCtx, AVMEDIA_TYPE_VIDEO, -1, -1, &avCodec, 0);
 
     if (videoStreamIndex == -1) {
         fprintf(stderr, "Error finding video stream\n");
         setState(State::StoppedState, {ResourceError, "Error finding video stream"});
     }
 
-    avcCtx = avcodec_alloc_context3(nullptr);
-    detectHardwareDevice();
+    avStream = avfCtx->streams[videoStreamIndex];
+    // detectHardwareDevice();
 
-    avcodec_parameters_to_context(avcCtx, avfCtx->streams[videoStreamIndex]->codecpar);
-    const AVCodec *pCodec = avcodec_find_decoder(avcCtx->codec_id);
+    avcodec_parameters_to_context(avcCtx, avStream->codecpar);
+    avCodec = avcodec_find_decoder(avcCtx->codec_id);
 
-    if (pCodec == nullptr) {
+    if (avCodec == nullptr) {
         fprintf(stderr, "Error finding codec\n");
         setState(State::StoppedState, {ResourceError, "Error finding codec"});
     }
 
 
-    if (avcodec_open2(avcCtx, pCodec, NULL) < 0) {
+    if (avcodec_open2(avcCtx, avCodec, NULL) < 0) {
         fprintf(stderr, "Error opening codec\n");
         setState(State::StoppedState, {ResourceError, "Error opening codec"});
     }
@@ -169,27 +184,103 @@ void Player::Private::load()
     setState(State::PlayingState);
 }
 
+void Player::Private::countClock()
+{
+    // Block until avStream is not NULL or return if isTerminate is true
+    while (!isTerminate && avStream == nullptr) {
+        QThread::sleep(std::chrono::milliseconds{100});
+    }
+    // Convert AVStream time_base to nanoseconds
+    int timeBase = av_q2d(avStream->time_base)*1000000*1000;
+
+
+    QElapsedTimer timer;
+    qint64 startTime = 0;
+    while (!isTerminate) {
+        if (state != PlayingState) {
+            QThread::sleep(std::chrono::milliseconds{10});
+            continue;
+        }
+
+        if(ptsCounter==0)
+            startTime = timer.nsecsElapsed();
+
+        {
+            QMutexLocker locker(&ptsMutex);
+            ptsCounter = (timer.nsecsElapsed()-startTime)/(timeBase);
+        }
+        //Sleep for the calculated duration
+        QThread::sleep(std::chrono::milliseconds{10});
+    }
+}
+
+static enum AVPixelFormat get_hw_pix_fmt(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts) {
+    while (*pix_fmts != AV_PIX_FMT_NONE) {
+#ifdef Q_OS_WIN
+        if (*pix_fmts == AV_PIX_FMT_D3D11)
+            return *pix_fmts;
+#else
+         if (*pix_fmts == AV_PIX_FMT_CUDA || *pix_fmts == AV_PIX_FMT_VAAPI || *pix_fmts == AV_PIX_FMT_DXVA2_VLD)
+            return *pix_fmts;
+#endif
+        pix_fmts++;
+    }
+    DBG("Failed to get HW surface format.\n");
+    return AV_PIX_FMT_NONE;
+}
+
+int init_hw_decoder(AVCodecContext *ctx, enum AVHWDeviceType type) {
+    int err;
+    AVBufferRef *hw_device_ctx = NULL;
+
+    if ((err = av_hwdevice_ctx_create(&hw_device_ctx, type, NULL, NULL, 0)) < 0) {
+        DBG("Failed to create specified HW device.\n");
+        return err;
+    }
+    ctx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+    av_buffer_unref(&hw_device_ctx);
+    return err;
+}
+
 void Player::Private::detectHardwareDevice()
 {
-    // AVHWDeviceType type = AV_HWDEVICE_TYPE_NONE;
-    // AVBufferRef *hwDeviceCtx = nullptr;
+    DBG("Detecting hardware device");
+    // Detect the hardware type
+    hw_type = AV_HWDEVICE_TYPE_NONE;
+    const char *hw_type_name = NULL;
+    while ((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE) {
+        hw_type_name = av_hwdevice_get_type_name(hw_type);
+        DBG("HW type: " << hw_type_name);
 
-    // while ((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE) {
-    //     if (av_hwdevice_ctx_create(&hwDeviceCtx, type, nullptr, nullptr, 0) >= 0) {
-    //         // Hardware device found
-    //         break;
-    //     }
-    // }
+        // Break if the hardware type is suitable for current platform
+#ifdef Q_OS_WIN
+        if (hw_type == AV_HWDEVICE_TYPE_D3D11VA)
+            break;
+#endif
+    }
 
-    // if (hwDeviceCtx) {
-    //     // Use the hardware device for decoding
-    //     avcCtx->hw_device_ctx = av_buffer_ref(hwDeviceCtx);
-    //     avcCtx->get_format = qavhwdevice_get_format;
-    //     avcCtx->opaque = new QAVHWDevicePrivate(hwDeviceCtx);
-    // } else {
-    //     // No hardware device found, use software decoding
-    //     avcCtx->hw_device_ctx = nullptr;
-    // }
+#ifdef Q_OS_WIN
+    if (hw_type != AV_HWDEVICE_TYPE_D3D11VA) {
+        DBG("D3D11VA hardware device not found.\n");
+        hw_type = AV_HWDEVICE_TYPE_NONE;
+        return;
+    }
+#else
+    if (hw_type == AV_HWDEVICE_TYPE_NONE) {
+        DBG("Hardware device not found.\n");
+        return;
+    }
+#endif
+
+
+    // Initialize hardware decoder
+    if (init_hw_decoder(avcCtx, hw_type) < 0) {
+        DBG("Failed to initialize hardware decoder.\n");
+        return;
+    }
+
+    avcCtx->get_format = get_hw_pix_fmt;
+    DBG("Hardware decoder initialized.\n");
 }
 
 void Player::Private::demux()
@@ -212,10 +303,29 @@ void Player::Private::demux()
             while (avcodec_receive_frame(avcCtx, avFrame) >= 0 && !isTerminate) {
                 // Process the frame here (e.g., save it to an image file)
                 // ...
-                DBG("Frame received avFrameFormat : "+QString::number(avFrame->format));
+                // DBG("Frame received avFrameFormat : "+QString::number(avFrame->format));
                 // add clone data to enqueue
-                AVFrame *frame = av_frame_clone(avFrame);
-                frameQueue.enqueue(frame);
+                if(hw_type == AV_HWDEVICE_TYPE_NONE)
+                {
+                    AVFrame *frame = av_frame_clone(avFrame);
+                    frameQueue.enqueue(frame);
+                }
+                else
+                {
+                    AVFrame *frame = av_frame_alloc();
+                    if (!frame) {
+                        fprintf(stderr, "Error allocating an AVFrame\n");
+                        break;
+                    }
+
+                    if (av_hwframe_transfer_data(frame, avFrame, 0) < 0) {
+                        fprintf(stderr, "Error transferring data to frame\n");
+                        av_frame_free(&frame);
+                        break;
+                    }
+                    frame->pts = avFrame->pts;
+                    frameQueue.enqueue(frame);
+                }
                 // DBG(QString("Frame received count: %1").arg(frameQueue.count()));
             }
         }
@@ -227,14 +337,35 @@ void Player::Private::demux()
 
 void Player::Private::play()
 {
+    int lastWidth = 0, lastHeight = 0;
     while (!isTerminate) {
-        DBG("Playing");
-        AVFrame *frame = frameQueue.dequeue();
+        AVFrame *frame = frameQueue.front();
         if (frame == nullptr) {
             DBG("Frame is null");
             continue;
         }
-        DBG("frame.format : "+QString::number(frame->format));
+
+        {
+            QMutexLocker locker(&ptsMutex);
+            if(frame->pts == AV_NOPTS_VALUE)
+            {
+                DBG("Frame pts is not valid");
+            }
+            else if(frame->pts > ptsCounter)
+            {
+                // DBG(QString("Frame pts : %1, ptsCounter : %2").arg(frame->pts).arg(ptsCounter));
+                continue;
+            }else {
+                // DBG(QString("Frame pts : %1, tempCounter : %2").arg(frame->pts).arg(ptsCounter));
+                //Calculate the pts in the second
+                // qint64 pts = frame->pts * av_q2d(avStream->time_base);
+                // DBG(QString("Frame pts : %1").arg(pts));
+                frameQueue.pop();
+            }
+        }
+
+        Q_EMIT owner->positionChanged(frame->pts*av_q2d(avStream->time_base)*1000);
+
 
         // Determine the format of the AVFrame (e.g., AV_PIX_FMT_YUV420P).
         const AVPixelFormat pixelFormat = static_cast<AVPixelFormat>(frame->format);
@@ -242,7 +373,6 @@ void Player::Private::play()
         // Create a SwsContext for converting pixel format if necessary.
         SwsContext *swsContext = nullptr;
 
-        DBG("pixelFormat: "+QString::number(pixelFormat));
         // Example: Convert AVFrame to QImage (Assuming RGB format).
         if (pixelFormat != AV_PIX_FMT_RGB24) {
             swsContext = sws_getContext(frame->width, frame->height, pixelFormat,
@@ -276,15 +406,18 @@ void Player::Private::play()
         // Now you can use the 'image' object as needed.
         // For example, display it in a QLabel or save it to a file.
         // Show AVFrame using imshow from OpenCV continously
-        DBG("Playing");
         if(videoOutput)
         {
-            videoOutput->setRGBParameters(image.width(),image.height());
+            if(image.width() != lastWidth || image.height() != lastHeight)
+            {
+                lastWidth = image.width();
+                lastHeight = image.height();
+                videoOutput->setRGBParameters(image.width(),image.height());
+            }
             videoOutput->setImage(image);
         }
         av_frame_unref(frame);
         av_frame_free(&frame);
-        DBG("Playing");
     }
 }
 
@@ -299,6 +432,7 @@ Player::~Player()
 {
     DBG("");
     d->terminate();
+    DBG("");
     if(d->avPacket)
     {
         av_packet_unref(d->avPacket);
@@ -348,7 +482,9 @@ Player::State Player::state() const
 void Player::play()
 {
     d->demuxerFuture = QtConcurrent::run(d->threadPool, &Player::Private::demux,d);
-    d->playerFuture = QtConcurrent::run(d->threadPool, &Player::Private::play,d);
+    d->consumerFuture = QtConcurrent::run(d->threadPool, &Player::Private::play,d);
+    d->clockFuture = QtConcurrent::run(d->threadPool, &Player::Private::countClock,d);
+
 }
 
 void Player::pause()

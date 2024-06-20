@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QQueue>
 #include <QWaitCondition>
+#include "log.h"
 
 template<typename T>
 class AsyncQueue : public QObject
@@ -44,13 +45,19 @@ public:
         while (m_queue.isEmpty()){
             if(m_isTerminate)
                 return NULL;
-            DBG("waiting for frame");
+            // DEBUG("waiting for frame");
             condition.wait(&mutex);
         }
 
-        T frame = m_queue.dequeue();
-        condition.wakeOne();
-        return frame;
+        if(++m_consumed >= m_registeredConsumer)
+        {
+            m_consumed = 0;
+            T frame = m_queue.dequeue();
+            condition.wakeOne();
+            return frame;
+        }
+        else
+            return m_queue.front();
     }
 
     void pop()
@@ -69,7 +76,7 @@ public:
         while (m_queue.isEmpty()){
             if(m_isTerminate)
                 return NULL;
-            DBG("waiting for frame");
+            // DEBUG("waiting for frame");
             condition.wait(&mutex);
         }
 
@@ -78,12 +85,12 @@ public:
 
     void reset()
     {
-        DBG("reset queue");
+        // DEBUG("reset queue");
         m_isTerminate = false;
         //clear all in queue
-        DBG("reset queue");
+        // DEBUG("reset queue");
         m_queue.clear();
-        DBG("reset queue");
+        // DEBUG("reset queue");
         condition.wakeAll();
     }
 
@@ -94,12 +101,23 @@ public:
         condition.wakeAll();
     }
 
+    void setRegisteredConsumer(int consumer)
+    {
+        QMutexLocker locker(&mutex);
+        if(consumer >= 1)
+            m_registeredConsumer = consumer;
+    }
+
 private:
     QQueue<T> m_queue;
     QMutex mutex;
     QWaitCondition condition;
     int m_bufferSize = 0;
     bool m_isTerminate = false;
+
+    int m_consumed = 0;
+    int m_registeredConsumer = 1;
 };
 
 #endif // ASYNCQUEUE_H
+
