@@ -54,5 +54,8 @@ compile_commands.json
 *_qmlcache.qrc
 
 **build-**
-
+**build**
+# Ignore all file in any directory or subdirectory named start with build
+build*/
+QMLMapDemo/vietnam_osm_tiles/*
 opencv/lib/*

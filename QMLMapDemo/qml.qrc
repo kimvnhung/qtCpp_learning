@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>osm_map.qml</file>
+
+    </qresource>
+</RCC>
