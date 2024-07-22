@@ -2,12 +2,14 @@
 #include "./ui_mainwindow.h"
 #include "myrectangle.h"
 
+#include "customgraphicsview.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    view = new QGraphicsView(this);
+    view = new CustomGraphicsView(this);
     scene = new QGraphicsScene(this);
 
     view->setScene(scene);
