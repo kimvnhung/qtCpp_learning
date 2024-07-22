@@ -14,6 +14,7 @@ public:
 
 protected:
     void wheelEvent(QWheelEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 private:
     void zoomIn();
     void zoomOut();

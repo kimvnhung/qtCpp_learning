@@ -6,9 +6,18 @@
 class GridItem : public QGraphicsItem
 {
 public:
-    GridItem();
+    GridItem(int displayRows = 1,int displayColumns = 1);
 
-signals:
+    void updateGrid(int displayRows, int displayColumns);
+
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    int displayRows() const;
+    int displayColumns() const;
+private:
+    int mDisplayRows;
+    int mDisplayColumns;
 };
 
 #endif // GRIDITEM_H

@@ -29,6 +29,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         myrectangle.h myrectangle.cpp
         griditem.h griditem.cpp
         customgraphicsview.h customgraphicsview.cpp
+        graphitemimpl.h graphitemimpl.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET QmlInQGraphicsSence APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

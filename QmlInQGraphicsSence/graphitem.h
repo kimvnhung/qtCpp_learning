@@ -11,11 +11,15 @@ public:
     GraphItem(int x = 0, int y = 0, QObject *parent = NULL);
     virtual ~GraphItem() = 0;
 
+    static int DISTANCE_UNIT;
+
     int x() const;
     int y() const;
 
     void setX(int x);
     void setY(int y);
+
+    QRectF boundingRect() const;
 signals:
     void xChanged();
     void yChanged();

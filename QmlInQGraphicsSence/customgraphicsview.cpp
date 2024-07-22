@@ -9,7 +9,9 @@ CustomGraphicsView::CustomGraphicsView(QWidget *parent)
 
 CustomGraphicsView::CustomGraphicsView(QGraphicsScene *scene, QWidget *parent)
     : base_type{scene, parent}
-{}
+{
+
+}
 
 void CustomGraphicsView::wheelEvent(QWheelEvent *event)
 {
@@ -48,4 +50,10 @@ void CustomGraphicsView::zoomIn()
 void CustomGraphicsView::zoomOut()
 {
     scale(1.0 / zoomFactor, 1.0 / zoomFactor);
+}
+
+void CustomGraphicsView::resizeEvent(QResizeEvent *event)
+{
+    QGraphicsView::resizeEvent(event);
+    fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
 }

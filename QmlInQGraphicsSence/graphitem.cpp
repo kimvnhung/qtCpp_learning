@@ -1,9 +1,18 @@
 #include "graphitem.h"
 
+#include <QRectF>
+
+int GraphItem::DISTANCE_UNIT = 100;
+
 GraphItem::GraphItem(int x, int y, QObject *parent)
     : QObject{parent}
     , m_x{x}
     , m_y{y}
+{
+
+}
+
+GraphItem::~GraphItem()
 {
 
 }
@@ -34,4 +43,9 @@ void GraphItem::setY(int y)
 
     m_y = y;
     emit yChanged();
+}
+
+QRectF GraphItem::boundingRect() const
+{
+    return QRectF((x()-1)*DISTANCE_UNIT+1,(y()-1)*DISTANCE_UNIT +1 , DISTANCE_UNIT-1, DISTANCE_UNIT-1);
 }
