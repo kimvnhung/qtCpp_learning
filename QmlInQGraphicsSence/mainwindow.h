@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "previewgraphicsvideoitem.h"
 #include "previewwidget.h"
 
 #include <QGraphicsView>
@@ -28,5 +29,8 @@ private:
     QGraphicsView *view = NULL;
     QGraphicsScene *scene = NULL;
     QList<PreviewWidget*> listPreviews;
+    QList<QGraphicsVideoItem*> listVideo;
+    QMediaPlayer* player = NULL;
+    PreviewGraphicsVideoItem *videoItem = NULL;
 };
 #endif // MAINWINDOW_H

@@ -45,6 +45,12 @@ void GraphItem::setY(int y)
     emit yChanged();
 }
 
+void GraphItem::setCordinate(int x, int y)
+{
+    setX(x);
+    setY(y);
+}
+
 QRectF GraphItem::rect() const
 {
     return QRectF((xUnit()-1)*DISTANCE_UNIT+1,(yUnit()-1)*DISTANCE_UNIT +1 , DISTANCE_UNIT-1, DISTANCE_UNIT-1);

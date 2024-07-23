@@ -61,8 +61,5 @@ void CustomGraphicsView::resizeEvent(QResizeEvent *event)
 
 void CustomGraphicsView::contextMenuEvent(QContextMenuEvent *event)
 {
-    // QMenu menu(this);
-    // menu.addAction(QAction("Zoom In", this),);
-
     QGraphicsView::contextMenuEvent(event);
 }

@@ -18,6 +18,7 @@ public:
 
     void setX(int x);
     void setY(int y);
+    void setCordinate(int x, int y);
 
     QRectF rect() const;
 signals:

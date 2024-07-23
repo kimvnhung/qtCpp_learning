@@ -6,6 +6,7 @@
 #include "graphitemimpl.h"
 #include "griditem.h"
 #include "menuwidget.h"
+#include "previewgraphicsvideoitem.h"
 #include "previewwidget.h"
 
 #include <QGraphicsProxyWidget>
@@ -62,6 +63,9 @@ MainWindow::MainWindow(QWidget *parent)
             scene->addItem(cell);
         }
     }
+
+    player = new QMediaPlayer(this);
+    player->setSource(QUrl("rtsp://admin:admin123@192.168.1.88/live/ch0"));
 }
 
 MainWindow::~MainWindow()
@@ -98,16 +102,20 @@ void MainWindow::onHoverEnter()
     auto item = qobject_cast<GraphItemImpl*>(sender());
     if(item)
     {
-        QGraphicsVideoItem *videoItem = new QGraphicsVideoItem();
-        videoItem->setSize(QSizeF(300,400));
-        QMediaPlayer *player = new QMediaPlayer(videoItem);
-        scene->addItem(videoItem);
-        videoItem->setParentItem(item);
-        videoItem->setPos(item->pos());
-        videoItem->setZValue(1);
-        player->setVideoOutput(videoItem);
-        player->setSource(QUrl("rtsp://admin:admin123@192.168.1.88/live/ch0"));
-        player->play();
+        auto itemCenter = item->boundingRect().center();
+        auto videoOutput = new QGraphicsVideoItem();
+        listVideo.append(videoOutput);
+        player->setVideoOutput(videoOutput);
+        scene->addItem(videoOutput);
+        // videoOutput->setParentItem(item);
+        videoOutput->setPos(itemCenter);
+        // videoOutput->show();
+
+
+        if(player->playbackState() != QMediaPlayer::PlayingState)
+            player->play();
+
+        qDebug()<<__FUNCTION__<<__LINE__;
     }
 }
 
@@ -123,6 +131,15 @@ void MainWindow::onHoverLeave()
                 scene->removeItem(listPreviews[i]);
                 break;
             }
+        }
+
+        // scene->removeItem(videoItem);
+        if(player->playbackState() == QMediaPlayer::PlayingState)
+            player->stop();
+
+        foreach (QGraphicsVideoItem *videoItem, listVideo) {
+            scene->removeItem(videoItem);
+            // videoItem->deleteLater();
         }
 
         foreach (QGraphicsItem *child, item->childItems()) {
