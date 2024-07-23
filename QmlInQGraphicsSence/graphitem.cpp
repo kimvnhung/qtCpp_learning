@@ -17,12 +17,12 @@ GraphItem::~GraphItem()
 
 }
 
-int GraphItem::x() const
+int GraphItem::xUnit() const
 {
     return m_x;
 }
 
-int GraphItem::y() const
+int GraphItem::yUnit() const
 {
     return m_y;
 }
@@ -45,7 +45,7 @@ void GraphItem::setY(int y)
     emit yChanged();
 }
 
-QRectF GraphItem::boundingRect() const
+QRectF GraphItem::rect() const
 {
-    return QRectF((x()-1)*DISTANCE_UNIT+1,(y()-1)*DISTANCE_UNIT +1 , DISTANCE_UNIT-1, DISTANCE_UNIT-1);
+    return QRectF((xUnit()-1)*DISTANCE_UNIT+1,(yUnit()-1)*DISTANCE_UNIT +1 , DISTANCE_UNIT-1, DISTANCE_UNIT-1);
 }

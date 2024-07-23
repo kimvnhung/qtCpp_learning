@@ -20,8 +20,12 @@ public:
     void switchShowCordinate();
 signals:
     void rightMousePressed();
+    void hoverEnter();
+    void hoverLeave();
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 private:
     QColor m_color;
     bool m_isShowCordinate;

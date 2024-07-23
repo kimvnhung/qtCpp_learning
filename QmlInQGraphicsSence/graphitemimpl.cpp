@@ -6,6 +6,7 @@
 GraphItemImpl::GraphItemImpl(int x, int y, QObject *parent)
     : base_type{x,y,parent}
 {
+    setAcceptHoverEvents(true);
 }
 
 GraphItemImpl::~GraphItemImpl()
@@ -14,16 +15,15 @@ GraphItemImpl::~GraphItemImpl()
 
 QRectF GraphItemImpl::boundingRect() const
 {
-    return GraphItem::boundingRect();
+    return rect();
 }
 
 void GraphItemImpl::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painter->setBrush(m_color);
-    qDebug()<<"x:"<<GraphItem::x()<<"y:"<<GraphItem::y()<<"QRect: "<< boundingRect();
     painter->drawRect(boundingRect());
     if (m_isShowCordinate) {
-        painter->drawText(boundingRect(), QString("%1,%2").arg(GraphItem::x()).arg(GraphItem::y()));
+        painter->drawText(boundingRect(), QString("%1,%2").arg(xUnit()).arg(yUnit()));
     }
 }
 
@@ -33,6 +33,20 @@ void GraphItemImpl::mousePressEvent(QGraphicsSceneMouseEvent *event)
         emit rightMousePressed();
     }
     QGraphicsItem::mousePressEvent(event);
+}
+
+void GraphItemImpl::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    qDebug()<<__FUNCTION__;
+    emit hoverEnter();
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void GraphItemImpl::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    qDebug()<<__FUNCTION__;
+    emit hoverLeave();
+    QGraphicsItem::hoverLeaveEvent(event);
 }
 
 void GraphItemImpl::changeColor()

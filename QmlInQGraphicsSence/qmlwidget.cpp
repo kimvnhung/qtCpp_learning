@@ -1,5 +1,17 @@
 #include "qmlwidget.h"
 
-QMLWidget::QMLWidget(QObject *parent)
-    : QObject{parent}
-{}
+#include <QVariant>
+
+QMLWidget::QMLWidget(const QUrl& componentUrl, QObject *parent)
+    :
+    QObject{parent},
+    m_componentUrl(componentUrl)
+{
+
+}
+
+void QMLWidget::init()
+{
+    registerQmlType();
+    setUpQmlUrl(m_componentUrl);
+}

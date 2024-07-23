@@ -13,13 +13,13 @@ public:
 
     static int DISTANCE_UNIT;
 
-    int x() const;
-    int y() const;
+    int xUnit() const;
+    int yUnit() const;
 
     void setX(int x);
     void setY(int y);
 
-    QRectF boundingRect() const;
+    QRectF rect() const;
 signals:
     void xChanged();
     void yChanged();

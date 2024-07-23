@@ -2,6 +2,7 @@
 
 #include <QWheelEvent>
 #include <QScrollBar>
+#include <QMenu>
 
 CustomGraphicsView::CustomGraphicsView(QWidget *parent)
     : base_type{parent}
@@ -55,5 +56,13 @@ void CustomGraphicsView::zoomOut()
 void CustomGraphicsView::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
-    fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+    // fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+}
+
+void CustomGraphicsView::contextMenuEvent(QContextMenuEvent *event)
+{
+    // QMenu menu(this);
+    // menu.addAction(QAction("Zoom In", this),);
+
+    QGraphicsView::contextMenuEvent(event);
 }
