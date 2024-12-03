@@ -26,10 +26,26 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
 
   dashboardPage = new DashboardPage(this);
   progressDialog = new QProgressDialog(this);
+  progressDialog->setCancelButton(nullptr);
+  progressDialog->cancel();
   progressDialog->setWindowModality(Qt::WindowModal);
   progressDialog->setMinimum(0);
   progressDialog->setMaximum(MAX_PROGRESS_VALUE);
   progressDialog->setWindowTitle("Processing...");
+  // Apply custom style to increase the progress bar height
+  progressDialog->setStyleSheet(
+      "QProgressBar {"
+      "    min-height: 20px;"  // Adjust this value for height
+      "    max-height: 30px;"  // Keep consistent for fixed height
+      "    border: 1px solid #000;"
+      "    border-radius: 5px;"
+      "    text-align: center;"
+      "}"
+      "QProgressBar::chunk {"
+      "    background-color: #5D9CEC;"
+      "    width: 20px;"  // Chunk width for progress bar segments
+      "}"
+      );
 
   page1 = new POPpage(this);
   page2 = new PollutantOverviewPage(this);
@@ -81,6 +97,7 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   resize(800, 600);
   setWindowTitle("Water Quality Monitor Tool");
 }
+
 
 void WaterQualityWindow::navigateToDashboard()
 {
@@ -253,18 +270,30 @@ void WaterQualityWindow::about()
                      "(c) 2024 Best Group");
 }
 
-void WaterQualityWindow::updateProgress(int value)
+void WaterQualityWindow::updateProgress(int value, QString title, QString label)
 {
-  if (value == SHOW_PROGESS_VALUE)
-  {
-    progressDialog->show();
-  }
-  else if (value == HIDE_PROGRESS_VALUE)
-  {
-    progressDialog->hide();
-  }
-  else
-  {
-    progressDialog->setValue(value);
-  }
+    LOG();
+    if(title.isEmpty())
+    {
+        title = "Processing...";
+    }
+
+    if(label.isEmpty())
+    {
+        label = "Please wait...";
+    }
+    progressDialog->setLabelText(label);
+    progressDialog->setWindowTitle(title);
+    if (value == SHOW_PROGESS_VALUE)
+    {
+        progressDialog->show();
+    }
+    else if (value == HIDE_PROGRESS_VALUE)
+    {
+        progressDialog->hide();
+    }
+    else
+    {
+        progressDialog->setValue(value);
+    }
 }

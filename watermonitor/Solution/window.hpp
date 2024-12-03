@@ -69,7 +69,7 @@ private:
 
   QProgressDialog *progressDialog;
 public slots:
-  void updateProgress(int);
+  void updateProgress(int value, QString title = "", QString label = "");
 
 private slots:
   void openCSV();
