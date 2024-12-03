@@ -15,12 +15,16 @@ DashboardPage::DashboardPage(QWidget *parent) : QWidget(parent)
   CreateFilters *timePeriodFilter = new CreateFilters(sidePanel);
   timePeriodFilter->addTimePeriodButtons();
   QPushButton *loadButton = new QPushButton("Load CSV");
+  statusLabel = new QLabel("");
+  statusLabel->setAlignment(Qt::AlignCenter);
+
   // Link button click event with the DashboardPage::loadCSV event slot and loadCSV();
   connect(loadButton, &QPushButton::clicked, this, &DashboardPage::loadCSV);
   // Add widgets to the side panel
   sidePanel->layout()->addWidget(searchBar);
   sidePanel->layout()->addWidget(timePeriodFilter->getFiltersFrame());
   sidePanel->layout()->addWidget(loadButton);
+  sidePanel->layout()->addWidget(statusLabel);
 
   // Create cards
   // When the cards are clicked, a callback switches the page to the respected page -> [this](){...}.
@@ -60,6 +64,11 @@ DashboardPage::DashboardPage(QWidget *parent) : QWidget(parent)
   // contentPanel is temporary, until navigation bar is and completed -
   // to be replaced with relavent main info content
   mainLayout->addWidget(contentPanel, 2, 1, 8, 3);
+}
+
+void DashboardPage::updateStatus(const QString &message)
+{
+  statusLabel->setText(message);
 }
 
 // Implementing card interaction.

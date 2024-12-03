@@ -4,26 +4,42 @@
 #define DATAHANDLER_HPP
 
 #include <QObject>
+#include <QThread>
 #include <vector>
 #include "water.hpp"
 #include "dataset.hpp"
 
-class DataHandler : public QObject
+class DataHandler : public QThread
 {
     Q_OBJECT
 public:
     DataHandler(QObject *parent = nullptr);
     ~DataHandler();
 
+    void loadData(const std::string &filename);
+
     WaterDataset getDataset() const;
+    std::vector<Water> getData() const { return m_data; }
 
 signals:
     void dataReady();
+    void handling(int percent);
+    void handlingGeographicalData(int percent);
+    void geographicalDataReady(QStringList locations, QMap<QString,QList<int>> frequency, int min, int max);
 public slots:
-    void loadData(const std::string &filename);
+    void stop();
+protected:
+    void run() override;
 
 private:
-    std::vector<Water> data;
+    std::vector<Water> m_data;
+    QString m_filename;
+    bool m_isRunning;
+
+    bool loading();
+
+    void takeGeographicalData();
+
 };
 
 #endif // DATAHANDLER_HPP

@@ -24,4 +24,9 @@
 // SETING KEYS
 #define CSV_FILE_PATH "csv_file_path"
 
+//
+#define SHOW_PROGESS_VALUE 0
+#define HIDE_PROGRESS_VALUE -1
+#define MAX_PROGRESS_VALUE 100
+
 #endif // COMMON_HPP

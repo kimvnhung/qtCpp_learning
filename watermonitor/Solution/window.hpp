@@ -3,8 +3,10 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QProgressDialog>
 #include <QStackedWidget>
+#include <QThread>
 #include "model.hpp"
 
 class QString;
@@ -28,7 +30,7 @@ class WaterQualityWindow : public QMainWindow
 
 public:
   WaterQualityWindow(QWidget *parent = nullptr);
-
+  ~WaterQualityWindow();
 private:
   void init();
 
@@ -48,7 +50,7 @@ private:
   void navigateToRawDataPage();
   void navigateToGeographicalHotspotsPage();
 
-  WaterModel model;     // data model used by table
+  WaterModel *model;     // data model used by table
   QString dataLocation; // location of CSV data files
   QTableView *table;    // table of quake data
 
@@ -70,9 +72,12 @@ private:
   StatsDialog *statsDialog; // dialog to display stats
 
   QProgressDialog *progressDialog;
+  QDialog *msgBox;
 public slots:
   void updateProgress(int value, QString title = "", QString label = "");
-
+    void onHandleData(int percent);
+private:
+  DataHandler *dataHandler;
 private slots:
   void openCSV();
   void setDataLocation();

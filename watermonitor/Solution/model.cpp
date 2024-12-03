@@ -3,16 +3,17 @@
 #include "model.hpp"
 #include "common.hpp"
 
-WaterModel::WaterModel(QObject *parent) : QAbstractTableModel(parent)
+WaterModel::WaterModel(QObject *parent, DataHandler *dataHandler)
+    : QAbstractTableModel(parent)
+    , dataHandler(dataHandler)
 {
-    connect(&dataHandler, &DataHandler::dataReady, this, &WaterModel::onDataReady);
-    connect(this, &WaterModel::loadData, &dataHandler, &DataHandler::loadData, Qt::QueuedConnection);
+    connect(dataHandler, &DataHandler::dataReady, this, &WaterModel::onDataReady);
 }
 
 void WaterModel::updateFromFile(const QString &filename)
 {
     LOG();
-    emit loadData(filename.toStdString());
+    dataHandler->loadData(filename.toStdString());
 }
 
 void WaterModel::onDataReady()

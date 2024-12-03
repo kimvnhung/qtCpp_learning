@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QChartView>
 #include <QScatterSeries>
+#include <QTableWidget>
 
 class QPushButton;
 
@@ -20,16 +21,24 @@ public:
 
 signals:
     void goBack();
+    void handling(int percent, QString title, QString message);
+
+public slots:
+    void updateHeatMap(QStringList locations, QMap<QString,QList<int>> frequency, int min, int max);
+    void onHandling(int percent);
+
+protected:
+    // Overridden resizeEvent to catch size changes
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
     QPushButton *backButton;
     QChartView *chartView;
-    QFrame* placeholder;
+    QWidget* placeholder;
 
     DataHandler *dataHandler;
 
-    void initChart();
-    void updateChart();
-    QScatterSeries* createHeatMapSeries(const std::vector<std::vector<double>>& data, double min, double max);
-    QColor valueToColor(double value, double min, double max);
+    QTableWidget *heatMap;
+    void initHeatMap();
+
 };

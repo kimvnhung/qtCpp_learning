@@ -10,7 +10,7 @@ class WaterModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    WaterModel(QObject *parent = nullptr);
+    WaterModel(QObject *parent = nullptr, DataHandler *dataHandler = nullptr);
   void updateFromFile(const QString &);
   bool hasData() const { return dataset.size() > 0; }
 
@@ -25,5 +25,5 @@ public slots:
     void onDataReady();
 private:
   WaterDataset dataset;
-    DataHandler dataHandler;
+    DataHandler *dataHandler;
 };

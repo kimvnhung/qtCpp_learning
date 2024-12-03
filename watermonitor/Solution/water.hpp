@@ -4,6 +4,7 @@
 
 #include <string>
 #include <iostream>
+#include <QDateTime>
 
 class Water
 {
@@ -12,6 +13,7 @@ public:
   std::string getID() const { return ID; }
   std::string getLocation() const { return location; }
   std::string getTime() const { return time; }
+  QDateTime getDateTime() const { return dateTime; }
   std::string getDeterminand() const { return determinand; }
   double getResult() const { return result; }
   std::string getUnit() const { return unit; }
@@ -28,6 +30,7 @@ private:
   std::string ID;
   std::string location;
   std::string time;
+  QDateTime dateTime;
   std::string determinand;
   double result;
   std::string unit;

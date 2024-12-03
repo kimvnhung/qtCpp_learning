@@ -17,14 +17,17 @@
 
 static const int MIN_WIDTH = 620;
 
-static const int SHOW_PROGESS_VALUE = 0;
-static const int HIDE_PROGRESS_VALUE = -1;
-static const int MAX_PROGRESS_VALUE = 100;
-
 WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), pageStack(new QStackedWidget(this)), statsDialog(nullptr)
 {
 
   dashboardPage = new DashboardPage(this);
+  dataHandler = new DataHandler(this);
+  connect(dataHandler, &DataHandler::handling, this, &WaterQualityWindow::onHandleData);
+  connect(dataHandler, &DataHandler::dataReady, [this]() {
+      dashboardPage->updateStatus("Data loaded successfully.");
+  });
+  dataHandler->start();
+
   progressDialog = new QProgressDialog(this);
   progressDialog->setCancelButton(nullptr);
   progressDialog->cancel();
@@ -47,6 +50,8 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
       "}"
       );
 
+  msgBox = new QDialog(this);
+
   page1 = new POPpage(this);
   page2 = new PollutantOverviewPage(this);
   page3 = new ComplianceDashboardPage(this);
@@ -56,7 +61,8 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   QGridLayout *layout = page6->mainLayout;
   layout->addWidget(createDataTable(), 2, 1, 8, 6);
   page6->setLayout(layout);
-  page7 = new GeographicalHotspotsPage(this);
+  page7 = new GeographicalHotspotsPage(this,dataHandler);
+  connect(page7, &GeographicalHotspotsPage::handling, this, &WaterQualityWindow::updateProgress);
 
   pageStack->addWidget(dashboardPage); // Index 0
   pageStack->addWidget(page1);         // Index 1
@@ -98,6 +104,14 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   setWindowTitle("Water Quality Monitor Tool");
 
     init();
+}
+
+WaterQualityWindow::~WaterQualityWindow()
+{
+    dataHandler->stop();
+    dataHandler->quit();
+    dataHandler->wait();
+    delete dataHandler;
 }
 
 void WaterQualityWindow::init()
@@ -150,10 +164,11 @@ void WaterQualityWindow::navigateToGeographicalHotspotsPage()
 
 QWidget *WaterQualityWindow::createDataTable()
 {
+  model = new WaterModel(this,dataHandler);
   QFrame *tableFrame = createFrame();
   QVBoxLayout *tableLayout = new QVBoxLayout(tableFrame);
   table = new QTableView();
-  table->setModel(&model);
+  table->setModel(model);
 
   QFont tableFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
   table->setFont(tableFont);
@@ -259,7 +274,8 @@ void WaterQualityWindow::openCSV()
 
   try
   {
-    model.updateFromFile(dataLocation);
+      updateProgress(SHOW_PROGESS_VALUE);
+    model->updateFromFile(dataLocation);
   }
   catch (const std::exception &error)
   {
@@ -279,9 +295,23 @@ void WaterQualityWindow::about()
                      "(c) 2024 Best Group");
 }
 
+void WaterQualityWindow::onHandleData(int percent)
+{
+    LOGD(QString("percent: %1").arg(percent));
+    if(percent != HIDE_PROGRESS_VALUE)
+    {
+
+        updateProgress(percent, "Importing data...", "Please wait...");
+    }
+    else
+    {
+        updateProgress(HIDE_PROGRESS_VALUE);
+    }
+}
+
 void WaterQualityWindow::updateProgress(int value, QString title, QString label)
 {
-    LOG();
+    LOGD(QString("value: %1").arg(value));
     if(title.isEmpty())
     {
         title = "Processing...";

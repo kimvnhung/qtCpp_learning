@@ -15,7 +15,8 @@ GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent, DataHandler 
     , dataHandler(dataHandler)
 {
     if(dataHandler){
-        connect(dataHandler, &DataHandler::dataReady, this, &GeographicalHotspotsPage::initChart);
+        connect(dataHandler, &DataHandler::geographicalDataReady, this, &GeographicalHotspotsPage::updateHeatMap);
+        connect(dataHandler, &DataHandler::handlingGeographicalData,this, &GeographicalHotspotsPage::onHandling);
     }
     else
         LOGD("DataHandler is null");
@@ -24,10 +25,7 @@ GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent, DataHandler 
     QWidget *titlePanel = createHeading("Geographical Hotspots Page", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    placeholder = createFrame();
-    placeholder->setLayout(new QGridLayout);
-    initChart();
-
+    placeholder = new QWidget(this);
 
     backButton = new QPushButton("Back to Dashboard", this);
     connect(backButton, &QPushButton::clicked, this, &GeographicalHotspotsPage::goBack);
@@ -36,95 +34,170 @@ GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent, DataHandler 
     mainLayout->addWidget(createNavigationBar(), 1, 0, 1, -1);
     mainLayout->addWidget(placeholder);
     mainLayout->addWidget(backButton, 10, 0, 1, -1);
+    setLayout(mainLayout);
+    initHeatMap();
 }
 
-void GeographicalHotspotsPage::initChart()
+void GeographicalHotspotsPage::initHeatMap()
 {
-    // Sample data: frequency of person in a month
-    // Format: {month, person1, person2, ..., personN}
-    QVector<QVector<int>> data = {
-        {10, 2, 3, 5}, // January: person1(10), person2(2), person3(3), person4(5)
-        {12, 4, 1, 7}, // February: person1(12), person2(4), person3(1), person4(7)
-        {8, 1, 2, 3},  // March
-        {14, 3, 6, 8}, // April
-        {10, 2, 4, 5}  // May
-    };
+    LOG();
+    QStringList months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    QStringList people = {};
+    // Create the heat map
+    heatMap = new QTableWidget(this);
+    heatMap->setRowCount(people.size());
+    heatMap->setColumnCount(months.size());
 
-    // List of months
-    QStringList months = {"Jan", "Feb", "Mar", "Apr", "May"};
+    // Set the row and column headers (for months and people)
+    heatMap->setHorizontalHeaderLabels(months);
+    // heatMap->setVerticalHeaderLabels(people);
 
-    // List of people
-    QStringList people = {"Person 1", "Person 2", "Person 3", "Person 4"};
+    // Set the cell values and color each cell based on the frequency
+    // for (int row = 0; row < people.size(); ++row) {
+    //     for (int col = 0; col < months.size(); ++col) {
+    //         int value = rand() % 15; // Random value for demonstration
 
-    // Create the chart
-    QChart* chart = new QChart();
-    chart->setTitle("Frequency of People in Each Month");
+    //         // Create a table item and set the frequency value as text
+    //         QTableWidgetItem* item = new QTableWidgetItem(QString::number(value));
 
-    // Create a series for each person
-    QVector<QBarSet*> barSets;
-    for (int i = 0; i < people.size(); ++i) {
-        QBarSet* barSet = new QBarSet(people[i]);
-        for (int j = 0; j < data.size(); ++j) {
-            barSet->append(data[j][i]); // Frequency for each person in each month
+    //         heatMap->setItem(row, col, item);
+
+    //         // Determine the color based on the value (heat map colorization)
+    //         QColor color;
+    //         if (value <= 5) {
+    //             color = QColor(255, 0, 0); // Red for values 0-5
+    //         } else if (value <= 10) {
+    //             color = QColor(0, 255, 0); // Green for values 5-10
+    //         } else {
+    //             color = QColor(0, 0, 255); // Blue for values > 10
+    //         }
+
+    //         // Apply the color to the cell
+    //         item->setBackground(QBrush(color));
+    //     }
+    // }
+
+    // Resize the columns and rows to fit the content
+    // heatMap->resizeColumnsToContents();
+    // heatMap->resizeRowsToContents();
+    QVBoxLayout *grid = new QVBoxLayout(placeholder);
+    grid->addWidget(heatMap);
+    placeholder->setLayout(grid);
+
+    // Set size policy to expand and fit
+    heatMap->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    // Remove scrollbars
+    // heatMap->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    heatMap->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    // Make rows and columns stretch to fill the available space
+    heatMap->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    heatMap->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    // Remove row and column spacing
+    heatMap->setShowGrid(false); // Remove grid lines
+    // Set the table background to white
+    heatMap->setStyleSheet(R"(
+    QTableWidget::item
+    {
+        border: 0px solid;
+        background: transparent;
+        border-radius: 0px
+        margin: 0px;
+        padding: 0px;
+    }
+)");
+
+    // set for cant edit
+    heatMap->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    // set for unclicable
+    heatMap->setSelectionMode(QAbstractItemView::NoSelection);
+
+
+}
+
+void GeographicalHotspotsPage::resizeEvent(QResizeEvent *event)
+{
+    LOG();
+    // Call the base class implementation to ensure normal resizing behavior
+    QWidget::resizeEvent(event);
+
+
+    LOGD(QString("newSize: %1x%2").arg(placeholder->size().width()).arg(placeholder->size().height()));
+
+    // set all column width equal to placeholder width/13
+    QSize newSize = placeholder->size();
+    for (int i = 0; i < 13; i++) {
+        heatMap->setColumnWidth(i, newSize.width() / 13);
+    }
+}
+
+void GeographicalHotspotsPage::onHandling(int percent) {
+    LOG();
+    emit handling(percent, "Geographical Hotspots", "Processing data...");
+}
+
+void GeographicalHotspotsPage::updateHeatMap(QStringList locations, QMap<QString,QList<int>> frequency, int min, int max) {
+    LOG();
+
+    //set to heatMap
+    heatMap->setRowCount(locations.size());
+    heatMap->setVerticalHeaderLabels(locations);
+
+    int count = 0;
+    int size = heatMap->rowCount() * heatMap->columnCount();
+
+    // Set the cell values and color each cell based on the frequency
+    for (int row = 0; row < locations.size(); ++row) {
+        for (int col = 0; col < heatMap->columnCount(); ++col) {
+            LOGD(QString("row: %1, col: %2").arg(row).arg(col));
+            // get header text
+            QString month = heatMap->horizontalHeaderItem(col)->text();
+            int value = frequency[month][row]; // Random value for demonstration
+            LOGD(QString("row: %1, col: %2").arg(row).arg(col));
+            // Create a table item and set the frequency value as text
+            QTableWidgetItem* item = new QTableWidgetItem(QString::number(value));
+            // set for alignment center of the text
+            item->setTextAlignment(Qt::AlignCenter);
+
+            heatMap->setItem(row, col, item);
+            LOGD(QString("row: %1, col: %2").arg(row).arg(col));
+            // Determine the color based on the value (heat map colorization)
+            QColor color;
+            /*
+             * Value change from white -> green -> yellow -> red, from the lowest value to the highest value
+            */
+            int r = 0;
+            int g = 0;
+            int b = 0;
+            if (value <= (max - min) / 3) {
+                // 0 is white, (max-min)/3 is green
+                r = 255 * (1 - value * 1.0f / ((max - min) / 3));
+                g = 255;
+                b = 255;
+            } else if (value <= 2 * (max - min) / 3) {
+                // (max-min)/3 is green, 2*(max-min)/3 is yellow
+                r = 255 * (value * 1.0f / ((max - min) / 3) - 1);
+                g = 255;
+            } else {
+                // 2*(max-min)/3 is yellow, max-min is red
+                r = 255;
+                g = 255 * (value * 1.0f / ((max - min) / 3) - 2);
+            }
+
+            color = QColor(r, g, b);
+
+            // Apply the color to the cell
+            item->setBackground(QBrush(color));
+            LOGD(QString("row: %1, col: %2").arg(row).arg(col));
         }
-        barSets.append(barSet);
     }
 
-    // Create a bar series and add the bar sets
-    QBarSeries* series = new QBarSeries();
-    for (auto barSet : barSets) {
-        series->append(barSet);
-    }
+    emit handling(HIDE_PROGRESS_VALUE, "Geographical Hotspots", "Processing data...");
 
-    // Add the series to the chart
-    chart->addSeries(series);
-
-    // Create and configure the X-axis (months)
-    QBarCategoryAxis* axisX = new QBarCategoryAxis();
-    axisX->append(months); // Set the months as categories for X-axis
-    chart->setAxisX(axisX, series);
-
-    // Create and configure the Y-axis (people)
-    QValueAxis* axisY = new QValueAxis();
-    axisY->setRange(0, 20); // Set range for Y-axis, adjust as needed
-    chart->setAxisY(axisY, series);
-
-    // Create the chart view
-    chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-
-    placeholder->layout()->addWidget(chartView);
+    //Resize the columns and rows to fit the content
+    heatMap->resizeColumnsToContents();
+    heatMap->resizeRowsToContents();
 }
 
-// Function to map a value to a color
-QColor GeographicalHotspotsPage::valueToColor(double value, double min, double max) {
-    // Normalize the value
-    double normalized = (value - min) / (max - min);
-    normalized = std::clamp(normalized, 0.0, 1.0);
 
-    // Interpolate between blue (low) and red (high)
-    int r = static_cast<int>(normalized * 255);
-    int g = 0;
-    int b = static_cast<int>((1.0 - normalized) * 255);
-    return QColor(r, g, b);
-}
-
-// Function to create the heat map series
-QScatterSeries* GeographicalHotspotsPage::createHeatMapSeries(const std::vector<std::vector<double>>& data, double min, double max) {
-    QScatterSeries* series = new QScatterSeries();
-    series->setMarkerShape(QScatterSeries::MarkerShapeRectangle);
-    series->setMarkerSize(10.0); // Adjust marker size for better visibility
-
-    int rows = data.size();
-    int cols = data[0].size();
-
-    for (int y = 0; y < rows; ++y) {
-        for (int x = 0; x < cols; ++x) {
-            double value = data[y][x];
-            QColor color = valueToColor(value, min, max);
-            series->append(x, y); // Add data point
-            series->setColor(color); // Set the color for the marker
-        }
-    }
-    return series;
-}
