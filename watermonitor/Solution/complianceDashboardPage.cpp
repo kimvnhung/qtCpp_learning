@@ -2,17 +2,18 @@
 #include "ui_elements.hpp"
 #include <QtWidgets>
 
-ComplianceDashboardPage::ComplianceDashboardPage(QWidget* parent)
-    : QWidget(parent) {
+ComplianceDashboardPage::ComplianceDashboardPage(QWidget *parent)
+    : QWidget(parent)
+{
 
-    QGridLayout* mainLayout = new QGridLayout(this);
+    QGridLayout *mainLayout = new QGridLayout(this);
     // Create page title with a fixed height and flexible width.
-    QWidget* titlePanel = createHeading("Compliance Dashboard Page", TITLE_SIZE);
+    QWidget *titlePanel = createHeading("Compliance Dashboard Page", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
     // Create container to hold contents
-    QWidget* placeholder = createFrame();
-    QVBoxLayout* placeholderLayout = new QVBoxLayout(placeholder);
+    QWidget *placeholder = createFrame();
+    QVBoxLayout *placeholderLayout = new QVBoxLayout(placeholder);
     placeholderLayout->addWidget(createHeading("Placeholder", SUBHEADING_SIZE));
 
     // Back button to return to dashboard

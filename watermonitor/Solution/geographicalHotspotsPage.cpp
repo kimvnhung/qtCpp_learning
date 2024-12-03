@@ -2,15 +2,16 @@
 #include "ui_elements.hpp"
 #include <QtWidgets>
 
-GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget* parent)
-    : QWidget(parent) {
+GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent)
+    : QWidget(parent)
+{
 
-    QGridLayout* mainLayout = new QGridLayout(this);
-    QWidget* titlePanel = createHeading("Geographical Hotspots Page", TITLE_SIZE);
+    QGridLayout *mainLayout = new QGridLayout(this);
+    QWidget *titlePanel = createHeading("Geographical Hotspots Page", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    QWidget* placeholder = createFrame();
-    QVBoxLayout* placeholderLayout = new QVBoxLayout(placeholder);
+    QWidget *placeholder = createFrame();
+    QVBoxLayout *placeholderLayout = new QVBoxLayout(placeholder);
     placeholderLayout->addWidget(createHeading("Placeholder", SUBHEADING_SIZE));
 
     backButton = new QPushButton("Back to Dashboard", this);

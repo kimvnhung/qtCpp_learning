@@ -8,13 +8,14 @@
 
 using namespace std;
 
-void WaterDataset::fetchLatLong(const QString& id, Water* water)
+void WaterDataset::fetchLatLong(const QString &id, Water *water)
 {
 
     QNetworkRequest request{QUrl(id)};
-    QNetworkReply* reply = networkManager->get(request);
+    QNetworkReply *reply = networkManager->get(request);
 
-    QObject::connect(reply, &QNetworkReply::finished, [this, reply, water]() {
+    QObject::connect(reply, &QNetworkReply::finished, [this, reply, water]()
+                     {
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray response = reply->readAll();
             QJsonDocument jsonDoc = QJsonDocument::fromJson(response);
@@ -42,14 +43,15 @@ void WaterDataset::fetchLatLong(const QString& id, Water* water)
         }
 
         reply->deleteLater();
-        processNextRequest(); 
-    });
+        processNextRequest(); });
 }
 
-void WaterDataset::processNextRequest() {
-    if (requestQueue.empty()) {
+void WaterDataset::processNextRequest()
+{
+    if (requestQueue.empty())
+    {
         processingQueue = false;
-       
+
         return;
     }
 
@@ -57,15 +59,13 @@ void WaterDataset::processNextRequest() {
     auto [id, water] = requestQueue.front();
     requestQueue.pop();
 
-   
-
     fetchLatLong(id, water);
-
 }
 
-void WaterDataset::loadData(const std::string& filename)
+void WaterDataset::loadData(const std::string &filename)
 {
-    if (processingQueue) {
+    if (processingQueue)
+    {
         std::cerr << "Cannot load data while processing requests. Wait until processing completes." << std::endl;
         return;
     }
@@ -73,7 +73,8 @@ void WaterDataset::loadData(const std::string& filename)
     csv::CSVReader reader(filename);
     data.clear();
 
-    for (const auto& row : reader) {
+    for (const auto &row : reader)
+    {
         Water water{
             row["@id"].get<std::string>(),
             row["sample.samplingPoint.label"].get<std::string>(),
@@ -84,22 +85,17 @@ void WaterDataset::loadData(const std::string& filename)
             row["sample.sampledMaterialType.label"].get<std::string>(),
         };
 
-
         data.push_back(water);
         requestQueue.emplace(QString::fromStdString(row["@id"].get<std::string>()), &data.back());
     }
 
-    
-        processNextRequest(); 
-    
-
-    
+    processNextRequest();
 }
 
 void WaterDataset::checkDataExists() const
 {
-    if (size() == 0) {
+    if (size() == 0)
+    {
         throw std::runtime_error("Dataset is empty!");
     }
-
 }

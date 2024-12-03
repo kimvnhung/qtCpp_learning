@@ -9,18 +9,18 @@ class QWidget;
 /**
  * @brief Template for an information page.
  */
-class RawDataPage : public QWidget {
+class RawDataPage : public QWidget
+{
     Q_OBJECT
 
 public:
-    explicit RawDataPage(QWidget* parent = nullptr);
-    QGridLayout* mainLayout;
+    explicit RawDataPage(QWidget *parent = nullptr);
+    QGridLayout *mainLayout;
 
 signals:
     void goBack();
-    void loadCSV(); 
+    void loadCSV();
 
 private:
-    QPushButton* backButton;
-
+    QPushButton *backButton;
 };

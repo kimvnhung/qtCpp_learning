@@ -2,24 +2,24 @@
 #include "ui_elements.hpp"
 #include <QtWidgets>
 
-FluorinatedCompoundsPage::FluorinatedCompoundsPage(QWidget* parent): QWidget(parent) 
+FluorinatedCompoundsPage::FluorinatedCompoundsPage(QWidget *parent) : QWidget(parent)
 {
-    QGridLayout* mainLayout = new QGridLayout(this);
-    QWidget* titlePanel = createHeading("Fluorinated Compounds", TITLE_SIZE);
+    QGridLayout *mainLayout = new QGridLayout(this);
+    QWidget *titlePanel = createHeading("Fluorinated Compounds", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    QWidget* complianceIndexPanel = createFrame();
-    QVBoxLayout* complianceIndexLayout = new QVBoxLayout(complianceIndexPanel);
+    QWidget *complianceIndexPanel = createFrame();
+    QVBoxLayout *complianceIndexLayout = new QVBoxLayout(complianceIndexPanel);
     complianceIndexLayout->addWidget(createHeading("Compliance Index", SUBHEADING_SIZE));
     complianceIndexLayout->addWidget(createParagraph("bla bla bla include some info lskadjlk asdflkj asfl ksalf dk"));
     complianceIndexLayout->setAlignment(Qt::AlignTop);
 
-    QWidget* mapPanel = createFrame();
-    QVBoxLayout* mapLayout = new QVBoxLayout(mapPanel);
+    QWidget *mapPanel = createFrame();
+    QVBoxLayout *mapLayout = new QVBoxLayout(mapPanel);
     mapLayout->addWidget(createHeading("Map to show distribution of compounds", SUBHEADING_SIZE));
-    
-    QWidget* informationPanel = createFrame();
-    QVBoxLayout* informationLayout = new QVBoxLayout(informationPanel);
+
+    QWidget *informationPanel = createFrame();
+    QVBoxLayout *informationLayout = new QVBoxLayout(informationPanel);
     informationLayout->addWidget(createHeading("Display Levels of PFA's", SUBHEADING_SIZE));
 
     mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
@@ -32,5 +32,4 @@ FluorinatedCompoundsPage::FluorinatedCompoundsPage(QWidget* parent): QWidget(par
     connect(backButton, &QPushButton::clicked, this, &FluorinatedCompoundsPage::goBack);
 
     mainLayout->addWidget(backButton, 10, 0, 1, -1);
-
 }

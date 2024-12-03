@@ -7,16 +7,16 @@
 class QLineEdit;
 class QPushButton;
 
-class StatsDialog: public QDialog
+class StatsDialog : public QDialog
 {
-  public:
-    StatsDialog(QWidget*);
-    void update(double, double);
+public:
+  StatsDialog(QWidget *);
+  void update(double, double);
 
-  private:
-    QLineEdit* meanDepth;
-    QLineEdit* meanMagnitude;
-    QPushButton* closeButton;
-    void createWidgets();
-    void arrangeWidgets();
+private:
+  QLineEdit *meanDepth;
+  QLineEdit *meanMagnitude;
+  QPushButton *closeButton;
+  void createWidgets();
+  void arrangeWidgets();
 };

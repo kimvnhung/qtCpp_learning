@@ -10,13 +10,23 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Network)
 qt_standard_project_setup()
 
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-file(GLOB_RECURSE SOURCES ${SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE HEADERS ${SOURCE_DIR}/*.hpp)
-
 qt_add_executable(waterqualitymonitor
-    ${SOURCES}
-    ${HEADERS}
+    main.cpp
+    water.cpp
+    dataset.cpp
+    model.cpp
+    window.cpp
+    stats.cpp
+    dashboardpage.cpp
+    POPpage.cpp
+    pollutantOverviewPage.cpp
+    complianceDashboardPage.cpp
+    fluorinatedCompoundsPage.cpp
+    environmentalLitterIndicatorsPage.cpp
+    geographicalHotspotsPage.cpp
+    rawDataPage.cpp
+    ui_elements.cpp
+    interactive_card.cpp
 )
 
 target_link_libraries(waterqualitymonitor PRIVATE Qt6::Widgets PRIVATE Qt6::Core Qt6::Network)

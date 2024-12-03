@@ -13,35 +13,44 @@
 #include "environmentalLitterIndicatorsPage.hpp"
 #include "geographicalHotspotsPage.hpp"
 #include "rawDataPage.hpp"
+#include "common.hpp"
 
 static const int MIN_WIDTH = 620;
 
+static const int SHOW_PROGESS_VALUE = 0;
+static const int HIDE_PROGRESS_VALUE = -1;
+static const int MAX_PROGRESS_VALUE = 100;
 
-WaterQualityWindow::WaterQualityWindow(QWidget* parent): QMainWindow(parent), pageStack(new QStackedWidget(this)), statsDialog(nullptr)
+WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), pageStack(new QStackedWidget(this)), statsDialog(nullptr)
 {
 
   dashboardPage = new DashboardPage(this);
-  
+  progressDialog = new QProgressDialog(this);
+  progressDialog->setWindowModality(Qt::WindowModal);
+  progressDialog->setMinimum(0);
+  progressDialog->setMaximum(MAX_PROGRESS_VALUE);
+  progressDialog->setWindowTitle("Processing...");
+
   page1 = new POPpage(this);
   page2 = new PollutantOverviewPage(this);
   page3 = new ComplianceDashboardPage(this);
   page4 = new FluorinatedCompoundsPage(this);
   page5 = new EnvironmentalLitterIndicatorsPage(this);
   page6 = new RawDataPage(this);
-  QGridLayout* layout =  page6->mainLayout;
+  QGridLayout *layout = page6->mainLayout;
   layout->addWidget(createDataTable(), 2, 1, 8, 6);
   page6->setLayout(layout);
   page7 = new GeographicalHotspotsPage(this);
 
   pageStack->addWidget(dashboardPage); // Index 0
-  pageStack->addWidget(page1); // Index 1
-  pageStack->addWidget(page2); // Index 2
-  pageStack->addWidget(page3); // Index 3
-  pageStack->addWidget(page4); // Index 4
-  pageStack->addWidget(page5); // Index 5
-  pageStack->addWidget(page6); // Index 6
-  pageStack->addWidget(page7); // Index 7
-  
+  pageStack->addWidget(page1);         // Index 1
+  pageStack->addWidget(page2);         // Index 2
+  pageStack->addWidget(page3);         // Index 3
+  pageStack->addWidget(page4);         // Index 4
+  pageStack->addWidget(page5);         // Index 5
+  pageStack->addWidget(page6);         // Index 6
+  pageStack->addWidget(page7);         // Index 7
+
   connect(dashboardPage, &DashboardPage::goToPOPpage, this, &WaterQualityWindow::navigateToPOPpage);
   connect(dashboardPage, &DashboardPage::goToPollutantOverviewPage, this, &WaterQualityWindow::navigateToPollutantOverviewPage);
   connect(dashboardPage, &DashboardPage::goToComplianceDashboardPage, this, &WaterQualityWindow::navigateToComplianceDashboardPage);
@@ -49,7 +58,6 @@ WaterQualityWindow::WaterQualityWindow(QWidget* parent): QMainWindow(parent), pa
   connect(dashboardPage, &DashboardPage::goToEnvironmentalLitterIndicatorsPage, this, &WaterQualityWindow::navigateToEnvironmentalLitterIndicatorsPage);
   connect(dashboardPage, &DashboardPage::goToRawDataPage, this, &WaterQualityWindow::navigateToRawDataPage);
   connect(dashboardPage, &DashboardPage::goToGeographicalHotspotsPage, this, &WaterQualityWindow::navigateToGeographicalHotspotsPage);
-
 
   connect(dashboardPage, &DashboardPage::loadCSV, this, &WaterQualityWindow::openCSV);
   connect(page6, &RawDataPage::loadCSV, this, &WaterQualityWindow::openCSV);
@@ -63,7 +71,7 @@ WaterQualityWindow::WaterQualityWindow(QWidget* parent): QMainWindow(parent), pa
   connect(page7, &GeographicalHotspotsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
 
   setCentralWidget(pageStack);
-  
+
   createFileSelectors();
   createStatusBar();
   addFileMenu();
@@ -74,43 +82,50 @@ WaterQualityWindow::WaterQualityWindow(QWidget* parent): QMainWindow(parent), pa
   setWindowTitle("Water Quality Monitor Tool");
 }
 
-void WaterQualityWindow::navigateToDashboard() {
+void WaterQualityWindow::navigateToDashboard()
+{
   pageStack->setCurrentIndex(0);
 }
 
-void WaterQualityWindow::navigateToPOPpage() {
+void WaterQualityWindow::navigateToPOPpage()
+{
   pageStack->setCurrentIndex(1);
 }
 
-void WaterQualityWindow::navigateToPollutantOverviewPage() {
+void WaterQualityWindow::navigateToPollutantOverviewPage()
+{
   pageStack->setCurrentIndex(2);
 }
 
-void WaterQualityWindow::navigateToComplianceDashboardPage() {
+void WaterQualityWindow::navigateToComplianceDashboardPage()
+{
   pageStack->setCurrentIndex(3);
 }
 
-void WaterQualityWindow::navigateToFluorinatedCompoundsPage() {
+void WaterQualityWindow::navigateToFluorinatedCompoundsPage()
+{
   pageStack->setCurrentIndex(4);
 }
 
-void WaterQualityWindow::navigateToEnvironmentalLitterIndicatorsPage() {
+void WaterQualityWindow::navigateToEnvironmentalLitterIndicatorsPage()
+{
   pageStack->setCurrentIndex(5);
 }
 
-void WaterQualityWindow::navigateToRawDataPage() {
+void WaterQualityWindow::navigateToRawDataPage()
+{
   pageStack->setCurrentIndex(6);
 }
 
-void WaterQualityWindow::navigateToGeographicalHotspotsPage() {
+void WaterQualityWindow::navigateToGeographicalHotspotsPage()
+{
   pageStack->setCurrentIndex(7);
 }
 
-
-QWidget* WaterQualityWindow::createDataTable()
+QWidget *WaterQualityWindow::createDataTable()
 {
-  QFrame* tableFrame = createFrame();
-  QVBoxLayout* tableLayout = new QVBoxLayout(tableFrame);
+  QFrame *tableFrame = createFrame();
+  QVBoxLayout *tableLayout = new QVBoxLayout(tableFrame);
   table = new QTableView();
   table->setModel(&model);
 
@@ -120,7 +135,6 @@ QWidget* WaterQualityWindow::createDataTable()
 
   return tableFrame;
 }
-
 
 void WaterQualityWindow::createFileSelectors()
 {
@@ -135,17 +149,16 @@ void WaterQualityWindow::createFileSelectors()
   period->addItems(periodOptions);
 }
 
-
 void WaterQualityWindow::createToolBar()
 {
-  QToolBar* toolBar = new QToolBar();
+  QToolBar *toolBar = new QToolBar();
 
-  QLabel* significanceLabel = new QLabel("Significance");
+  QLabel *significanceLabel = new QLabel("Significance");
   significanceLabel->setAlignment(Qt::AlignVCenter);
   toolBar->addWidget(significanceLabel);
   toolBar->addWidget(significance);
 
-  QLabel* periodLabel = new QLabel("Period");
+  QLabel *periodLabel = new QLabel("Period");
   periodLabel->setAlignment(Qt::AlignVCenter);
   toolBar->addWidget(periodLabel);
   toolBar->addWidget(period);
@@ -153,84 +166,105 @@ void WaterQualityWindow::createToolBar()
   toolBar->addSeparator();
 
   loadButton = new QPushButton("Load");
-  connect(loadButton, SIGNAL(clicked()), this, SLOT(openCSV()));  
+  connect(loadButton, SIGNAL(clicked()), this, SLOT(openCSV()));
   toolBar->addWidget(loadButton);
 
   addToolBar(Qt::LeftToolBarArea, toolBar);
 }
 void WaterQualityWindow::createStatusBar()
 {
-    fileInfo = new QLabel("Current file: <none>");
-    QStatusBar* status = statusBar();
-    status->addWidget(fileInfo);
+  fileInfo = new QLabel("Current file: <none>");
+  QStatusBar *status = statusBar();
+  status->addWidget(fileInfo);
 }
-
-
 
 void WaterQualityWindow::addHelpMenu()
 {
-    QAction* aboutAction = new QAction("&About", this);
-    connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+  QAction *aboutAction = new QAction("&About", this);
+  connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
-    QAction* aboutQtAction = new QAction("About &Qt", this);
-    connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+  QAction *aboutQtAction = new QAction("About &Qt", this);
+  connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-    QMenu* helpMenu = menuBar()->addMenu("&Help");
-    helpMenu->addAction(aboutAction);
-    helpMenu->addAction(aboutQtAction);
+  QMenu *helpMenu = menuBar()->addMenu("&Help");
+  helpMenu->addAction(aboutAction);
+  helpMenu->addAction(aboutQtAction);
 }
 
 void WaterQualityWindow::addFileMenu()
 {
-    QAction* openFileAction = new QAction("Open &File", this);
-    openFileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_O));
-    connect(openFileAction, SIGNAL(triggered()), this, SLOT(setDataLocation()));
+  QAction *openFileAction = new QAction("Open &File", this);
+  openFileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_O));
+  connect(openFileAction, SIGNAL(triggered()), this, SLOT(setDataLocation()));
 
-    QAction* closeAction = new QAction("Quit", this);
-    closeAction->setShortcut(QKeySequence::Close);
-    connect(closeAction, SIGNAL(triggered()), this, SLOT(close()));
+  QAction *closeAction = new QAction("Quit", this);
+  closeAction->setShortcut(QKeySequence::Close);
+  connect(closeAction, SIGNAL(triggered()), this, SLOT(close()));
 
-    QMenu* fileMenu = menuBar()->addMenu("&File");
-    fileMenu->addAction(openFileAction);
-    fileMenu->addAction(closeAction);
+  QMenu *fileMenu = menuBar()->addMenu("&File");
+  fileMenu->addAction(openFileAction);
+  fileMenu->addAction(closeAction);
 }
 void WaterQualityWindow::setDataLocation()
 {
-    QString filePath = QFileDialog::getOpenFileName(
-        this, "Select CSV File", ".",
-        "CSV Files (*.csv);;All Files (*)");
+  LOG();
+  QString filePath = QFileDialog::getOpenFileName(
+      this, "Select CSV File", ".",
+      "CSV Files (*.csv);;All Files (*)");
 
-    if (!filePath.isEmpty()) {
-        dataLocation = filePath;
-        fileInfo->setText(QString("Current file: <kbd>%1</kbd>").arg(QFileInfo(filePath).fileName()));
-    }
+  LOGD(QString("Selected file: %1").arg(filePath));
+  if (!filePath.isEmpty())
+  {
+    dataLocation = filePath;
+    SET_VALUE(CSV_FILE_PATH, filePath);
+
+    fileInfo->setText(QString("Current file: <kbd>%1</kbd>").arg(QFileInfo(filePath).fileName()));
+  }
 }
 void WaterQualityWindow::openCSV()
 {
-    if (dataLocation.isEmpty()) {
-        QMessageBox::critical(this, "File Error",
-            "No file has been selected!\n\n"
-            "Please select a file via the File menu.");
-        return;
-    }
+  if (dataLocation.isEmpty())
+  {
+    QMessageBox::critical(this, "File Error",
+                          "No file has been selected!\n\n"
+                          "Please select a file via the File menu.");
+    return;
+  }
 
-    try {
-        model.updateFromFile(dataLocation);
-    }
-    catch (const std::exception& error) {
-        QMessageBox::critical(this, "CSV File Error", error.what());
-        return;
-    }
+  try
+  {
+    model.updateFromFile(dataLocation);
+  }
+  catch (const std::exception &error)
+  {
+    QMessageBox::critical(this, "CSV File Error", error.what());
+    return;
+  }
 
-    fileInfo->setText(QString("Current file: <kbd>%1</kbd>").arg(QFileInfo(dataLocation).fileName()));
-    table->resizeColumnsToContents();
+  fileInfo->setText(QString("Current file: <kbd>%1</kbd>").arg(QFileInfo(dataLocation).fileName()));
+  table->resizeColumnsToContents();
 }
-
 
 void WaterQualityWindow::about()
 {
   QMessageBox::about(this, "About Water Quality Monitor Tool",
-    "Water Quality Monitor Tool displays and analyzes water quality data loaded from"
-    "a CSV file produced by ...\n\n"
-    "(c) 2024 Best Group");
+                     "Water Quality Monitor Tool displays and analyzes water quality data loaded from"
+                     "a CSV file produced by ...\n\n"
+                     "(c) 2024 Best Group");
+}
+
+void WaterQualityWindow::updateProgress(int value)
+{
+  if (value == SHOW_PROGESS_VALUE)
+  {
+    progressDialog->show();
+  }
+  else if (value == HIDE_PROGRESS_VALUE)
+  {
+    progressDialog->hide();
+  }
+  else
+  {
+    progressDialog->setValue(value);
+  }
 }

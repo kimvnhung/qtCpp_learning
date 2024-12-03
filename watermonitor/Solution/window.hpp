@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QProgressDialog>
 #include <QStackedWidget>
 #include "model.hpp"
 
@@ -21,53 +22,57 @@ class EnvironmentalLitterIndicatorsPage;
 class GeographicalHotspotsPage;
 class RawDataPage;
 
-class WaterQualityWindow: public QMainWindow
+class WaterQualityWindow : public QMainWindow
 {
   Q_OBJECT
 
-  public:
-    WaterQualityWindow(QWidget* parent = nullptr);
+public:
+  WaterQualityWindow(QWidget *parent = nullptr);
 
-  private:
-    QWidget* createDataTable();
-    void createFileSelectors();
-    void createToolBar();
-    void createStatusBar();
-    void addFileMenu();
-    void addHelpMenu();
+private:
+  QWidget *createDataTable();
+  void createFileSelectors();
+  void createToolBar();
+  void createStatusBar();
+  void addFileMenu();
+  void addHelpMenu();
 
-    void navigateToDashboard();
-    void navigateToPOPpage();
-    void navigateToPollutantOverviewPage();
-    void navigateToComplianceDashboardPage();
-    void navigateToFluorinatedCompoundsPage();
-    void navigateToEnvironmentalLitterIndicatorsPage();
-    void navigateToRawDataPage();
-    void navigateToGeographicalHotspotsPage();
+  void navigateToDashboard();
+  void navigateToPOPpage();
+  void navigateToPollutantOverviewPage();
+  void navigateToComplianceDashboardPage();
+  void navigateToFluorinatedCompoundsPage();
+  void navigateToEnvironmentalLitterIndicatorsPage();
+  void navigateToRawDataPage();
+  void navigateToGeographicalHotspotsPage();
 
-    WaterModel model;          // data model used by table
-    QString dataLocation;      // location of CSV data files
-    QTableView* table;         // table of quake data
+  WaterModel model;     // data model used by table
+  QString dataLocation; // location of CSV data files
+  QTableView *table;    // table of quake data
 
-    QStackedWidget* pageStack;
-    DashboardPage* dashboardPage;
-    POPpage* page1;
-    PollutantOverviewPage* page2;
-    ComplianceDashboardPage* page3;
-    FluorinatedCompoundsPage* page4;
-    EnvironmentalLitterIndicatorsPage* page5;
-    RawDataPage* page6;
-    GeographicalHotspotsPage* page7;
+  QStackedWidget *pageStack;
+  DashboardPage *dashboardPage;
+  POPpage *page1;
+  PollutantOverviewPage *page2;
+  ComplianceDashboardPage *page3;
+  FluorinatedCompoundsPage *page4;
+  EnvironmentalLitterIndicatorsPage *page5;
+  RawDataPage *page6;
+  GeographicalHotspotsPage *page7;
 
-    QComboBox* significance;   // selector for quake feed significance level
-    QComboBox* period;         // selector for quake feed time period
-    QPushButton* loadButton;   // button to load a new CSV file
-    QPushButton* statsButton;  // button to display dataset stats
-    QLabel* fileInfo;          // status bar info on current file
-    StatsDialog* statsDialog;  // dialog to display stats
+  QComboBox *significance;  // selector for quake feed significance level
+  QComboBox *period;        // selector for quake feed time period
+  QPushButton *loadButton;  // button to load a new CSV file
+  QPushButton *statsButton; // button to display dataset stats
+  QLabel *fileInfo;         // status bar info on current file
+  StatsDialog *statsDialog; // dialog to display stats
 
-  private slots:
-    void openCSV();
-    void setDataLocation();
-    void about();
+  QProgressDialog *progressDialog;
+public slots:
+  void updateProgress(int);
+
+private slots:
+  void openCSV();
+  void setDataLocation();
+  void about();
 };

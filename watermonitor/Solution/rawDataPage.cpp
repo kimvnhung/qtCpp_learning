@@ -3,20 +3,21 @@
 #include <QtWidgets>
 #include <vector>
 
-RawDataPage::RawDataPage(QWidget* parent)
-    : QWidget(parent) {
+RawDataPage::RawDataPage(QWidget *parent)
+    : QWidget(parent)
+{
 
     mainLayout = new QGridLayout(this);
-    QWidget* titlePanel = createHeading("Raw Data", TITLE_SIZE);
+    QWidget *titlePanel = createHeading("Raw Data", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    QWidget* sidePanel = createSidePanel();
-    QWidget* searchBar = createSearchBar();
-    
-    CreateFilters* timePeriodFilter = new CreateFilters(sidePanel);
+    QWidget *sidePanel = createSidePanel();
+    QWidget *searchBar = createSearchBar();
+
+    CreateFilters *timePeriodFilter = new CreateFilters(sidePanel);
     timePeriodFilter->addTimePeriodButtons();
 
-    QPushButton* loadButton = new QPushButton("Load CSV");
+    QPushButton *loadButton = new QPushButton("Load CSV");
     connect(loadButton, &QPushButton::clicked, this, &RawDataPage::loadCSV);
 
     backButton = new QPushButton("Back to Dashboard", this);

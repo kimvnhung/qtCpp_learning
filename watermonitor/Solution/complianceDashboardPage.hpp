@@ -7,15 +7,16 @@ class QPushButton;
 /**
  * @brief Template for an information page.
  */
-class ComplianceDashboardPage : public QWidget {
+class ComplianceDashboardPage : public QWidget
+{
     Q_OBJECT
 
 public:
-    ComplianceDashboardPage(QWidget* parent = nullptr);
+    ComplianceDashboardPage(QWidget *parent = nullptr);
 
 signals:
     void goBack();
 
 private:
-    QPushButton* backButton;
+    QPushButton *backButton;
 };
