@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Core Network)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Core Network Charts)
 qt_standard_project_setup()
 
 qt_add_executable(waterqualitymonitor
@@ -27,9 +27,16 @@ qt_add_executable(waterqualitymonitor
     rawDataPage.cpp
     ui_elements.cpp
     interactive_card.cpp
+    dataHandler.cpp
 )
 
-target_link_libraries(waterqualitymonitor PRIVATE Qt6::Widgets PRIVATE Qt6::Core Qt6::Network)
+target_link_libraries(waterqualitymonitor
+    PRIVATE
+        Qt6::Widgets
+        Qt6::Core
+        Qt6::Network
+        Qt6::Charts
+)
 
 set_target_properties(waterqualitymonitor PROPERTIES
     WIN32_EXECUTABLE ON

@@ -19,6 +19,8 @@ class WaterDataset
 {
 public:
   WaterDataset(const std::string &filename) { loadData(filename); }
+
+    WaterDataset(std::vector<Water> data) : data(data) {}
   WaterDataset() : networkManager(new QNetworkAccessManager()) {}
   ~WaterDataset() { delete networkManager; }
   void loadData(const std::string &filename);

@@ -1,12 +1,26 @@
 // COMP2811 Coursework 2: data model
 
 #include "model.hpp"
+#include "common.hpp"
+
+WaterModel::WaterModel(QObject *parent) : QAbstractTableModel(parent)
+{
+    connect(&dataHandler, &DataHandler::dataReady, this, &WaterModel::onDataReady);
+    connect(this, &WaterModel::loadData, &dataHandler, &DataHandler::loadData, Qt::QueuedConnection);
+}
 
 void WaterModel::updateFromFile(const QString &filename)
 {
-  beginResetModel();
-  dataset.loadData(filename.toStdString());
-  endResetModel();
+    LOG();
+    emit loadData(filename.toStdString());
+}
+
+void WaterModel::onDataReady()
+{
+    LOG();
+    // beginResetModel();
+    // dataset = dataHandler.getDataset();
+    // endResetModel();
 }
 
 QVariant WaterModel::data(const QModelIndex &index, int role) const

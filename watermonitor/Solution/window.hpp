@@ -30,6 +30,8 @@ public:
   WaterQualityWindow(QWidget *parent = nullptr);
 
 private:
+  void init();
+
   QWidget *createDataTable();
   void createFileSelectors();
   void createToolBar();

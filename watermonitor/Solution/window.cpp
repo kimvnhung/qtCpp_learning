@@ -96,8 +96,17 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   setMinimumWidth(MIN_WIDTH);
   resize(800, 600);
   setWindowTitle("Water Quality Monitor Tool");
+
+    init();
 }
 
+void WaterQualityWindow::init()
+{
+    LOG();
+    // init old csv
+    dataLocation = GET_STRING(CSV_FILE_PATH);
+    fileInfo->setText(QString("Current file: <kbd>%1</kbd>").arg(QFileInfo(dataLocation).fileName()));
+}
 
 void WaterQualityWindow::navigateToDashboard()
 {
