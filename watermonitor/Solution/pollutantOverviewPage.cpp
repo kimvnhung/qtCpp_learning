@@ -115,7 +115,7 @@ void PollutantOverviewPage::updateChart(QStringList materials, QList<int> counts
 
     // Add series to chart
     chart->addSeries(series);
-    chart->setTitle("Updated Bar Chart");
+    chart->setTitle("Pollutant Overview");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
     // Update axes

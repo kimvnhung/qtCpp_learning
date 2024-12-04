@@ -172,18 +172,39 @@ void DataHandler::takeComplianceDashboardData()
 
 void DataHandler::takePOPData()
 {
-    QMap<QString, int> frequency; // <month, frequency>
+    QList<double> values = QList<double>(12,0);
+    QList<double> counts = QList<double>(12,0);
+    double max = 0;
+    double min = 0;
 
     emit handlingPOPData(SHOW_PROGESS_VALUE);
 
     for (const auto &water : m_data)
     {
-        QString month = water.getDateTime().toString("MMM");
-        frequency[month] += 1;
+        // filter Persistent Organic Pollutants by name
+        if(QString::fromStdString(water.getDeterminand()).contains("on"))
+        {
+            int month = water.getDateTime().date().month();
+            values[month] += water.getResult();
+            counts[month] += 1;
+        }
+    }
+
+    for (int i = 0; i < values.size(); ++i)
+    {
+        values[i] = counts[i] ? values[i] / counts[i] : 0;
+        if(values[i] > max)
+        {
+            max = values[i];
+        }
+        if(values[i] < min)
+        {
+            min = values[i];
+        }
     }
 
     emit handlingPOPData(99);
-    emit POPDataReady(frequency);
+    emit POPDataReady(values, max, min);
 }
 
 void DataHandler::takeFluorinatedCompoundsData()

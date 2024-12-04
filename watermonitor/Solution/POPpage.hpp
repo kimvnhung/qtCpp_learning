@@ -10,6 +10,8 @@ class QFrame;
 class QLineEdit;
 class QRect;
 class QPushButton;
+class QChartView;
+class QLineSeries;
 
 /**
  * @brief Template for an information page.
@@ -20,9 +22,17 @@ class POPpage : public QWidget
 public:
     explicit POPpage(QWidget *parent = nullptr);
 
+public slots:
+    void updateChart(QList<double> values, double max, double min);
+
 signals:
     void goBack();
 
 private:
     QPushButton *backButton;
+
+    QChartView *chartHolder;
+    QLineSeries *lineSeries;
+
+    void initChart();
 };

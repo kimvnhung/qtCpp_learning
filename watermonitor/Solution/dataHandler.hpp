@@ -35,7 +35,7 @@ signals:
     void complianceDashboardDataReady(int trueCount, int falseCount);
 
     void handlingPOPData(int percent);
-    void POPDataReady(QMap<QString, int> frequency);
+    void POPDataReady(QList<double> values, double max, double min);
 
     void handlingFluorinatedCompoundsData(int percent);
     void fluorinatedCompoundsDataReady(QMap<QString, int> frequency);

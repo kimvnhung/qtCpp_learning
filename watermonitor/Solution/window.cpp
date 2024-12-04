@@ -54,11 +54,14 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   msgBox = new QDialog(this);
 
   page1 = new POPpage(this);
+  connect(dataHandler, &DataHandler::POPDataReady, page1, &POPpage::updateChart);
+
   page2 = new PollutantOverviewPage(this);
   connect(dataHandler, &DataHandler::pollutantOverviewDataReady, page2, &PollutantOverviewPage::updateChart);
 
   page3 = new ComplianceDashboardPage(this);
   connect(dataHandler, &DataHandler::complianceDashboardDataReady, page3, &ComplianceDashboardPage::updateChart);
+
   page4 = new FluorinatedCompoundsPage(this);
   page5 = new EnvironmentalLitterIndicatorsPage(this);
   page6 = new RawDataPage(this);
