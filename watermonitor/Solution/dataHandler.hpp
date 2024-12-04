@@ -32,7 +32,7 @@ signals:
     void pollutantOverviewDataReady(QStringList materials, QList<int> counts, QList<double> avgs, int maxCount, double maxAvg);
 
     void handlingComplianceDashboardData(int percent);
-    void complianceDashboardDataReady(QMap<QString, int> frequency);
+    void complianceDashboardDataReady(int trueCount, int falseCount);
 
     void handlingPOPData(int percent);
     void POPDataReady(QMap<QString, int> frequency);

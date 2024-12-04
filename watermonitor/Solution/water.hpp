@@ -9,7 +9,7 @@
 class Water
 {
 public:
-  Water(const std::string &, const std::string &, const std::string &, const std::string &, double, const std::string &, const std::string &);
+  Water(const std::string &, const std::string &, const std::string &, const std::string &, double, const std::string &, const std::string &, bool);
   std::string getID() const { return ID; }
   std::string getLocation() const { return location; }
   std::string getTime() const { return time; }
@@ -26,6 +26,8 @@ public:
     longitude = lon;
   }
 
+  bool isComplianceSample() const { return m_isComplianceSample; }
+
 private:
   std::string ID;
   std::string location;
@@ -37,4 +39,5 @@ private:
   std::string type;
   double longitude;
   double latitude;
+  bool m_isComplianceSample;
 };

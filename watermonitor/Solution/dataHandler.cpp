@@ -153,17 +153,21 @@ void DataHandler::takePollutantOverviewData()
 
 void DataHandler::takeComplianceDashboardData()
 {
-    QMap<QString, int> frequency; // <location, frequency>
+    int trueCount = 0;
+    int falseCount = 0;
 
     emit handlingComplianceDashboardData(SHOW_PROGESS_VALUE);
 
     for (const auto &water : m_data)
     {
-        frequency[QString::fromStdString(water.getLocation())] += 1;
+        if(water.isComplianceSample())
+            trueCount++;
+        else
+            falseCount++;
     }
 
     emit handlingComplianceDashboardData(99);
-    emit complianceDashboardDataReady(frequency);
+    emit complianceDashboardDataReady(trueCount,falseCount);
 }
 
 void DataHandler::takePOPData()
@@ -248,6 +252,7 @@ bool DataHandler::loading()
             row["result"].get<double>(),
             row["determinand.unit.label"].get<std::string>(),
             row["sample.sampledMaterialType.label"].get<std::string>(),
+            QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"
         };
 
         m_data.push_back(water);

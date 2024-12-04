@@ -58,6 +58,7 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   connect(dataHandler, &DataHandler::pollutantOverviewDataReady, page2, &PollutantOverviewPage::updateChart);
 
   page3 = new ComplianceDashboardPage(this);
+  connect(dataHandler, &DataHandler::complianceDashboardDataReady, page3, &ComplianceDashboardPage::updateChart);
   page4 = new FluorinatedCompoundsPage(this);
   page5 = new EnvironmentalLitterIndicatorsPage(this);
   page6 = new RawDataPage(this);

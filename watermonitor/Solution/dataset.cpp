@@ -83,6 +83,7 @@ void WaterDataset::loadData(const std::string &filename)
             row["result"].get<double>(),
             row["determinand.unit.label"].get<std::string>(),
             row["sample.sampledMaterialType.label"].get<std::string>(),
+            QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"
         };
 
         data.push_back(water);
