@@ -41,6 +41,9 @@ public:
     QWidget *getFiltersFrame();
     void changeToHorizontalLayout();
 
+signals:
+    void filterChanged(const QString &filterName);
+
 private slots:
     void handleButtonClick(QAbstractButton *button);
 

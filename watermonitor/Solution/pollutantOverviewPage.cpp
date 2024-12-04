@@ -44,51 +44,61 @@ PollutantOverviewPage::PollutantOverviewPage(QWidget *parent)
     mainLayout->addWidget(backButton, 10, 0, 1, -1);           // Back button
 }
 
+QWidget* PollutantOverviewPage::getChart() const
+{
+    return chartHolder;
+}
+
 void PollutantOverviewPage::initChart()
 {
-    // Data setup
-    QStringList names = {"Alice", "Bob", "Charlie"};
-    QList<int> counts = {10, 15, 7};
-    QList<double> averages = {3.5, 4.2, 2.8};
+    if(chartHolder)
+        static_cast<QGridLayout*>(layout())->addWidget(chartHolder, 2, 0, 1, -1);   // Compliance Indicator
+    else
+    {
+        // Data setup
+        QStringList names = {"Empty", "..."};
+        QList<int> counts = {10, 15};
+        QList<double> averages = {3.5, 4.2};
 
-    // Create series
-    QBarSet *countSet = new QBarSet("Count");
-    QBarSet *avgSet = new QBarSet("Average");
+        // Create series
+        QBarSet *countSet = new QBarSet("Count");
+        QBarSet *avgSet = new QBarSet("Average");
 
-    for (int i = 0; i < names.size(); ++i) {
-        *countSet << counts[i];
-        *avgSet << averages[i];
+        for (int i = 0; i < names.size(); ++i) {
+            *countSet << counts[i];
+            *avgSet << averages[i];
+        }
+
+        QBarSeries *series = new QBarSeries();
+        series->append(countSet);
+        series->append(avgSet);
+
+        // Create chart
+        QChart *chart = new QChart();
+        chart->addSeries(series);
+        chart->setTitle("Pollutant Overview");
+        chart->setAnimationOptions(QChart::SeriesAnimations);
+
+        // Customize X-axis
+        QBarCategoryAxis *axisX = new QBarCategoryAxis();
+        axisX->append(names);
+        chart->addAxis(axisX, Qt::AlignBottom);
+        series->attachAxis(axisX);
+
+        // Customize Y-axis
+        QValueAxis *axisY = new QValueAxis();
+        axisY->setRange(0, 20); // Adjust range as needed
+        chart->addAxis(axisY, Qt::AlignLeft);
+        series->attachAxis(axisY);
+
+        // Customize legend
+        chart->legend()->setVisible(true);
+        chart->legend()->setAlignment(Qt::AlignBottom);
+
+        // Create the chart view and show it
+        chartHolder = new QChartView(chart);
+        chartHolder->setRenderHint(QPainter::Antialiasing);
     }
-
-    QBarSeries *series = new QBarSeries();
-    series->append(countSet);
-    series->append(avgSet);
-
-    // Create chart
-    QChart *chart = new QChart();
-    chart->addSeries(series);
-    chart->setTitle("Bar Chart Example");
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-
-    // Customize X-axis
-    QBarCategoryAxis *axisX = new QBarCategoryAxis();
-    axisX->append(names);
-    chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
-
-    // Customize Y-axis
-    QValueAxis *axisY = new QValueAxis();
-    axisY->setRange(0, 20); // Adjust range as needed
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-    // Customize legend
-    chart->legend()->setVisible(true);
-    chart->legend()->setAlignment(Qt::AlignBottom);
-
-    // Create the chart view and show it
-    chartHolder = new QChartView(chart);
-    chartHolder->setRenderHint(QPainter::Antialiasing);
 }
 
 void PollutantOverviewPage::updateChart(QStringList materials, QList<int> counts, QList<double> avgs, int maxCount, double maxAvg)

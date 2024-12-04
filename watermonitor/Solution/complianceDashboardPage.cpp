@@ -26,40 +26,53 @@ ComplianceDashboardPage::ComplianceDashboardPage(QWidget *parent)
     // Add widgets to layout (widget name, row, column, row span, column span)
     mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
     mainLayout->addWidget(createNavigationBar(), 1, 0, 1, -1);
+
     if(chartHolder)
-        mainLayout->addWidget(chartHolder);
+        mainLayout->addWidget(chartHolder,2,0,1,-1);
+    else
+        mainLayout->addWidget(createFrame(), 2, 0, 1,-1);
     mainLayout->addWidget(backButton, 10, 0, 1, -1);
+}
+
+QWidget* ComplianceDashboardPage::getChart() const
+{
+    return chartHolder;
 }
 
 void ComplianceDashboardPage::initChart()
 {
     LOG();
 
-    // Create pie series
-    pieSeries = new QPieSeries();
-    pieSeries->append("TRUE", 0);
-    pieSeries->append("FALSE", 0);
+    if(chartHolder)
+        static_cast<QGridLayout*>(layout())->addWidget(chartHolder,2,0,1,-1);
+    else {
+        // Create pie series
+        pieSeries = new QPieSeries();
+        pieSeries->append("TRUE", 0);
+        pieSeries->append("FALSE", 0);
 
-    // Customize slices
-    QPieSlice *trueSlice = pieSeries->slices().at(0);
-    trueSlice->setLabel("True: " + QString::number(0));
-    trueSlice->setBrush(Qt::green);
-    trueSlice->setExploded(); // Optional: highlight the slice
+        // Customize slices
+        QPieSlice *trueSlice = pieSeries->slices().at(0);
+        trueSlice->setLabel("True: " + QString::number(0));
+        trueSlice->setBrush(Qt::green);
+        trueSlice->setExploded(); // Optional: highlight the slice
 
-    QPieSlice *falseSlice = pieSeries->slices().at(1);
-    falseSlice->setLabel("False: " + QString::number(0));
-    falseSlice->setBrush(Qt::red);
+        QPieSlice *falseSlice = pieSeries->slices().at(1);
+        falseSlice->setLabel("False: " + QString::number(0));
+        falseSlice->setBrush(Qt::red);
 
-    // Create chart
-    QChart *chart = new QChart();
-    chart->addSeries(pieSeries);
-    chart->setTitle("Compliance Status (e.g., Compliant vs. Non-compliant)");
-    chart->legend()->setVisible(true);
-    chart->legend()->setAlignment(Qt::AlignBottom);
+        // Create chart
+        QChart *chart = new QChart();
+        chart->addSeries(pieSeries);
+        chart->setTitle("Compliance Status (e.g., Compliant vs. Non-compliant)");
+        chart->legend()->setVisible(true);
+        chart->legend()->setAlignment(Qt::AlignBottom);
 
-    // Display chart in a view
-    chartHolder = new QChartView(chart);
-    chartHolder->setRenderHint(QPainter::Antialiasing);
+        // Display chart in a view
+        chartHolder = new QChartView(chart);
+        chartHolder->setRenderHint(QPainter::Antialiasing);
+        chartHolder->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    }
 }
 
 void ComplianceDashboardPage::updateChart(int trueCount, int falseCount)

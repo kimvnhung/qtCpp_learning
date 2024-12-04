@@ -13,9 +13,27 @@ class DashboardPage : public QWidget
   Q_OBJECT
 
 public:
-  DashboardPage(QWidget *parent = nullptr);
-  QWidget *createCard(const QString &title, QWidget *parent, std::function<void()> onClickCallback);
+  DashboardPage(QWidget *parent = nullptr
+                  , QWidget *pollutantsOverviewChart = nullptr
+                  , QWidget *complianceDashboardChart = nullptr
+                 , QWidget *fluorinatedCompoundsChart = nullptr
+                  , QWidget *environmentalLitterIndicatorsChart = nullptr
+                  , QWidget *popChart = nullptr
+                  , QWidget *geographicalHotspotsChart = nullptr);
+  QWidget *createCard(const QString &title,QWidget* cardWidget, QWidget *parent, std::function<void()> onClickCallback);
 
+  enum FilterType {
+      PAST_30_DAYS,
+      PAST_3_MONTHS,
+      PAST_6_MONTHS,
+      YEAR_TILL_DATE,
+      PAST_YEAR,
+      ALL_TIME
+  };
+
+  FilterType currentFilter() const;
+
+  void reloadCharts();
   public slots:
   void updateStatus(const QString &message);
 signals:
@@ -29,4 +47,16 @@ signals:
   void loadCSV();
 private:
   QLabel *statusLabel;
+
+    QGridLayout *cardLayout = nullptr;
+
+  QWidget *pollutantsOverviewChart;
+  QWidget *complianceDashboardChart;
+  QWidget *fluorinatedCompoundsChart;
+  QWidget *environmentalLitterIndicatorsChart;
+  QWidget *popChart;
+  QWidget *geographicalHotspotsChart;
+
+  FilterType curFilter = FilterType::ALL_TIME;
+
 };

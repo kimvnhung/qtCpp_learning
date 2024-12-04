@@ -25,79 +25,92 @@ GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent, DataHandler 
     QWidget *titlePanel = createHeading("Geographical Hotspots Page", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    placeholder = new QWidget(this);
+    initChart();
 
     backButton = new QPushButton("Back to Dashboard", this);
     connect(backButton, &QPushButton::clicked, this, &GeographicalHotspotsPage::goBack);
 
     mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
     mainLayout->addWidget(createNavigationBar(), 1, 0, 1, -1);
-    mainLayout->addWidget(placeholder);
+    if(placeholder)
+        mainLayout->addWidget(placeholder);
+    else
+        mainLayout->addWidget(createFrame());
     mainLayout->addWidget(backButton, 10, 0, 1, -1);
     setLayout(mainLayout);
-    initHeatMap();
+    initChart();
 }
 
-void GeographicalHotspotsPage::initHeatMap()
+QWidget* GeographicalHotspotsPage::getChart() const
+{
+    return placeholder;
+}
+
+void GeographicalHotspotsPage::initChart()
 {
     LOG();
-    QStringList months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    QStringList people = {};
-    // Create the heat map
-    heatMap = new QTableWidget(this);
-    heatMap->setRowCount(people.size());
-    heatMap->setColumnCount(months.size());
+    if(placeholder)
+    {
+        static_cast<QGridLayout*>(layout())->addWidget(placeholder,2,0);
+    }
+    else
+    {
+        QStringList months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        QStringList people = {};
+        // Create the heat map
+        heatMap = new QTableWidget(this);
+        heatMap->setRowCount(people.size());
+        heatMap->setColumnCount(months.size());
 
-    // Set the row and column headers (for months and people)
-    heatMap->setHorizontalHeaderLabels(months);
-    // heatMap->setVerticalHeaderLabels(people);
+        // Set the row and column headers (for months and people)
+        heatMap->setHorizontalHeaderLabels(months);
+        // heatMap->setVerticalHeaderLabels(people);
 
-    // Set the cell values and color each cell based on the frequency
-    // for (int row = 0; row < people.size(); ++row) {
-    //     for (int col = 0; col < months.size(); ++col) {
-    //         int value = rand() % 15; // Random value for demonstration
+        // Set the cell values and color each cell based on the frequency
+        // for (int row = 0; row < people.size(); ++row) {
+        //     for (int col = 0; col < months.size(); ++col) {
+        //         int value = rand() % 15; // Random value for demonstration
 
-    //         // Create a table item and set the frequency value as text
-    //         QTableWidgetItem* item = new QTableWidgetItem(QString::number(value));
+        //         // Create a table item and set the frequency value as text
+        //         QTableWidgetItem* item = new QTableWidgetItem(QString::number(value));
 
-    //         heatMap->setItem(row, col, item);
+        //         heatMap->setItem(row, col, item);
 
-    //         // Determine the color based on the value (heat map colorization)
-    //         QColor color;
-    //         if (value <= 5) {
-    //             color = QColor(255, 0, 0); // Red for values 0-5
-    //         } else if (value <= 10) {
-    //             color = QColor(0, 255, 0); // Green for values 5-10
-    //         } else {
-    //             color = QColor(0, 0, 255); // Blue for values > 10
-    //         }
+        //         // Determine the color based on the value (heat map colorization)
+        //         QColor color;
+        //         if (value <= 5) {
+        //             color = QColor(255, 0, 0); // Red for values 0-5
+        //         } else if (value <= 10) {
+        //             color = QColor(0, 255, 0); // Green for values 5-10
+        //         } else {
+        //             color = QColor(0, 0, 255); // Blue for values > 10
+        //         }
 
-    //         // Apply the color to the cell
-    //         item->setBackground(QBrush(color));
-    //     }
-    // }
+        //         // Apply the color to the cell
+        //         item->setBackground(QBrush(color));
+        //     }
+        // }
 
-    // Resize the columns and rows to fit the content
-    // heatMap->resizeColumnsToContents();
-    // heatMap->resizeRowsToContents();
-    QVBoxLayout *grid = new QVBoxLayout(placeholder);
-    grid->addWidget(heatMap);
-    placeholder->setLayout(grid);
+        // Resize the columns and rows to fit the content
+        // heatMap->resizeColumnsToContents();
+        // heatMap->resizeRowsToContents();
+        QGridLayout *grid = new QGridLayout();
+        grid->addWidget(heatMap);
 
-    // Set size policy to expand and fit
-    heatMap->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        // Set size policy to expand and fit
+        heatMap->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // Remove scrollbars
-    // heatMap->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    heatMap->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        // Remove scrollbars
+        // heatMap->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        heatMap->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // Make rows and columns stretch to fill the available space
-    heatMap->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    heatMap->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    // Remove row and column spacing
-    heatMap->setShowGrid(false); // Remove grid lines
-    // Set the table background to white
-    heatMap->setStyleSheet(R"(
+        // Make rows and columns stretch to fill the available space
+        heatMap->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        heatMap->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        // Remove row and column spacing
+        heatMap->setShowGrid(false); // Remove grid lines
+        // Set the table background to white
+        heatMap->setStyleSheet(R"(
     QTableWidget::item
     {
         border: 0px solid;
@@ -108,11 +121,14 @@ void GeographicalHotspotsPage::initHeatMap()
     }
 )");
 
-    // set for cant edit
-    heatMap->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    // set for unclicable
-    heatMap->setSelectionMode(QAbstractItemView::NoSelection);
+        // set for cant edit
+        heatMap->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        // set for unclicable
+        heatMap->setSelectionMode(QAbstractItemView::NoSelection);
 
+        placeholder = new QWidget(this);
+        placeholder->setLayout(grid);
+    }
 
 }
 

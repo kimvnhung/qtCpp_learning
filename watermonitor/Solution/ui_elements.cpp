@@ -112,7 +112,8 @@ void CreateFilters::changeToHorizontalLayout()
 
 void CreateFilters::handleButtonClick(QAbstractButton *button)
 {
-    filtersFrame->layout()->addWidget(createHeading(button->text(), TITLE_SIZE));
+    // filtersFrame->layout()->addWidget(createHeading(button->text(), TITLE_SIZE));
+    emit filterChanged(button->text());
 }
 
 QWidget *CreateFilters::getFiltersFrame()

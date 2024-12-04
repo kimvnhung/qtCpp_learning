@@ -115,6 +115,7 @@ void DataHandler::triggerEnvironmentalLitterIndicators()
 
 void DataHandler::takePollutantOverviewData()
 {
+    LOG();
     QStringList materials;
     QList<int> counts;
     QList<double> avgs;
@@ -263,6 +264,27 @@ bool DataHandler::loading()
 
     int count = 0;
 
+    QDateTime compareDate = QDateTime::currentDateTime();
+
+    switch (m_filterType)
+    {
+    case DashboardPage::PAST_30_DAYS:
+        compareDate = QDateTime::currentDateTime().addDays(-30);
+        break;
+    case DashboardPage::PAST_3_MONTHS:
+        compareDate = QDateTime::currentDateTime().addMonths(-3);
+        break;
+    case DashboardPage::PAST_6_MONTHS:
+        compareDate = QDateTime::currentDateTime().addMonths(-6);
+        break;
+    case DashboardPage::PAST_YEAR:
+    case DashboardPage::YEAR_TILL_DATE:
+        compareDate = QDateTime::currentDateTime().addYears(-1);
+        break;
+    default:
+        break;
+    }
+
     for (const auto &row : reader)
     {
         Water water{
@@ -276,6 +298,23 @@ bool DataHandler::loading()
             QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"
         };
 
+        // do filter
+        if(m_filterType == DashboardPage::PAST_YEAR)
+        {
+            if(water.getDateTime().date().year() != compareDate.date().year())
+            {
+                LOGD(QString("Ignore date %1").arg(water.getDateTime().toString()));
+                continue;
+            }
+        }
+        else if(m_filterType != DashboardPage::ALL_TIME)
+        {
+            if(water.getDateTime() < compareDate)
+            {
+                LOGD(QString("Ignore date %1").arg(water.getDateTime().toString()));
+                continue;
+            }
+        }
         m_data.push_back(water);
         emit handling((int)(count++*100/rowCount));
         if(!m_isRunning)
@@ -285,13 +324,16 @@ bool DataHandler::loading()
     emit handling(HIDE_PROGRESS_VALUE);
     emit dataReady();
 
+    file.close();
+
     return !m_data.empty();
 }
 
-void DataHandler::loadData(const std::string &filename)
+void DataHandler::loadData(const std::string &filename, DashboardPage::FilterType filterType)
 {
     LOG();
     m_filename = QString::fromStdString(filename);
+    m_filterType = filterType;
     m_isLoaded = false;
 }
 

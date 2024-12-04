@@ -19,6 +19,7 @@ class GeographicalHotspotsPage : public QWidget
 public:
     explicit GeographicalHotspotsPage(QWidget *parent = nullptr, DataHandler *dataHandler = nullptr);
 
+    QWidget *getChart() const;
 signals:
     void goBack();
     void handling(int percent, QString title, QString message);
@@ -27,6 +28,7 @@ public slots:
     void updateHeatMap(QStringList locations, QMap<QString,QList<int>> frequency, int min, int max);
     void onHandling(int percent);
 
+    void initChart();
 protected:
     // Overridden resizeEvent to catch size changes
     void resizeEvent(QResizeEvent* event) override;
@@ -34,11 +36,11 @@ protected:
 private:
     QPushButton *backButton;
     QChartView *chartView;
-    QWidget* placeholder;
+    QWidget* placeholder = nullptr;
 
     DataHandler *dataHandler;
 
     QTableWidget *heatMap;
-    void initHeatMap();
+
 
 };

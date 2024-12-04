@@ -9,6 +9,8 @@
 #include "water.hpp"
 #include "dataset.hpp"
 
+#include "dashboardpage.hpp"
+
 class DataHandler : public QThread
 {
     Q_OBJECT
@@ -16,7 +18,7 @@ public:
     DataHandler(QObject *parent = nullptr);
     ~DataHandler();
 
-    void loadData(const std::string &filename);
+    void loadData(const std::string &filename, DashboardPage::FilterType filterType = DashboardPage::FilterType::ALL_TIME);
 
     WaterDataset getDataset() const;
     std::vector<Water> getData() const { return m_data; }
@@ -59,6 +61,7 @@ protected:
 private:
     std::vector<Water> m_data;
     QString m_filename;
+    DashboardPage::FilterType m_filterType;
     bool m_isRunning;
 
     bool m_isLoaded;

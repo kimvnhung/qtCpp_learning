@@ -8,10 +8,12 @@ class interactiveCard : public QFrame
     Q_OBJECT
 
 public:
-    explicit interactiveCard(const QString &title, QWidget *parent = nullptr);
+    explicit interactiveCard(const QString &title, QWidget* cardWidget = nullptr, QWidget *parent = nullptr);
     ~interactiveCard() override = default;
     void setOnClick(std::function<void()> callback);
 
+    void reloadCardWidget();
+    bool hasCardWidget() const;
 signals:
     void cardClicked(const QString &title);
 
@@ -21,6 +23,7 @@ protected:
 
 private:
     QString cardTitle;
+    QWidget *cardWidget;
     bool gestureEvent(QGestureEvent *event);
     std::function<void()> onClickCallback;
 };

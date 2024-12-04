@@ -15,16 +15,18 @@ class PollutantOverviewPage : public QWidget
 public:
     explicit PollutantOverviewPage(QWidget *parent = nullptr);
 
+    QWidget *getChart() const;
 signals:
     void goBack();
 public slots:
     void updateChart(QStringList materials, QList<int> counts, QList<double> avgs, int maxCount, double maxAvg);
 
+    void initChart();
 private:
     QPushButton *backButton;
 
     QWidget *placeholder;
-    QChartView *chartHolder;
+    QChartView* chartHolder = nullptr;
 
-    void initChart();
+
 };

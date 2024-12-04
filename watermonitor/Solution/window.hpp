@@ -56,13 +56,13 @@ private:
 
   QStackedWidget *pageStack;
   DashboardPage *dashboardPage;
-  POPpage *page1;
-  PollutantOverviewPage *page2;
-  ComplianceDashboardPage *page3;
-  FluorinatedCompoundsPage *page4;
-  EnvironmentalLitterIndicatorsPage *page5;
-  RawDataPage *page6;
-  GeographicalHotspotsPage *page7;
+  POPpage *popPage;
+  PollutantOverviewPage *pollutantOverviewPage;
+  ComplianceDashboardPage *complianceDashboardPage;
+  FluorinatedCompoundsPage *fluorinatedCompoundsPage;
+  EnvironmentalLitterIndicatorsPage *environmentalLIPage;
+  RawDataPage *rawDataPage;
+  GeographicalHotspotsPage *geographicalHotspotPage;
 
   QComboBox *significance;  // selector for quake feed significance level
   QComboBox *period;        // selector for quake feed time period

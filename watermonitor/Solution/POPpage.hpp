@@ -22,17 +22,19 @@ class POPpage : public QWidget
 public:
     explicit POPpage(QWidget *parent = nullptr);
 
+    QWidget* getChart() const;
+
 public slots:
     void updateChart(QList<double> values, double max, double min);
-
+    void initChart();
 signals:
     void goBack();
 
 private:
     QPushButton *backButton;
 
-    QChartView *chartHolder;
+    QChartView *chartHolder = nullptr;
     QLineSeries *lineSeries;
 
-    void initChart();
+
 };

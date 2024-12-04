@@ -16,17 +16,18 @@ class ComplianceDashboardPage : public QWidget
 public:
     ComplianceDashboardPage(QWidget *parent = nullptr);
 
+    QWidget* getChart() const;
 public slots:
     void updateChart(int trueCount, int falseCount);
 
+    void initChart();
 signals:
     void goBack();
 
 private:
     QPushButton *backButton;
 
-    QChartView *chartHolder;
+    QChartView *chartHolder = nullptr;
     QPieSeries *pieSeries;
 
-    void initChart();
 };

@@ -20,14 +20,12 @@ static const int MIN_WIDTH = 620;
 WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), pageStack(new QStackedWidget(this)), statsDialog(nullptr)
 {
 
-  dashboardPage = new DashboardPage(this);
+
   dataHandler = new DataHandler(this);
   connect(dataHandler, &DataHandler::handling, this, &WaterQualityWindow::onHandleData);
   connect(dataHandler, &DataHandler::dataReady, [this]() {
       dashboardPage->updateStatus("Data loaded successfully.");
   });
-
-  dataHandler->start();
 
   progressDialog = new QProgressDialog(this);
   progressDialog->setCancelButton(nullptr);
@@ -53,32 +51,40 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
 
   msgBox = new QDialog(this);
 
-  page1 = new POPpage(this);
-  connect(dataHandler, &DataHandler::POPDataReady, page1, &POPpage::updateChart);
+  popPage = new POPpage(this);
+  connect(dataHandler, &DataHandler::POPDataReady, popPage, &POPpage::updateChart);
 
-  page2 = new PollutantOverviewPage(this);
-  connect(dataHandler, &DataHandler::pollutantOverviewDataReady, page2, &PollutantOverviewPage::updateChart);
+  pollutantOverviewPage = new PollutantOverviewPage(this);
+  connect(dataHandler, &DataHandler::pollutantOverviewDataReady, pollutantOverviewPage, &PollutantOverviewPage::updateChart);
 
-  page3 = new ComplianceDashboardPage(this);
-  connect(dataHandler, &DataHandler::complianceDashboardDataReady, page3, &ComplianceDashboardPage::updateChart);
+  complianceDashboardPage = new ComplianceDashboardPage(this);
+  connect(dataHandler, &DataHandler::complianceDashboardDataReady, complianceDashboardPage, &ComplianceDashboardPage::updateChart);
 
-  page4 = new FluorinatedCompoundsPage(this);
-  page5 = new EnvironmentalLitterIndicatorsPage(this);
-  page6 = new RawDataPage(this);
-  QGridLayout *layout = page6->mainLayout;
+  fluorinatedCompoundsPage = new FluorinatedCompoundsPage(this);
+  environmentalLIPage = new EnvironmentalLitterIndicatorsPage(this);
+  rawDataPage = new RawDataPage(this);
+  QGridLayout *layout = rawDataPage->mainLayout;
   layout->addWidget(createDataTable(), 2, 1, 8, 6);
-  page6->setLayout(layout);
-  page7 = new GeographicalHotspotsPage(this,dataHandler);
-  connect(page7, &GeographicalHotspotsPage::handling, this, &WaterQualityWindow::updateProgress);
+  rawDataPage->setLayout(layout);
+  geographicalHotspotPage = new GeographicalHotspotsPage(this,dataHandler);
+  connect(geographicalHotspotPage, &GeographicalHotspotsPage::handling, this, &WaterQualityWindow::updateProgress);
+
+    dashboardPage = new DashboardPage(this
+                                    ,pollutantOverviewPage->getChart()
+                                    ,complianceDashboardPage->getChart()
+                                    , fluorinatedCompoundsPage->getChart()
+                                    , environmentalLIPage->getChart()
+                                    ,popPage->getChart()
+                                    ,geographicalHotspotPage->getChart());
 
   pageStack->addWidget(dashboardPage); // Index 0
-  pageStack->addWidget(page1);         // Index 1
-  pageStack->addWidget(page2);         // Index 2
-  pageStack->addWidget(page3);         // Index 3
-  pageStack->addWidget(page4);         // Index 4
-  pageStack->addWidget(page5);         // Index 5
-  pageStack->addWidget(page6);         // Index 6
-  pageStack->addWidget(page7);         // Index 7
+  pageStack->addWidget(popPage);         // Index 1
+  pageStack->addWidget(pollutantOverviewPage);         // Index 2
+  pageStack->addWidget(complianceDashboardPage);         // Index 3
+  pageStack->addWidget(fluorinatedCompoundsPage);         // Index 4
+  pageStack->addWidget(environmentalLIPage);         // Index 5
+  pageStack->addWidget(rawDataPage);         // Index 6
+  pageStack->addWidget(geographicalHotspotPage);         // Index 7
 
   connect(dashboardPage, &DashboardPage::goToPOPpage, this, &WaterQualityWindow::navigateToPOPpage);
   connect(dashboardPage, &DashboardPage::goToPollutantOverviewPage, this, &WaterQualityWindow::navigateToPollutantOverviewPage);
@@ -95,16 +101,24 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   connect(dashboardPage, &DashboardPage::goToFluorinatedCompoundsPage, dataHandler, &DataHandler::triggerFluorinatedCompounds);
   connect(dashboardPage, &DashboardPage::goToEnvironmentalLitterIndicatorsPage, dataHandler, &DataHandler::triggerEnvironmentalLitterIndicators);
 
-  connect(dashboardPage, &DashboardPage::loadCSV, this, &WaterQualityWindow::openCSV);
-  connect(page6, &RawDataPage::loadCSV, this, &WaterQualityWindow::openCSV);
+  connect(dashboardPage, &DashboardPage::goToGeographicalHotspotsPage, geographicalHotspotPage, &GeographicalHotspotsPage::initChart);
+  connect(dashboardPage, &DashboardPage::goToComplianceDashboardPage, complianceDashboardPage, &ComplianceDashboardPage::initChart);
+  connect(dashboardPage, &DashboardPage::goToPollutantOverviewPage, pollutantOverviewPage, &PollutantOverviewPage::initChart);
+  connect(dashboardPage, &DashboardPage::goToPOPpage, popPage, &POPpage::initChart);
+  connect(dashboardPage, &DashboardPage::goToFluorinatedCompoundsPage, fluorinatedCompoundsPage, &FluorinatedCompoundsPage::initChart);
+  connect(dashboardPage, &DashboardPage::goToEnvironmentalLitterIndicatorsPage, environmentalLIPage, &EnvironmentalLitterIndicatorsPage::initChart);
 
-  connect(page1, &POPpage::goBack, this, &WaterQualityWindow::navigateToDashboard);
-  connect(page2, &PollutantOverviewPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
-  connect(page3, &ComplianceDashboardPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
-  connect(page4, &FluorinatedCompoundsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
-  connect(page5, &EnvironmentalLitterIndicatorsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
-  connect(page6, &RawDataPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
-  connect(page7, &GeographicalHotspotsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+
+  connect(dashboardPage, &DashboardPage::loadCSV, this, &WaterQualityWindow::openCSV);
+  connect(rawDataPage, &RawDataPage::loadCSV, this, &WaterQualityWindow::openCSV);
+
+  connect(popPage, &POPpage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+  connect(pollutantOverviewPage, &PollutantOverviewPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+  connect(complianceDashboardPage, &ComplianceDashboardPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+  connect(fluorinatedCompoundsPage, &FluorinatedCompoundsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+  connect(environmentalLIPage, &EnvironmentalLitterIndicatorsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+  connect(rawDataPage, &RawDataPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
+  connect(geographicalHotspotPage, &GeographicalHotspotsPage::goBack, this, &WaterQualityWindow::navigateToDashboard);
 
   setCentralWidget(pageStack);
 
@@ -114,10 +128,12 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   addHelpMenu();
 
   setMinimumWidth(MIN_WIDTH);
-  resize(800, 600);
+  resize(1200, 800);
   setWindowTitle("Water Quality Monitor Tool");
 
     init();
+
+      dataHandler->start();
 }
 
 WaterQualityWindow::~WaterQualityWindow()
@@ -138,6 +154,7 @@ void WaterQualityWindow::init()
 
 void WaterQualityWindow::navigateToDashboard()
 {
+    dashboardPage->reloadCharts();
   pageStack->setCurrentIndex(0);
 }
 
@@ -289,7 +306,7 @@ void WaterQualityWindow::openCSV()
   try
   {
     updateProgress(SHOW_PROGESS_VALUE);
-      dataHandler->loadData(dataLocation.toStdString());
+      dataHandler->loadData(dataLocation.toStdString(),dashboardPage->currentFilter());
   }
   catch (const std::exception &error)
   {
