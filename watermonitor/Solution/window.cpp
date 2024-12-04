@@ -81,6 +81,8 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   connect(dashboardPage, &DashboardPage::goToRawDataPage, this, &WaterQualityWindow::navigateToRawDataPage);
   connect(dashboardPage, &DashboardPage::goToGeographicalHotspotsPage, this, &WaterQualityWindow::navigateToGeographicalHotspotsPage);
 
+  connect(dashboardPage, &DashboardPage::goToGeographicalHotspotsPage, dataHandler, &DataHandler::triggerGeographicalHotspots);
+
   connect(dashboardPage, &DashboardPage::loadCSV, this, &WaterQualityWindow::openCSV);
   connect(page6, &RawDataPage::loadCSV, this, &WaterQualityWindow::openCSV);
 
@@ -274,8 +276,8 @@ void WaterQualityWindow::openCSV()
 
   try
   {
-      updateProgress(SHOW_PROGESS_VALUE);
-    model->updateFromFile(dataLocation);
+    updateProgress(SHOW_PROGESS_VALUE);
+      dataHandler->loadData(dataLocation.toStdString());
   }
   catch (const std::exception &error)
   {

@@ -24,10 +24,13 @@ void DataHandler::run()
             continue;
         }
 
-        if(loading())
+        if(!m_isLoaded)
+            m_isLoaded = loading();
+
+        if(m_isLoaded && m_isGeographicalHotspotsTriggered)
         {
             takeGeographicalData();
-            break;
+            m_isGeographicalHotspotsTriggered = false;
         }
     }
     stop();
@@ -37,6 +40,12 @@ void DataHandler::stop()
 {
     LOG();
     m_isRunning = false;
+}
+
+void DataHandler::triggerGeographicalHotspots()
+{
+    LOG();
+    m_isGeographicalHotspotsTriggered = true;
 }
 
 WaterDataset DataHandler::getDataset() const
@@ -52,6 +61,12 @@ bool DataHandler::loading()
 
     while (std::getline(file, line)) {
         ++rowCount;
+    }
+
+    if(rowCount == 0)
+    {
+        emit handling(HIDE_PROGRESS_VALUE);
+        return false;
     }
 
     csv::CSVReader reader(m_filename.toStdString());
@@ -79,13 +94,15 @@ bool DataHandler::loading()
 
     emit handling(HIDE_PROGRESS_VALUE);
     emit dataReady();
-    return true;
+
+    return !m_data.empty();
 }
 
 void DataHandler::loadData(const std::string &filename)
 {
     LOG();
     m_filename = QString::fromStdString(filename);
+    m_isLoaded = false;
 }
 
 void DataHandler::takeGeographicalData()

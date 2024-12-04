@@ -170,21 +170,36 @@ void GeographicalHotspotsPage::updateHeatMap(QStringList locations, QMap<QString
             int r = 0;
             int g = 0;
             int b = 0;
-            if (value <= (max - min) / 3) {
-                // 0 is white, (max-min)/3 is green
-                r = 255 * (1 - value * 1.0f / ((max - min) / 3));
+
+            double delta = (max - min) * 0.3;
+            double whiteGreenLimit = (max - min) * 0.3 + min;
+            double greenYellowLimit = (max - min) * 0.6 + min;
+            double yellowRedLimit = (max - min) * 0.9 + min;
+
+            if (value <= whiteGreenLimit) {
+                // White
+                double percentage = value? value / whiteGreenLimit : 1;
+                r = 255 * (1-percentage);
                 g = 255;
-                b = 255;
-            } else if (value <= 2 * (max - min) / 3) {
-                // (max-min)/3 is green, 2*(max-min)/3 is yellow
-                r = 255 * (value * 1.0f / ((max - min) / 3) - 1);
+                b = 255 * (1-percentage);
+            } else if (value <= greenYellowLimit) {
+                // Green
+                double newValue = value - whiteGreenLimit;
+                double percentage = newValue > 0? newValue / delta : 1;
+                r = 255 * percentage;
                 g = 255;
-            } else {
-                // 2*(max-min)/3 is yellow, max-min is red
+            } else if (value <= yellowRedLimit) {
+                // Yellow
+                double newValue = value - greenYellowLimit;
+                double percentage = newValue > 0? newValue / delta : 1;
                 r = 255;
-                g = 255 * (value * 1.0f / ((max - min) / 3) - 2);
+                g = 255 * (1 - percentage);
+            } else {
+                // Red
+                r = 255;
             }
 
+            LOGD(QString("value = %1; r,g,b = %2,%3,%4").arg(value).arg(r).arg(g).arg(b));
             color = QColor(r, g, b);
 
             // Apply the color to the cell

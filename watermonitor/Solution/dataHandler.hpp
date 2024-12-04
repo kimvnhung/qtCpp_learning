@@ -28,6 +28,8 @@ signals:
     void geographicalDataReady(QStringList locations, QMap<QString,QList<int>> frequency, int min, int max);
 public slots:
     void stop();
+
+    void triggerGeographicalHotspots();
 protected:
     void run() override;
 
@@ -35,6 +37,9 @@ private:
     std::vector<Water> m_data;
     QString m_filename;
     bool m_isRunning;
+
+    bool m_isLoaded;
+    bool m_isGeographicalHotspotsTriggered;
 
     bool loading();
 
