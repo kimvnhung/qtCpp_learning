@@ -27,11 +27,46 @@ void DataHandler::run()
         if(!m_isLoaded)
             m_isLoaded = loading();
 
-        if(m_isLoaded && m_isGeographicalHotspotsTriggered)
+        if(m_isLoaded)
         {
-            takeGeographicalData();
-            m_isGeographicalHotspotsTriggered = false;
+            if(m_isGeographicalHotspotsTriggered)
+            {
+                takeGeographicalData();
+                m_isGeographicalHotspotsTriggered = false;
+            }
+
+            if(m_isPollutantOverviewTriggered)
+            {
+                takePollutantOverviewData();
+                m_isPollutantOverviewTriggered = false;
+            }
+
+            if(m_isComplianceDashboardTriggered)
+            {
+                takeComplianceDashboardData();
+                m_isComplianceDashboardTriggered = false;
+            }
+
+            if(m_isPOPTriggered)
+            {
+                takePOPData();
+                m_isPOPTriggered = false;
+            }
+
+            if(m_isFluorinatedCompoundsTriggered)
+            {
+                takeFluorinatedCompoundsData();
+                m_isFluorinatedCompoundsTriggered = false;
+            }
+
+            if(m_isEnvironmentalLitterIndicatorsTriggered)
+            {
+                takeEnvironmentalLitterIndicatorsData();
+                m_isEnvironmentalLitterIndicatorsTriggered = false;
+            }
         }
+
+
     }
     stop();
 }
@@ -46,6 +81,135 @@ void DataHandler::triggerGeographicalHotspots()
 {
     LOG();
     m_isGeographicalHotspotsTriggered = true;
+}
+
+void DataHandler::triggerPollutantOverview()
+{
+    LOG();
+    m_isPollutantOverviewTriggered = true;
+}
+
+void DataHandler::triggerComplianceDashboard()
+{
+    LOG();
+    m_isComplianceDashboardTriggered = true;
+}
+
+void DataHandler::triggerPOP()
+{
+    LOG();
+    m_isPOPTriggered = true;
+}
+
+void DataHandler::triggerFluorinatedCompounds()
+{
+    LOG();
+    m_isFluorinatedCompoundsTriggered = true;
+}
+
+void DataHandler::triggerEnvironmentalLitterIndicators()
+{
+    LOG();
+    m_isEnvironmentalLitterIndicatorsTriggered = true;
+}
+
+void DataHandler::takePollutantOverviewData()
+{
+    QStringList materials;
+    QList<int> counts;
+    QList<double> avgs;
+    int maxCount = 0;
+    double maxAvg = 0;
+
+    emit handlingPollutantOverviewData(SHOW_PROGESS_VALUE);
+
+    for (const auto &water : m_data)
+    {
+        if(!materials.contains(QString::fromStdString(water.getWaterType())))
+        {
+            materials.append(QString::fromStdString(water.getWaterType()));
+        }
+    }
+
+    for (const auto &material : materials)
+    {
+        int count = 0;
+        double sum = 0;
+        for (const auto &water : m_data)
+        {
+            if (material == QString::fromStdString(water.getWaterType()))
+            {
+                count += 1;
+                sum += water.getResult();
+            }
+        }
+        counts.append(count);
+        avgs.append(sum / count);
+    }
+
+    emit handlingPollutantOverviewData(99);
+    emit pollutantOverviewDataReady(materials, counts, avgs, maxCount, maxAvg);
+}
+
+void DataHandler::takeComplianceDashboardData()
+{
+    QMap<QString, int> frequency; // <location, frequency>
+
+    emit handlingComplianceDashboardData(SHOW_PROGESS_VALUE);
+
+    for (const auto &water : m_data)
+    {
+        frequency[QString::fromStdString(water.getLocation())] += 1;
+    }
+
+    emit handlingComplianceDashboardData(99);
+    emit complianceDashboardDataReady(frequency);
+}
+
+void DataHandler::takePOPData()
+{
+    QMap<QString, int> frequency; // <month, frequency>
+
+    emit handlingPOPData(SHOW_PROGESS_VALUE);
+
+    for (const auto &water : m_data)
+    {
+        QString month = water.getDateTime().toString("MMM");
+        frequency[month] += 1;
+    }
+
+    emit handlingPOPData(99);
+    emit POPDataReady(frequency);
+}
+
+void DataHandler::takeFluorinatedCompoundsData()
+{
+    QMap<QString, int> frequency; // <location, frequency>
+
+    emit handlingFluorinatedCompoundsData(SHOW_PROGESS_VALUE);
+
+    for (const auto &water : m_data)
+    {
+        frequency[QString::fromStdString(water.getLocation())] += 1;
+    }
+
+    emit handlingFluorinatedCompoundsData(99);
+    emit fluorinatedCompoundsDataReady(frequency);
+}
+
+void DataHandler::takeEnvironmentalLitterIndicatorsData()
+{
+    QMap<QString, int> frequency; // <location, frequency>
+
+    emit handlingEnvironmentalLitterIndicatorsData(SHOW_PROGESS_VALUE);
+
+    for (const auto &water : m_data)
+    {
+        frequency[QString::fromStdString(water.getLocation())] += 1;
+    }
+
+    emit handlingEnvironmentalLitterIndicatorsData(99);
+    emit environmentalLitterIndicatorsDataReady(frequency);
 }
 
 WaterDataset DataHandler::getDataset() const

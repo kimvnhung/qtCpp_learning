@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QChartView>
 #include <QWidget>
 
 class QPushButton;
@@ -16,7 +17,14 @@ public:
 
 signals:
     void goBack();
+public slots:
+    void updateChart(QStringList materials, QList<int> counts, QList<double> avgs, int maxCount, double maxAvg);
 
 private:
     QPushButton *backButton;
+
+    QWidget *placeholder;
+    QChartView *chartHolder;
+
+    void initChart();
 };

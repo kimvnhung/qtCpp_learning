@@ -26,6 +26,7 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   connect(dataHandler, &DataHandler::dataReady, [this]() {
       dashboardPage->updateStatus("Data loaded successfully.");
   });
+
   dataHandler->start();
 
   progressDialog = new QProgressDialog(this);
@@ -54,6 +55,8 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
 
   page1 = new POPpage(this);
   page2 = new PollutantOverviewPage(this);
+  connect(dataHandler, &DataHandler::pollutantOverviewDataReady, page2, &PollutantOverviewPage::updateChart);
+
   page3 = new ComplianceDashboardPage(this);
   page4 = new FluorinatedCompoundsPage(this);
   page5 = new EnvironmentalLitterIndicatorsPage(this);
@@ -82,6 +85,11 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   connect(dashboardPage, &DashboardPage::goToGeographicalHotspotsPage, this, &WaterQualityWindow::navigateToGeographicalHotspotsPage);
 
   connect(dashboardPage, &DashboardPage::goToGeographicalHotspotsPage, dataHandler, &DataHandler::triggerGeographicalHotspots);
+  connect(dashboardPage, &DashboardPage::goToComplianceDashboardPage, dataHandler, &DataHandler::triggerComplianceDashboard);
+  connect(dashboardPage, &DashboardPage::goToPollutantOverviewPage, dataHandler, &DataHandler::triggerPollutantOverview);
+  connect(dashboardPage, &DashboardPage::goToPOPpage, dataHandler, &DataHandler::triggerPOP);
+  connect(dashboardPage, &DashboardPage::goToFluorinatedCompoundsPage, dataHandler, &DataHandler::triggerFluorinatedCompounds);
+  connect(dashboardPage, &DashboardPage::goToEnvironmentalLitterIndicatorsPage, dataHandler, &DataHandler::triggerEnvironmentalLitterIndicators);
 
   connect(dashboardPage, &DashboardPage::loadCSV, this, &WaterQualityWindow::openCSV);
   connect(page6, &RawDataPage::loadCSV, this, &WaterQualityWindow::openCSV);
