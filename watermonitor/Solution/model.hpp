@@ -12,18 +12,19 @@ class WaterModel : public QAbstractTableModel
 public:
     WaterModel(QObject *parent = nullptr, DataHandler *dataHandler = nullptr);
   void updateFromFile(const QString &);
-  bool hasData() const { return dataset.size() > 0; }
+    bool hasData() const;
 
-  int rowCount(const QModelIndex &index) const { return dataset.size(); }
-  int columnCount(const QModelIndex &index) const { return 9; }
+  int rowCount(const QModelIndex &index) const;
+    int columnCount(const QModelIndex &index) const ;
   QVariant data(const QModelIndex &, int) const;
   QVariant headerData(int, Qt::Orientation, int) const;
 
-signals:
-  void loadData(const std::string &filename);
 public slots:
-    void onDataReady();
+    void updateData();
+
 private:
   WaterDataset dataset;
     DataHandler *dataHandler;
+
+  std::vector<Water> m_data;
 };

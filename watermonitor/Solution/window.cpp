@@ -134,6 +134,8 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
     init();
 
       dataHandler->start();
+
+    // Auto load data
 }
 
 WaterQualityWindow::~WaterQualityWindow()
@@ -291,6 +293,8 @@ void WaterQualityWindow::setDataLocation()
     SET_VALUE(CSV_FILE_PATH, filePath);
 
     fileInfo->setText(QString("Current file: <kbd>%1</kbd>").arg(QFileInfo(filePath).fileName()));
+    // auto load
+    openCSV();
   }
 }
 void WaterQualityWindow::openCSV()

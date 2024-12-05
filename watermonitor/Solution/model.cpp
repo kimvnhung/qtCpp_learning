@@ -7,7 +7,7 @@ WaterModel::WaterModel(QObject *parent, DataHandler *dataHandler)
     : QAbstractTableModel(parent)
     , dataHandler(dataHandler)
 {
-    connect(dataHandler, &DataHandler::dataReady, this, &WaterModel::onDataReady);
+    connect(dataHandler, &DataHandler::dataReady, this, &WaterModel::updateData);
 }
 
 void WaterModel::updateFromFile(const QString &filename)
@@ -16,12 +16,19 @@ void WaterModel::updateFromFile(const QString &filename)
     dataHandler->loadData(filename.toStdString());
 }
 
-void WaterModel::onDataReady()
+bool WaterModel::hasData() const
 {
-    LOG();
-    // beginResetModel();
-    // dataset = dataHandler.getDataset();
-    // endResetModel();
+    return !m_data.empty();
+}
+
+int WaterModel::rowCount(const QModelIndex &index) const
+{
+    return m_data.size();
+}
+
+int WaterModel::columnCount(const QModelIndex &index) const
+{
+    return 9;
 }
 
 QVariant WaterModel::data(const QModelIndex &index, int role) const
@@ -37,7 +44,7 @@ QVariant WaterModel::data(const QModelIndex &index, int role) const
   }
   else if (role == Qt::DisplayRole)
   {
-    Water q = dataset[index.row()];
+    Water q = m_data[index.row()];
     switch (index.column())
     {
     case 0:
@@ -99,4 +106,12 @@ QVariant WaterModel::headerData(int section, Qt::Orientation orientation, int ro
   default:
     return QVariant();
   }
+}
+
+void WaterModel::updateData()
+{
+  LOG();
+  beginResetModel();
+    m_data = dataHandler->getData();
+  endResetModel();
 }
