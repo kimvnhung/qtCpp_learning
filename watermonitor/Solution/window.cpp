@@ -108,6 +108,7 @@ WaterQualityWindow::WaterQualityWindow(QWidget *parent) : QMainWindow(parent), p
   connect(dashboardPage, &DashboardPage::goToFluorinatedCompoundsPage, fluorinatedCompoundsPage, &FluorinatedCompoundsPage::initChart);
   connect(dashboardPage, &DashboardPage::goToEnvironmentalLitterIndicatorsPage, environmentalLIPage, &EnvironmentalLitterIndicatorsPage::initChart);
 
+  connect(dataHandler, &DataHandler::chartDataReady, dashboardPage, &DashboardPage::reloadCharts);
 
   connect(dashboardPage, &DashboardPage::loadCSV, this, &WaterQualityWindow::openCSV);
   connect(rawDataPage, &RawDataPage::loadCSV, this, &WaterQualityWindow::openCSV);

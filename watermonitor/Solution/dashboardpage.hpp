@@ -33,9 +33,11 @@ public:
 
   FilterType currentFilter() const;
 
-  void reloadCharts();
-  public slots:
-  void updateStatus(const QString &message);
+
+public slots:
+    void updateStatus(const QString &message);
+    void reloadCharts();
+
 signals:
   void goToPOPpage();
   void goToPollutantOverviewPage();

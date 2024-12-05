@@ -25,6 +25,7 @@ public:
 
 signals:
     void dataReady();
+    void chartDataReady();
     void handling(int percent);
 
     void handlingGeographicalData(int percent);

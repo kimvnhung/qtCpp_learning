@@ -16,6 +16,7 @@ void DataHandler::run()
 {
     LOG();
     m_isRunning = true;
+    bool markedForReloadChart = false;
     while (m_isRunning)
     {
         // Do something
@@ -24,47 +25,28 @@ void DataHandler::run()
             continue;
         }
 
+
+
         if(!m_isLoaded)
+        {
             m_isLoaded = loading();
+            markedForReloadChart = true;
+        }
 
         if(m_isLoaded)
         {
-            if(m_isGeographicalHotspotsTriggered)
+            if(markedForReloadChart)
             {
                 takeGeographicalData();
-                m_isGeographicalHotspotsTriggered = false;
-            }
-
-            if(m_isPollutantOverviewTriggered)
-            {
                 takePollutantOverviewData();
-                m_isPollutantOverviewTriggered = false;
-            }
-
-            if(m_isComplianceDashboardTriggered)
-            {
                 takeComplianceDashboardData();
-                m_isComplianceDashboardTriggered = false;
-            }
-
-            if(m_isPOPTriggered)
-            {
                 takePOPData();
-                m_isPOPTriggered = false;
-            }
-
-            if(m_isFluorinatedCompoundsTriggered)
-            {
                 takeFluorinatedCompoundsData();
-                m_isFluorinatedCompoundsTriggered = false;
-            }
-
-            if(m_isEnvironmentalLitterIndicatorsTriggered)
-            {
                 takeEnvironmentalLitterIndicatorsData();
-                m_isEnvironmentalLitterIndicatorsTriggered = false;
+                markedForReloadChart = false;
             }
         }
+
 
 
     }
