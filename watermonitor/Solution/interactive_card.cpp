@@ -3,6 +3,8 @@
 #include <QLabel>
 #include <QGestureEvent>
 
+#include "common.hpp"
+
 interactiveCard::interactiveCard(const QString &title,QWidget* cardWidget , QWidget *parent)
     : QFrame(parent)
     , cardTitle(title)
@@ -40,7 +42,9 @@ void interactiveCard::setOnClick(std::function<void()> callback)
 
 void interactiveCard::reloadCardWidget()
 {
+    cardWidget->update();
     layout()->addWidget(cardWidget);
+    acceptClickEvents(cardWidget,false);
 }
 
 bool interactiveCard::hasCardWidget() const

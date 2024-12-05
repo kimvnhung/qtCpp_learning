@@ -44,7 +44,10 @@ void ComplianceDashboardPage::initChart()
     LOG();
 
     if(chartHolder)
+    {
         static_cast<QGridLayout*>(layout())->addWidget(chartHolder,2,0,1,-1);
+        acceptClickEvents(chartHolder);
+    }
     else {
         // Create pie series
         pieSeries = new QPieSeries();
@@ -70,6 +73,7 @@ void ComplianceDashboardPage::initChart()
 
         // Display chart in a view
         chartHolder = new QChartView(chart);
+        // Disable click and hover events
         chartHolder->setRenderHint(QPainter::Antialiasing);
         chartHolder->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     }

@@ -4,6 +4,7 @@
 #define COMMON_HPP
 
 #include <QSettings>
+#include <QWidget>
 
 #define QSETIINGS QSettings("watermonitor", "watermonitor")
 #define SET_VALUE(key, value) QSETIINGS.setValue(key, value)
@@ -28,5 +29,7 @@
 #define SHOW_PROGESS_VALUE 0
 #define HIDE_PROGRESS_VALUE -1
 #define MAX_PROGRESS_VALUE 100
+
+void acceptClickEvents(QWidget *widget, bool isAccept = true);
 
 #endif // COMMON_HPP

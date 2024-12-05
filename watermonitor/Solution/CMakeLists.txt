@@ -28,6 +28,7 @@ qt_add_executable(waterqualitymonitor
     ui_elements.cpp
     interactive_card.cpp
     dataHandler.cpp
+    common.cpp
 )
 
 target_link_libraries(waterqualitymonitor

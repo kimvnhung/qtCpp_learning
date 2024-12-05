@@ -54,8 +54,10 @@ void FluorinatedCompoundsPage::initChart()
     {
         // Create bar series
         QBarSet *set0 = new QBarSet("PFA's");
-        *set0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0;
+        // Add random data to the bar series
+        *set0 << 10 << 50 << 20 << 40 << 60 << 80 << 30 << 90 << 70 << 20 << 40 << 60;
         QBarSeries *series = new QBarSeries();
+        series->setBarWidth(1);
         series->append(set0);
 
         // Create chart and add series
@@ -68,6 +70,7 @@ void FluorinatedCompoundsPage::initChart()
         QStringList categories;
         categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun" << "Jul" << "Aug" << "Sep" << "Oct" << "Nov" << "Dec";
         QBarCategoryAxis *axisX = new QBarCategoryAxis();
+
         axisX->append(categories);
         chart->addAxis(axisX, Qt::AlignBottom);
         series->attachAxis(axisX);
