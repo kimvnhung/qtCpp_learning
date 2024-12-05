@@ -15,7 +15,11 @@ interactiveCard::interactiveCard(const QString &title,QWidget* cardWidget , QWid
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     if(cardWidget)
+    {
         layout->addWidget(cardWidget);
+        // Disable click event for the card widget
+        cardWidget->setAttribute(Qt::WA_AcceptTouchEvents, false);
+    }
     else
     {
         QLabel *titleLabel = new QLabel(title, this);

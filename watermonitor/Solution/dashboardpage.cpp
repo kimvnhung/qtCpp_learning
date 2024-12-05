@@ -17,10 +17,15 @@ DashboardPage::DashboardPage(
 {
   // Central panel to store "cards"
   QWidget *contentPanel = createFrame();
+  // Fix the size of the contentPanel
+  contentPanel->setFixedWidth(900);
+  contentPanel->setFixedHeight(720);
   cardLayout = new QGridLayout();
 
   // Side panel for Search, Time filter and Load CSV button
   QWidget *sidePanel = createSidePanel();
+  // Fix the size of the sidePanel
+  sidePanel->setFixedWidth(200);
   QWidget *searchBar = createSearchBar();
   CreateFilters *timePeriodFilter = new CreateFilters(sidePanel);
   connect(timePeriodFilter, &CreateFilters::filterChanged, [this](const QString &buttonText)
@@ -64,7 +69,7 @@ DashboardPage::DashboardPage(
                         0, 0, 1, -1);
   cardLayout->addWidget(createCard("Persistent Organic Pollutants",popChart, this, [this]()
                                    { goToPOPpage(); }),
-                        1, 1);
+                        1, 1,1,-1);
   cardLayout->addWidget(createCard("Compliance Dashboard",complianceDashboardChart, this, [this]()
                                    { goToComplianceDashboardPage(); }),
                         1, 0);
@@ -92,7 +97,7 @@ DashboardPage::DashboardPage(
 
   // contentPanel is temporary, until navigation bar is and completed -
   // to be replaced with relavent main info content
-  mainLayout->addWidget(contentPanel, 2, 1, 8, 3);
+  mainLayout->addWidget(contentPanel, 2, 1, 8, -1);
 }
 
 void DashboardPage::updateStatus(const QString &message)
@@ -105,6 +110,10 @@ QWidget *DashboardPage::createCard(const QString &title, QWidget *cardWidget, QW
 {
   // Create new card object with title and parent of the card widget.
   interactiveCard *card = new interactiveCard(title,cardWidget, this);
+
+  // Set Fixed size of the card
+  card->setMinimumWidth(410);
+  card->setFixedHeight(170);
 
   // When a card is clicked, interactiveCard emits cardClicked signal.
   // [this, title]() {...} determines which function to call based on the title.
