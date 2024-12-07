@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QTranslator>
 #include "dashboard.h"
+#include "generaldashboard.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,8 +12,12 @@ int main(int argc, char *argv[])
     //     app.installTranslator(&translator);
     // }
 
-    Dashboard dashboard;
-    dashboard.show();
+    // Dashboard dashboard;
+    // dashboard.show();
+
+    GeneralDashboard generalDashboard;
+    generalDashboard.show();
+
 
     return app.exec();
 }

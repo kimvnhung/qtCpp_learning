@@ -39,6 +39,14 @@ qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(water
         ${PROJECT_SOURCES}
+        settingpanel.h
+        settingpanel.cpp
+        overviewchartwidget.h
+        overviewchartwidget.cpp
+        generaldashboard.h
+        generaldashboard.cpp
+        statusbar.h statusbar.cpp
+        images.qrc
     )
 else()
     add_executable(water
