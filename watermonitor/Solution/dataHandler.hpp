@@ -8,8 +8,9 @@
 #include <vector>
 #include "water.hpp"
 #include "dataset.hpp"
-
 #include "dashboardpage.hpp"
+
+class DashboardPage; // Optional if used as pointer or reference.
 
 class DataHandler : public QThread
 {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QStackedWidget>
 #include "ui_elements.hpp"
 
 class QPushButton;
@@ -16,25 +17,23 @@ class QLineSeries;
 /**
  * @brief Template for an information page.
  */
-class POPpage : public QWidget
-{
+class POPpage : public QWidget {
     Q_OBJECT
-public:
-    explicit POPpage(QWidget *parent = nullptr);
 
+public:
+    explicit POPpage(QWidget* parent = nullptr, QStackedWidget* pageStack = nullptr);
     QWidget* getChart() const;
+    void initChart();
 
 public slots:
     void updateChart(QList<double> values, double max, double min);
-    void initChart();
+    
+
 signals:
     void goBack();
 
 private:
     QPushButton *backButton;
-
     QChartView *chartHolder = nullptr;
     QLineSeries *lineSeries;
-
-
 };

@@ -1,7 +1,6 @@
 #include "fluorinatedCompoundsPage.hpp"
 #include "ui_elements.hpp"
 #include <QtWidgets>
-
 #include <QBarCategoryAxis>
 #include <QBarSeries>
 #include <QBarSet>
@@ -9,40 +8,48 @@
 #include <QValueAxis>
 
 #include "common.hpp"
+FluorinatedCompoundsPage::FluorinatedCompoundsPage(QWidget* parent, QStackedWidget* pageStack)
+    : QWidget(parent) {
 
-FluorinatedCompoundsPage::FluorinatedCompoundsPage(QWidget *parent) : QWidget(parent)
-{
-    QGridLayout *mainLayout = new QGridLayout(this);
-    QWidget *titlePanel = createHeading("Fluorinated Compounds", TITLE_SIZE);
+    // Main layout for page
+    QGridLayout* mainLayout = new QGridLayout(this);
+
+    // Title panel with heading
+    QWidget* titlePanel = createHeading("Fluorinated Compounds", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    QWidget *complianceIndexPanel = createFrame();
-    QVBoxLayout *complianceIndexLayout = new QVBoxLayout(complianceIndexPanel);
+    // Add a navigation bar
+    mainLayout->addWidget(createNavigationBar(pageStack, this), 1, 0, 1, -1); // Navigation bar
+
+    // Compliance index panel
+    QWidget* complianceIndexPanel = createFrame();
+    QVBoxLayout* complianceIndexLayout = new QVBoxLayout(complianceIndexPanel);
     complianceIndexLayout->addWidget(createHeading("Compliance Index", SUBHEADING_SIZE));
-    complianceIndexLayout->addWidget(createParagraph("bla bla bla include some info lskadjlk asdflkj asfl ksalf dk"));
+    complianceIndexLayout->addWidget(createParagraph("bla bla bla include some info."));
     complianceIndexLayout->setAlignment(Qt::AlignTop);
 
     initChart();
 
-    QWidget *informationPanel = createFrame();
-    QVBoxLayout *informationLayout = new QVBoxLayout(informationPanel);
-    informationLayout->addWidget(createHeading("Display Levels of PFA's", SUBHEADING_SIZE));
+    // Tooltop label
+    QLabel* infoLabel = new QLabel("Hover over me!", this);
+    infoLabel->setStyleSheet("background-color: lightgray; padding: 5px;");
+    attachTooltip(infoLabel, this, "Information Label", "This label displays some important information.");
 
-    mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
-    mainLayout->addWidget(createNavigationBar(), 1, 0, 1, -1);
-    mainLayout->addWidget(complianceIndexPanel, 2, 0, 8, 2);
-    mainLayout->addWidget(informationPanel, 2, 2, 3, 5);
-    if(chartHolder)
-        mainLayout->addWidget(chartHolder, 5, 2, 5, 5);
-    else
-        mainLayout->addWidget(createFrame(), 5, 2, 5, 5);
-
+    // Back button to dashboard
     backButton = new QPushButton("Back to Dashboard", this);
     connect(backButton, &QPushButton::clicked, this, &FluorinatedCompoundsPage::goBack);
 
-    mainLayout->addWidget(backButton, 10, 0, 1, -1);
-}
+    // Add widgets to grid layout
+    mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
+    mainLayout->addWidget(complianceIndexPanel, 2, 0, 8, 2);
+    mainLayout->addWidget(infoLabel, 2, 2, 1, 1); 
+    if(chartHolder)
+            mainLayout->addWidget(chartHolder, 5, 2, 5, 5);
+        else
+            mainLayout->addWidget(createFrame(), 5, 2, 5, 5);    mainLayout->addWidget(backButton, 10, 0, 1, -1);
 
+    setLayout(mainLayout);
+}
 void FluorinatedCompoundsPage::initChart()
 {
     LOG();

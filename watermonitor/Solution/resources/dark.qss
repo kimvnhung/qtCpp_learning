@@ -1,0 +1,29 @@
+/*
+Stylesheet colour palatte
+Dark mode:
+Primary background: #1c2252
+Secondary background: #2b417d
+Accent colours: #287d8f #287d8f 
+Text colour: #eef2fc
+*/
+QWidget {
+  background-color: #1c2252; /* Primary background */
+  color: #eef2fc;           /* Text color */
+}
+QLineEdit {
+  background-color: #1c2252; /* Secondary background */
+  color: #eef2fc;            /* Text color for input fields */
+  border: 1px solid #8BBEB2; /* Accent border */
+}
+QPushButton {
+  background-color: #1c2252; /* Accent color */
+  color: #eef2fc;            /* Text on buttons */
+  border-radius: 5px;        /* Rounded corners */
+  padding: 5px;
+}
+QPushButton:hover {
+  background-color: #F3CA40; /* Highlight on hover */
+}
+QCheckBox {
+  color: #eef2fc; /* Text color for checkboxes */
+}

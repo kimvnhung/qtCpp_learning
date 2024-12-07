@@ -10,11 +10,11 @@
 
 #include "common.hpp"
 
-GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent, DataHandler *dataHandler)
-    : QWidget(parent)
+GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget* parent, QStackedWidget* pageStack, DataHandler *dataHandler = nullptr)
+    : QWidget(parent) 
     , dataHandler(dataHandler)
-{
-    if(dataHandler){
+    {
+        if(dataHandler){
         connect(dataHandler, &DataHandler::geographicalDataReady, this, &GeographicalHotspotsPage::updateHeatMap);
         connect(dataHandler, &DataHandler::handlingGeographicalData,this, &GeographicalHotspotsPage::onHandling);
     }
@@ -27,20 +27,25 @@ GeographicalHotspotsPage::GeographicalHotspotsPage(QWidget *parent, DataHandler 
 
     initChart();
 
+
+    // Add a navigation bar
+    mainLayout->addWidget(createNavigationBar(pageStack, this), 1, 0, 1, -1); // Navigation bar
+
+    // Map panel
+    QWidget* mapPanel = createFrame();
+    QVBoxLayout* mapLayout = new QVBoxLayout(mapPanel);
+    mapLayout->addWidget(createHeading("Map Placeholder", SUBHEADING_SIZE));
+
+    // Back button to dashboard
     backButton = new QPushButton("Back to Dashboard", this);
     connect(backButton, &QPushButton::clicked, this, &GeographicalHotspotsPage::goBack);
 
+    // Add widgets to grid layout
     mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
-    mainLayout->addWidget(createNavigationBar(), 1, 0, 1, -1);
-    if(placeholder)
-        mainLayout->addWidget(placeholder);
-    else
-        mainLayout->addWidget(createFrame());
     mainLayout->addWidget(backButton, 10, 0, 1, -1);
-    setLayout(mainLayout);
-    initChart();
-}
 
+    setLayout(mainLayout);
+}
 QWidget* GeographicalHotspotsPage::getChart() const
 {
     return placeholder;

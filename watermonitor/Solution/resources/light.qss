@@ -1,0 +1,22 @@
+QWidget {
+  background-color: #E8F1F5;
+  color: #071827;
+}
+QLineEdit {
+  background-color: #1c2252; /* Secondary background */
+  color: #eef2fc;            /* Text color for input fields */
+  border: 1px solid #8BBEB2; /* Accent border */
+}
+QPushButton {
+  background-color: #F3CA40;
+  color: #071827;
+  border: 1px solid #8BBEB2;
+  border-radius: 5px;
+}
+QPushButton:hover {
+  background-color: #8BBEB2;
+  color: #FFFFFF;
+}
+QCheckBox {
+  color: #eef2fc; /* Text color for checkboxes */
+}

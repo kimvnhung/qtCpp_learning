@@ -1,28 +1,34 @@
 #pragma once
 #include <QWidget>
+#include <QStackedWidget>
 
 class QPushButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QGridLayout;
 class QWidget;
+class DataHandler;
+class CreateFilters;
 class QLabel;
 
-class DashboardPage : public QWidget
-{
+class DashboardPage : public QWidget {
   Q_OBJECT
 
 public:
-  DashboardPage(QWidget *parent = nullptr
-                  , QWidget *pollutantsOverviewChart = nullptr
-                  , QWidget *complianceDashboardChart = nullptr
-                 , QWidget *fluorinatedCompoundsChart = nullptr
-                  , QWidget *environmentalLitterIndicatorsChart = nullptr
-                  , QWidget *popChart = nullptr
-                  , QWidget *geographicalHotspotsChart = nullptr);
-  QWidget *createCard(const QString &title,QWidget* cardWidget, QWidget *parent, std::function<void()> onClickCallback);
+    DashboardPage(QWidget* parent = nullptr, QStackedWidget* pageStack = nullptr
+                , QWidget *pollutantsOverviewChart = nullptr
+                , QWidget *complianceDashboardChart = nullptr
+                , QWidget *fluorinatedCompoundsChart = nullptr
+                , QWidget *environmentalLitterIndicatorsChart = nullptr
+                , QWidget *popChart = nullptr
+                , QWidget *geographicalHotspotsChart = nullptr
+                , DataHandler* dataHandler=nullptr);
 
-  enum FilterType {
+    QWidget *createCard(const QString &title,QWidget* cardWidget, QWidget *parent, std::function<void()> onClickCallback);
+
+    CreateFilters* timePeriodFilter;
+
+    enum FilterType {
       PAST_30_DAYS,
       PAST_3_MONTHS,
       PAST_6_MONTHS,
@@ -33,32 +39,26 @@ public:
 
   FilterType currentFilter() const;
 
+private:
+    QStackedWidget* pageStack;
+    QLabel *statusLabel;
+    QGridLayout *cardLayout = nullptr;
+    QWidget *pollutantsOverviewChart;
+    QWidget *complianceDashboardChart;
+    QWidget *fluorinatedCompoundsChart;
+    QWidget *environmentalLitterIndicatorsChart;
+    QWidget *popChart;
+    QWidget *geographicalHotspotsChart;
+    FilterType curFilter = FilterType::ALL_TIME;
+    QWidget *dashboardCards;
+
+
 
 public slots:
     void updateStatus(const QString &message);
     void reloadCharts();
-
+  
 signals:
-  void goToPOPpage();
-  void goToPollutantOverviewPage();
-  void goToComplianceDashboardPage();
-  void goToFluorinatedCompoundsPage();
-  void goToEnvironmentalLitterIndicatorsPage();
-  void goToRawDataPage();
-  void goToGeographicalHotspotsPage();
-  void loadCSV();
-private:
-  QLabel *statusLabel;
+    void loadCSV();    
+}; 
 
-    QGridLayout *cardLayout = nullptr;
-
-  QWidget *pollutantsOverviewChart;
-  QWidget *complianceDashboardChart;
-  QWidget *fluorinatedCompoundsChart;
-  QWidget *environmentalLitterIndicatorsChart;
-  QWidget *popChart;
-  QWidget *geographicalHotspotsChart;
-
-  FilterType curFilter = FilterType::ALL_TIME;
-
-};

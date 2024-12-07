@@ -1,23 +1,28 @@
 #include "complianceDashboardPage.hpp"
 #include "ui_elements.hpp"
 #include <QtWidgets>
-
 #include <QChartView>
 #include <QPieSeries>
 
 #include "common.hpp"
 
-ComplianceDashboardPage::ComplianceDashboardPage(QWidget *parent)
-    : QWidget(parent)
-{
+ComplianceDashboardPage::ComplianceDashboardPage(QWidget* parent, QStackedWidget* pageStack)
+    : QWidget(parent) {
 
-    QGridLayout *mainLayout = new QGridLayout(this);
+    QGridLayout* mainLayout = new QGridLayout(this);
     // Create page title with a fixed height and flexible width.
-    QWidget *titlePanel = createHeading("Compliance Dashboard Page", TITLE_SIZE);
+    QWidget* titlePanel = createHeading("Compliance Dashboard Page", TITLE_SIZE);
     titlePanel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-
     // Create container to hold contents
     initChart();
+    // Add a navigation bar
+    mainLayout->addWidget(createNavigationBar(pageStack, this), 1, 0, 1, -1); // Navigation bar
+
+    if(chartHolder)
+        mainLayout->addWidget(chartHolder,2,0,1,-1);
+    else
+        mainLayout->addWidget(createFrame(), 2, 0, 1,-1);
+
 
     // Back button to return to dashboard
     backButton = new QPushButton("Back to Dashboard", this);
@@ -25,13 +30,9 @@ ComplianceDashboardPage::ComplianceDashboardPage(QWidget *parent)
 
     // Add widgets to layout (widget name, row, column, row span, column span)
     mainLayout->addWidget(titlePanel, 0, 0, 1, -1);
-    mainLayout->addWidget(createNavigationBar(), 1, 0, 1, -1);
-
-    if(chartHolder)
-        mainLayout->addWidget(chartHolder,2,0,1,-1);
-    else
-        mainLayout->addWidget(createFrame(), 2, 0, 1,-1);
     mainLayout->addWidget(backButton, 10, 0, 1, -1);
+
+    setLayout(mainLayout);
 }
 
 QWidget* ComplianceDashboardPage::getChart() const
