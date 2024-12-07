@@ -1,1 +1,7 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/">
+        <file>images/left-arrow.png</file>
+        <file>images/setting.png</file>
+        <file>images/back.png</file>
+    </qresource>
+</RCC>

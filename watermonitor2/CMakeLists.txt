@@ -23,13 +23,27 @@ set(TS_FILES
     water_de.ts
 )
 
+file(GLOB CHART_SOURCES charts/*.cpp)
+file(GLOB CHART_HEADERS charts/*.h)
+
 # Source files
 set(PROJECT_SOURCES
     main.cpp
     dashboard.cpp
     dashboard.h
-    chartholderbasewidget.cpp
-    chartholderbasewidget.h
+    settingpanel.h
+    settingpanel.cpp
+    overviewchartwidget.h
+    overviewchartwidget.cpp
+    generaldashboard.h
+    generaldashboard.cpp
+    statusbar.h
+    statusbar.cpp
+    images.qrc
+    common.h
+    common.cpp
+    ${CHART_SOURCES}
+    ${CHART_HEADERS}
 )
 
 # Generate .qm files from .ts files
@@ -39,14 +53,6 @@ qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(water
         ${PROJECT_SOURCES}
-        settingpanel.h
-        settingpanel.cpp
-        overviewchartwidget.h
-        overviewchartwidget.cpp
-        generaldashboard.h
-        generaldashboard.cpp
-        statusbar.h statusbar.cpp
-        images.qrc
     )
 else()
     add_executable(water

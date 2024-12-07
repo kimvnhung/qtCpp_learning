@@ -22,7 +22,8 @@ private:
     void setUpStatusBar();
 
 private:
-    QGridLayout *m_mainLayout;
+    QVBoxLayout *m_mainLayout;
+    QHBoxLayout *m_contentLayout;
     SettingPanel *m_settingPanel;
     OverviewChartWidget *m_chartPanel;
     StatusBar *m_statusBar;
