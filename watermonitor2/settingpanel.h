@@ -6,6 +6,7 @@
 class QHBoxLayout;
 class QPushButton;
 class QComboBox;
+class QLineEdit;
 
 
 class SettingPanel : public QWidget
@@ -24,7 +25,7 @@ private:
     QComboBox *m_languageComboBox;
     QComboBox *m_regionComboBox;
     QComboBox *m_timeComboBox;
-
+    QLineEdit *m_filePathEdit;
 
     bool m_isCollapsed = false;
 
@@ -34,6 +35,8 @@ private:
     void setUpSettingButton();
 
     void setUpContent();
+private slots:
+    void onOpenFileClicked();
 
 };
 

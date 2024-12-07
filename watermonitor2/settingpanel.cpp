@@ -3,7 +3,9 @@
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
+#include <QFileDialog>
 
 #include "common.h"
 
@@ -40,6 +42,7 @@ void SettingPanel::initializeUi()
     // add QHBoxLayout to the SettingPanel
     m_mainLayout = new QHBoxLayout{this};
     m_mainLayout->setContentsMargins(0,0,0,0);
+    m_mainLayout->setSpacing(0);
 
     setUpSettingButton();
     setUpContent();
@@ -89,12 +92,11 @@ void SettingPanel::setUpContent()
 
     QVBoxLayout *contentLayout = new QVBoxLayout{m_content};
 
+    contentLayout->setSpacing(30);
+
     QLabel *label = new QLabel("Setting Panel");
     label->setAlignment(Qt::AlignHCenter);
     contentLayout->addWidget(label);
-
-    // Add space between items
-    contentLayout->setSpacing(30);
 
     // Set up language combo box
     m_languageComboBox = new QComboBox{m_content};
@@ -119,8 +121,41 @@ void SettingPanel::setUpContent()
     m_timeComboBox->addItem(tr("Last Year"), "ly");
     contentLayout->addWidget(m_timeComboBox);
 
+    // Add file path label
+    QVBoxLayout *filePathLayout = new QVBoxLayout;
+    filePathLayout->setContentsMargins(0,0,0,0);
+    filePathLayout->setSpacing(5);
+    QLabel *filePathLabel = new QLabel("File Path:");
+    filePathLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    filePathLayout->addWidget(filePathLabel);
+
+    m_filePathEdit = new QLineEdit(this);
+    m_filePathEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_filePathEdit->setPlaceholderText("Select a file...");
+    m_filePathEdit->setReadOnly(true);
+
+    QHBoxLayout *openFileButtonLayout = new QHBoxLayout;
+    QPushButton *openFileButton = new QPushButton("Open", this);
+    connect(openFileButton, &QPushButton::clicked, this, &SettingPanel::onOpenFileClicked);
+    openFileButtonLayout->addStretch();
+    openFileButtonLayout->addWidget(openFileButton);
+
+    filePathLayout->addWidget(m_filePathEdit);
+    filePathLayout->addLayout(openFileButtonLayout);
+    filePathLayout->addStretch();
+
+
+    contentLayout->addLayout(filePathLayout);
     contentLayout->addStretch();
 
     // Add m_content to the first widget of the layout
     m_mainLayout->insertWidget(0,m_content);
+}
+
+void SettingPanel::onOpenFileClicked()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::homePath());
+    if (!filePath.isEmpty()) {
+        m_filePathEdit->setText(filePath);
+    }
 }
