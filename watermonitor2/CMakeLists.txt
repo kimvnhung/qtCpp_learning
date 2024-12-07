@@ -16,43 +16,43 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools Charts)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Charts)
 
 # Translation files
-# set(TS_FILES
-#     water_en.ts
-#     water_es.ts
-#     water_fr.ts
-#     water_de.ts
-# )
+set(TS_FILES
+    water_en.ts
+    water_es.ts
+    water_fr.ts
+    water_de.ts
+)
 
 # Source files
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
-file(GLOB_RECURSE SOURCES ${SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE HEADERS ${SOURCE_DIR}/*.h)
+set(PROJECT_SOURCES
+    main.cpp
+    dashboard.cpp
+    dashboard.h
+    chartholderbasewidget.cpp
+    chartholderbasewidget.h
+)
 
 # Generate .qm files from .ts files
-# qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
 # Create executable target
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(water
-        MANUAL_FINALIZATION
-        ${SOURCES}
-        ${HEADERS}
+        ${PROJECT_SOURCES}
     )
 else()
     add_executable(water
-        ${SOURCES}
-        ${HEADERS}
+        ${PROJECT_SOURCES}
     )
 endif()
 
 # Copy .qm files to the output directory
-# add_custom_command(TARGET water POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:water>/translations
-#     COMMAND ${CMAKE_COMMAND} -E copy_directory
-#         ${CMAKE_SOURCE_DIR}/translations
-#         $<TARGET_FILE_DIR:water>/translations
-# )
+add_custom_command(TARGET water POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:water>/translations
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/translations
+        $<TARGET_FILE_DIR:water>/translations
+)
 
 # Link Qt libraries
 target_link_libraries(water PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Charts)
