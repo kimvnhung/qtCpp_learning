@@ -21,6 +21,7 @@ public slots:
     void onBackButtonClicked();
     void onExpanded();
 
+    void onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
 private:
     QStackedWidget *m_stackWidget;
     QGridLayout *m_previewLayout;

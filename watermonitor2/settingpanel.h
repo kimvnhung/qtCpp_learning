@@ -1,6 +1,8 @@
 #ifndef SETTINGPANEL_H
 #define SETTINGPANEL_H
 
+#include "filtercombobox.h"
+
 #include <QWidget>
 
 class QHBoxLayout;
@@ -17,6 +19,16 @@ public:
 
     void setCollapse(bool collapse);
 
+public slots:
+    void setMaterialFilter(const QStringList &materials);
+    void setLocationsFilter(const QStringList &locations);
+
+signals:
+    void csvFileAvailable(const QString &filePath);
+
+    void materialFilterChanged(const QStringList &materials);
+    void locationFilterChanged(const QStringList &locations);
+
 private:
     QHBoxLayout *m_mainLayout;
     QWidget *m_content;
@@ -28,6 +40,11 @@ private:
     QLineEdit *m_filePathEdit;
 
     bool m_isCollapsed = false;
+
+    // For filter
+    FilterComboBox *m_materialFilter;
+    FilterComboBox *m_locationFilter;
+
 
 private:
     void initializeUi();

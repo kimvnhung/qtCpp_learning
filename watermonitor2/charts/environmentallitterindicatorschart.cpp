@@ -60,22 +60,56 @@ void EnvironmentalLitterIndicatorsChart::setUpChart()
     chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
 
-void EnvironmentalLitterIndicatorsChart::updateChart()
+// Result will be a map, with key is the location, and value is a list of double values (revelant to materials list index)
+void EnvironmentalLitterIndicatorsChart::updateChart(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue)
 {
     LOG();
     // Update the chart data
     QChart *chart = static_cast<QChartView *>(chartWidget())->chart();
-    QStackedBarSeries *stackedSeries = static_cast<QStackedBarSeries *>(chart->series().at(0));
+    // Remove all series
+    chart->removeAllSeries();
+    // Remove all axes
+    QList<QAbstractAxis *> axes = chart->axes();
+    for (auto axis : axes)
+    {
+        chart->removeAxis(axis);
+    }
 
-    // Update the data for each material
-    QBarSet *material1 = stackedSeries->barSets().at(0);
-    QBarSet *material2 = stackedSeries->barSets().at(1);
-    QBarSet *material3 = stackedSeries->barSets().at(2);
+    QList<QBarSet *> barSets;
+    for (int i = 0; i < materials.size(); ++i)
+    {
+        QBarSet *barSet = new QBarSet(materials[i]);
+        barSets.append(barSet);
+    }
 
-    // Update the data for locations and times
-    *material1 << 40 << 50 << 60;  // New data for time 1, 2, 3
-    *material2 << 45 << 55 << 65;
-    *material3 << 35 << 45 << 55;
+    for (int i = 0; i < locations.size(); ++i)
+    {
+        for (int j = 0; j < materials.size(); ++j)
+        {
+            *barSets[j] << results[locations[i]][j];
+        }
+    }
+
+    QStackedBarSeries *stackedSeries = new QStackedBarSeries();
+    for (auto barSet : barSets)
+    {
+        stackedSeries->append(barSet);
+    }
+
+    chart->addSeries(stackedSeries);
+
+    // Set categories for X-axis
+    QStringList categories = locations;
+    QBarCategoryAxis *axisX = new QBarCategoryAxis();
+    axisX->append(categories);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    stackedSeries->attachAxis(axisX);
+
+    // Set Y-axis
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setRange(0, maxValue*1.1);  // Adjust range as needed
+    chart->addAxis(axisY, Qt::AlignLeft);
+    stackedSeries->attachAxis(axisY);
 
     // Update the chart
     chart->update();

@@ -4,6 +4,7 @@
 #include "overviewchartwidget.h"
 #include "settingpanel.h"
 #include "statusbar.h"
+#include "handlers/dataHandler.hpp"
 
 #include <QGridLayout>
 #include <QWidget>
@@ -26,14 +27,18 @@ private:
     void setUpChartPanel();
     void setUpStatusBar();
     void setUpPreventDialog();
+
+    void setUpDataHandler();
 private:
     QVBoxLayout *m_mainLayout;
     QHBoxLayout *m_contentLayout;
     SettingPanel *m_settingPanel;
     OverviewChartWidget *m_chartPanel;
     StatusBar *m_statusBar;
+    DataHandler *m_dataHandler;
 
     QDialog *m_dialog;
+
 };
 
 #endif // GENERALDASHBOARD_H

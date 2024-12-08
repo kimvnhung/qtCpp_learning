@@ -6,8 +6,10 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QTimer>
 
 #include "common.h"
+#include "filtercombobox.h"
 
 #define COLLAPSED_WIDTH 25
 #define EXPANDED_WIDTH 200
@@ -34,6 +36,16 @@ void SettingPanel::setCollapse(bool collapse)
         setFixedWidth(EXPANDED_WIDTH);
         m_settingButton->setIcon(EXPANDED_ICON);
     }
+}
+
+void SettingPanel::setMaterialFilter(const QStringList &materials)
+{
+    m_materialFilter->addCheckableItems(materials);
+}
+
+void SettingPanel::setLocationsFilter(const QStringList &locations)
+{
+    m_locationFilter->addCheckableItems(locations);
 }
 
 //private
@@ -115,6 +127,16 @@ void SettingPanel::setUpContent()
     m_regionComboBox->addItem(tr("Region 3"), "r3");
     contentLayout->addWidget(m_regionComboBox);
 
+    // Set up material filter
+    m_materialFilter = new FilterComboBox{m_content};
+    connect(m_materialFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::materialFilterChanged);
+    contentLayout->addWidget(m_materialFilter);
+
+    // Set up location filter
+    m_locationFilter = new FilterComboBox{m_content};
+    connect(m_locationFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::locationFilterChanged);
+    contentLayout->addWidget(m_locationFilter);
+
     // Setup time combo box
     m_timeComboBox = new QComboBox{m_content};
     m_timeComboBox->addItem(tr("Last Month"), "lm");
@@ -136,6 +158,11 @@ void SettingPanel::setUpContent()
 
     if(!GET_STRING(CSV_FILE_PATH).isEmpty()) {
         m_filePathEdit->setText(GET_STRING(CSV_FILE_PATH));
+
+        //Delay the signal
+        QTimer::singleShot(500, this, [this] {
+            emit csvFileAvailable(GET_STRING(CSV_FILE_PATH));
+        });
     }
 
     QHBoxLayout *openFileButtonLayout = new QHBoxLayout;
@@ -162,5 +189,6 @@ void SettingPanel::onOpenFileClicked()
     if (!filePath.isEmpty()) {
         m_filePathEdit->setText(filePath);
         SET_VALUE(CSV_FILE_PATH, filePath);
+        emit csvFileAvailable(filePath);
     }
 }

@@ -17,6 +17,7 @@ void DataHandler::run()
     LOG();
     m_isRunning = true;
     bool markedForReloadChart = false;
+    m_isFilteredChanged = false;
     while (m_isRunning)
     {
         // Do something
@@ -35,13 +36,13 @@ void DataHandler::run()
 
         if(m_isLoaded)
         {
-            if(markedForReloadChart)
+            if(markedForReloadChart || m_isFilteredChanged)
             {
-                takeGeographicalData();
-                takePollutantOverviewData();
-                takeComplianceDashboardData();
-                takePOPData();
-                takeFluorinatedCompoundsData();
+                // takeGeographicalData();
+                // takePollutantOverviewData();
+                // takeComplianceDashboardData();
+                // takePOPData();
+                // takeFluorinatedCompoundsData();
                 takeEnvironmentalLitterIndicatorsData();
                 markedForReloadChart = false;
             }
@@ -104,8 +105,6 @@ void DataHandler::takePollutantOverviewData()
     int maxCount = 0;
     double maxAvg = 0;
 
-    emit handlingPollutantOverviewData(SHOW_PROGESS_VALUE);
-
     for (const auto &water : m_data)
     {
         if(!materials.contains(QString::fromStdString(water.getWaterType())))
@@ -129,9 +128,6 @@ void DataHandler::takePollutantOverviewData()
         counts.append(count);
         avgs.append(sum / count);
     }
-
-    emit handlingPollutantOverviewData(99);
-    emit pollutantOverviewDataReady(materials, counts, avgs, maxCount, maxAvg);
 }
 
 void DataHandler::takeComplianceDashboardData()
@@ -139,7 +135,6 @@ void DataHandler::takeComplianceDashboardData()
     int trueCount = 0;
     int falseCount = 0;
 
-    emit handlingComplianceDashboardData(SHOW_PROGESS_VALUE);
 
     for (const auto &water : m_data)
     {
@@ -148,9 +143,6 @@ void DataHandler::takeComplianceDashboardData()
         else
             falseCount++;
     }
-
-    emit handlingComplianceDashboardData(99);
-    emit complianceDashboardDataReady(trueCount,falseCount);
 }
 
 void DataHandler::takePOPData()
@@ -159,8 +151,6 @@ void DataHandler::takePOPData()
     QList<double> counts = QList<double>(12,0);
     double max = 0;
     double min = 0;
-
-    emit handlingPOPData(SHOW_PROGESS_VALUE);
 
     for (const auto &water : m_data)
     {
@@ -186,38 +176,105 @@ void DataHandler::takePOPData()
         }
     }
 
-    emit handlingPOPData(99);
-    emit POPDataReady(values, max, min);
 }
 
 void DataHandler::takeFluorinatedCompoundsData()
 {
     QMap<QString, int> frequency; // <location, frequency>
 
-    emit handlingFluorinatedCompoundsData(SHOW_PROGESS_VALUE);
 
     for (const auto &water : m_data)
     {
         frequency[QString::fromStdString(water.getLocation())] += 1;
     }
 
-    emit handlingFluorinatedCompoundsData(99);
-    emit fluorinatedCompoundsDataReady(frequency);
 }
 
 void DataHandler::takeEnvironmentalLitterIndicatorsData()
 {
-    QMap<QString, int> frequency; // <location, frequency>
+    QStringList locations;
+    QStringList materials;
 
-    emit handlingEnvironmentalLitterIndicatorsData(SHOW_PROGESS_VALUE);
-
-    for (const auto &water : m_data)
+    if(m_isFilteredChanged)
     {
-        frequency[QString::fromStdString(water.getLocation())] += 1;
+        locations = m_filteredLocations;
+        materials = m_filteredMaterials;
+    }
+    else
+    {
+        for(const auto &water : m_data)
+        {
+            // Get unqiue locations and materials
+
+            if(!locations.contains(QString::fromStdString(water.getLocation())))
+            {
+                locations.append(QString::fromStdString(water.getLocation()));
+            }
+
+            if(!materials.contains(QString::fromStdString(water.getDeterminand())))
+            {
+                materials.append(QString::fromStdString(water.getDeterminand()));
+            }
+        }
+
+        emit locationsChanged(locations);
+        emit materialsChanged(materials);
     }
 
-    emit handlingEnvironmentalLitterIndicatorsData(99);
-    emit environmentalLitterIndicatorsDataReady(frequency);
+    // Init map
+    QMap<QString,QList<double>> avgResults; // <location, <material,results>>
+    // Number of material sample at location
+    QMap<QString,QList<int>> counts; // <location, <material,counts>>
+
+
+    for (const auto &location : locations)
+    {
+        avgResults[location] = QList<double>(materials.size(), 0);
+        counts[location] = QList<int>(materials.size(), 0);
+    }
+
+    for(const auto &water : m_data)
+    {
+        int materialIndex = materials.indexOf(QString::fromStdString(water.getDeterminand()));
+
+        if(materialIndex == -1)
+        {
+            LOGD("Material not found");
+            continue;
+        }
+        avgResults[QString::fromStdString(water.getLocation())][materialIndex] += water.getResult();
+        counts[QString::fromStdString(water.getLocation())][materialIndex] += 1;
+    }
+
+    // Calculate average
+    for (const auto &location : locations)
+    {
+        for (int i = 0; i < materials.size(); ++i)
+        {
+            if(counts[location][i] != 0)
+            {
+                avgResults[location][i] /= counts[location][i];
+            }
+            else
+                avgResults[location][i] = 0;
+        }
+    }
+
+    // Find max value
+    double maxValue = 0;
+    for (const auto &location : locations)
+    {
+        for (int i = 0; i < materials.size(); ++i)
+        {
+            if(avgResults[location][i] > maxValue)
+            {
+                maxValue = avgResults[location][i];
+            }
+        }
+    }
+
+    emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, maxValue);
+    m_isFilteredChanged = false;
 }
 
 
@@ -244,24 +301,6 @@ bool DataHandler::loading()
 
     QDateTime compareDate = QDateTime::currentDateTime();
 
-    // switch (m_filterType)
-    // {
-    // case DashboardPage::PAST_30_DAYS:
-    //     compareDate = QDateTime::currentDateTime().addDays(-30);
-    //     break;
-    // case DashboardPage::PAST_3_MONTHS:
-    //     compareDate = QDateTime::currentDateTime().addMonths(-3);
-    //     break;
-    // case DashboardPage::PAST_6_MONTHS:
-    //     compareDate = QDateTime::currentDateTime().addMonths(-6);
-    //     break;
-    // case DashboardPage::PAST_YEAR:
-    // case DashboardPage::YEAR_TILL_DATE:
-    //     compareDate = QDateTime::currentDateTime().addYears(-1);
-    //     break;
-    // default:
-    //     break;
-    // }
 
     for (const auto &row : reader)
     {
@@ -276,23 +315,6 @@ bool DataHandler::loading()
             QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"
         };
 
-        // do filter
-        // if(m_filterType == DashboardPage::PAST_YEAR)
-        // {
-        //     if(water.getDateTime().date().year() != compareDate.date().year())
-        //     {
-        //         LOGD(QString("Ignore date %1").arg(water.getDateTime().toString()));
-        //         continue;
-        //     }
-        // }
-        // else if(m_filterType != DashboardPage::ALL_TIME)
-        // {
-        //     if(water.getDateTime() < compareDate)
-        //     {
-        //         LOGD(QString("Ignore date %1").arg(water.getDateTime().toString()));
-        //         continue;
-        //     }
-        // }
         m_data.push_back(water);
         emit handling((int)(count++*100/rowCount));
         if(!m_isRunning)
@@ -307,12 +329,32 @@ bool DataHandler::loading()
     return !m_data.empty();
 }
 
-void DataHandler::loadData(const std::string &filename/*, DashboardPage::FilterType filterType*/)
+void DataHandler::loadData(QString filename)
 {
     LOG();
-    m_filename = QString::fromStdString(filename);
+    m_filename = filename;
     // m_filterType = filterType;
     m_isLoaded = false;
+}
+
+void DataHandler::setFilteredLocations(QStringList locations)
+{
+    LOG();
+    if(m_filteredLocations != locations)
+    {
+        m_filteredLocations = locations;
+        m_isFilteredChanged = true;
+    }
+}
+
+void DataHandler::setFilteredMaterials(QStringList materials)
+{
+    LOG();
+    if(m_filteredMaterials != materials)
+    {
+        m_filteredMaterials = materials;
+        m_isFilteredChanged = true;
+    }
 }
 
 void DataHandler::takeGeographicalData()
@@ -321,7 +363,6 @@ void DataHandler::takeGeographicalData()
     QMap<QString,QList<int>> frequency; // <month,frequency>
 
 
-    emit handlingGeographicalData(SHOW_PROGESS_VALUE);
 
     int min = INT_MAX;
     int max = INT_MIN;
@@ -334,9 +375,6 @@ void DataHandler::takeGeographicalData()
             locations.append(QString::fromStdString(water.getLocation()));
         }
     }
-
-    // assume it took 30%
-    emit handlingGeographicalData(30);
 
     // fill for all 12 months
     frequency["Jan"] = QList<int>(locations.size(), 0);
@@ -363,8 +401,6 @@ void DataHandler::takeGeographicalData()
         frequency[month][index] += 1;
     }
 
-    // assume it took 70%
-    emit handlingGeographicalData(70);
     // find min and max frequency
     for (const auto &month : frequency)
     {
@@ -381,7 +417,4 @@ void DataHandler::takeGeographicalData()
         }
     }
 
-    // assume it took 100%
-    emit handlingGeographicalData(99);
-    emit geographicalDataReady(locations, frequency, min, max);
 }

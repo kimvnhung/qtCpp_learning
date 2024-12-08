@@ -110,6 +110,15 @@ void OverviewChartWidget::onExpanded()
     m_stackWidget->setCurrentIndex(1);
 }
 
+void OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString, QList<double>> results, double maxValue)
+{
+    auto chart = m_listChart->at(2);
+    auto environmentalLitterChart = dynamic_cast<EnvironmentalLitterIndicatorsChart*>(chart);
+    if (environmentalLitterChart) {
+        environmentalLitterChart->updateChart(locations, materials, results, maxValue);
+    }
+}
+
 void OverviewChartWidget::setUpChart()
 {
     m_listChart = new QList<ChartWidget*>;

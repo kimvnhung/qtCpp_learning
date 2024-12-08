@@ -6,8 +6,11 @@
 
 GeneralDashboard::GeneralDashboard(QWidget *parent)
     : QWidget{parent}
+    , m_dataHandler{new DataHandler}
 {
     initializeUi();
+
+    setUpDataHandler();
 }
 
 //private
@@ -27,9 +30,25 @@ void GeneralDashboard::initializeUi()
 
     //Set up the status bar
     setUpStatusBar();
+    setUpPreventDialog();
 
     setLayout(m_mainLayout);
     setMinimumSize(1280,720);
+}
+
+void GeneralDashboard::setUpDataHandler()
+{
+    connect(m_settingPanel, &SettingPanel::csvFileAvailable, m_dataHandler, &DataHandler::loadData);
+    connect(m_dataHandler, &DataHandler::processingMessage, this, &GeneralDashboard::setProcessingMessage);
+    connect(m_dataHandler, &DataHandler::handling, this, &GeneralDashboard::onProcessing);
+    connect(m_dataHandler, &DataHandler::environmentalLitterIndicatorsDataReady, m_chartPanel, &OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated);
+    connect(m_dataHandler, &DataHandler::locationsChanged, m_settingPanel, &SettingPanel::setLocationsFilter);
+    connect(m_dataHandler, &DataHandler::materialsChanged, m_settingPanel, &SettingPanel::setMaterialFilter);
+
+    connect(m_settingPanel, &SettingPanel::materialFilterChanged, m_dataHandler, &DataHandler::setFilteredMaterials);
+    connect(m_settingPanel, &SettingPanel::locationFilterChanged, m_dataHandler, &DataHandler::setFilteredLocations);
+
+    m_dataHandler->start();
 }
 
 void GeneralDashboard::setUpHeader()
@@ -75,17 +94,19 @@ void GeneralDashboard::setUpPreventDialog()
     m_dialog = new QDialog(this);
     m_dialog->setWindowTitle("Processing...");
     m_dialog->setModal(true);
-    m_dialog->setFixedSize(400, 200);
+    m_dialog->setFixedSize(300, 100);
 
     QVBoxLayout *layout = new QVBoxLayout;
     m_dialog->setLayout(layout);
 
     QLabel *label = new QLabel("Please wait while we process the data...");
+    label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 }
 
 void GeneralDashboard::onProcessing(int percent)
 {
+    LOGD(QString("percent %1").arg(percent));
     if(percent == HIDE_PROGRESS_VALUE)
     {
         m_dialog->close();
@@ -101,5 +122,6 @@ void GeneralDashboard::onProcessing(int percent)
 
 void GeneralDashboard::setProcessingMessage(QString message)
 {
+    LOGD(message);
     m_statusBar->setText(message);
 }

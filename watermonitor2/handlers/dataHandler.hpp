@@ -15,33 +15,17 @@ public:
     DataHandler(QObject *parent = nullptr);
     ~DataHandler();
 
-    void loadData(const std::string &filename);
-
     std::vector<Water> getData() const { return m_data; }
 
 signals:
     void dataReady();
     void chartDataReady();
     void handling(int percent);
+    void processingMessage(QString message);
+    void environmentalLitterIndicatorsDataReady(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
 
-    void handlingGeographicalData(int percent);
-    void geographicalDataReady(QStringList locations, QMap<QString,QList<int>> frequency, int min, int max);
-
-    void handlingPollutantOverviewData(int percent);
-    void pollutantOverviewDataReady(QStringList materials, QList<int> counts, QList<double> avgs, int maxCount, double maxAvg);
-
-    void handlingComplianceDashboardData(int percent);
-    void complianceDashboardDataReady(int trueCount, int falseCount);
-
-    void handlingPOPData(int percent);
-    void POPDataReady(QList<double> values, double max, double min);
-
-    void handlingFluorinatedCompoundsData(int percent);
-    void fluorinatedCompoundsDataReady(QMap<QString, int> frequency);
-
-    void handlingEnvironmentalLitterIndicatorsData(int percent);
-    void environmentalLitterIndicatorsDataReady(QMap<QString, int> frequency);
-
+    void locationsChanged(QStringList locations);
+    void materialsChanged(QStringList materials);
 public slots:
     void stop();
 
@@ -51,6 +35,10 @@ public slots:
     void triggerPOP();
     void triggerFluorinatedCompounds();
     void triggerEnvironmentalLitterIndicators();
+
+    void loadData(QString filename);
+    void setFilteredLocations(QStringList locations);
+    void setFilteredMaterials(QStringList materials);
 
 protected:
     void run() override;
@@ -68,6 +56,8 @@ private:
     bool m_isFluorinatedCompoundsTriggered;
     bool m_isEnvironmentalLitterIndicatorsTriggered;
 
+    bool m_isFilteredChanged;
+
     bool loading();
 
     void takeGeographicalData();
@@ -77,6 +67,8 @@ private:
     void takeFluorinatedCompoundsData();
     void takeEnvironmentalLitterIndicatorsData();
 
+    QStringList m_filteredLocations;
+    QStringList m_filteredMaterials;
 };
 
 #endif // DATAHANDLER_HPP
