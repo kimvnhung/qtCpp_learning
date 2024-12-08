@@ -39,11 +39,7 @@ void ChartHolderBaseWidget::initializeUi()
 {
     LOG();
     m_mainLayout = new QGridLayout;
-
     setUpChart();
-    setUpPreviewWidget();
-    setUpExpandedWidget();
-
     setLayout(m_mainLayout);
 
     setMode(PREVIEW);
@@ -58,10 +54,9 @@ void ChartHolderBaseWidget::setUpPreviewWidget()
     if(m_previewWidget)
     {
         if(m_chartContent)
-            m_previewWidget->layout()->addWidget(chartWidget());
+            m_previewWidget->layout()->addWidget(m_chartContent);
     }
-    else
-    {
+    else{
         m_previewWidget = new QWidget;
         m_previewWidget->setStyleSheet("background-color: #ffffff;");
         QVBoxLayout *layout = new QVBoxLayout;
@@ -69,47 +64,35 @@ void ChartHolderBaseWidget::setUpPreviewWidget()
         if(m_chartContent)
             layout->addWidget(m_chartContent);
     }
+
+    acceptClickEvents(m_previewWidget,false);
 }
 
 void ChartHolderBaseWidget::setUpExpandedWidget()
 {
     // Set Size Policy
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    if(m_expandedWidget)
-    {
-        if(m_chartContent)
-            m_expandedWidget->layout()->addWidget(chartWidget());
-    }
-    else
-    {
-        m_expandedWidget = new QWidget;
-        m_expandedWidget->setStyleSheet("background-color: #ffffff;");
-        QVBoxLayout *layout = new QVBoxLayout;
-        m_expandedWidget->setLayout(layout);
-        if(m_chartContent)
-            layout->addWidget(m_chartContent);
-    }
+    // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    // m_expandedWidget = new QWidget;
+    // m_expandedWidget->setStyleSheet("background-color: #ffffff;");
+    // QVBoxLayout *layout = new QVBoxLayout;
+    // m_expandedWidget->setLayout(layout);
+    // if(m_chartContent)
+    //     layout->addWidget(m_chartContent);
 }
 
 void ChartHolderBaseWidget::switchMode()
 {
     LOGD(QString("m_isPreview %1").arg(m_viewMode));
+    // Clean up the existing widget
+    // Clean on the main layout
+
     if(m_viewMode == PREVIEW)
     {
         setFixedSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
         setUpPreviewWidget();
-        m_mainLayout->removeWidget(m_expandedWidget);
         m_mainLayout->addWidget(m_previewWidget);
+        LOGD(QString("m_previewWidgetSize %1x%2").arg(m_previewWidget->width()).arg(m_previewWidget->height()));
     }
-    else
-    {
-        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        setFixedSize(EXPANDED_WIDTH, EXPANDED_HEIGHT);
-        setUpExpandedWidget();
-        m_mainLayout->removeWidget(m_previewWidget);
-        m_mainLayout->addWidget(m_expandedWidget);
-    }
-
 }
 
 QGridLayout *ChartHolderBaseWidget::mainLayout() const

@@ -20,6 +20,7 @@ public:
     };
 
     void setMode(ViewMode mode);
+    QChartView *chartWidget() const ;
 
 signals:
     void expanded();
@@ -34,7 +35,7 @@ protected:
     QWidget *expandedWidget() const;
 
     void setChartWidget(QChartView *chartContent);
-    QChartView *chartWidget() const ;
+
 
 
     // Handle extended functionality

@@ -33,6 +33,7 @@ enum FilterType {
 #define SHOW_PROGESS_VALUE 0
 #define HIDE_PROGRESS_VALUE -1
 
+void acceptClickEvents(QWidget *widget, bool isAccept = true);
 
 
 #endif // COMMON_H

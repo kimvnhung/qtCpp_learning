@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QStackedWidget>
+#include <QChartView>
 #include "charts/popschart.h"
 #include "common.h"
 
@@ -77,16 +78,26 @@ void OverviewChartWidget::setUpExpandedWidget()
 
 void OverviewChartWidget::onBackButtonClicked()
 {
+    if(m_interactiveIndex != INTERACTIVE_INDEX_EMPTY) {
+        setPreviewMode();
+        m_interactiveIndex = INTERACTIVE_INDEX_EMPTY;
+    }
+    else
+        LOGD("Interactive index is empty");
     m_stackWidget->setCurrentIndex(0);
-    setPreviewMode();
 }
 
 void OverviewChartWidget::onExpanded()
 {
     // Embbed the chart into the expanded widget
+    // Remove widget at index 1 of m_expandedWidget
+    auto item = m_expandedWidget->layout()->takeAt(1);
+    if(item == nullptr)
+        LOGD("No item to take");
+
     auto chart = qobject_cast<ChartWidget*>(sender());
     chart->setMode(ChartWidget::EXPANDED);
-    static_cast<QVBoxLayout*>(m_expandedWidget->layout())->addWidget(chart);
+    static_cast<QVBoxLayout*>(m_expandedWidget->layout())->addWidget(chart->chartWidget());
 
     //Find the interactive index
     for (int i = 0; i < m_listChart->size(); ++i) {
@@ -113,11 +124,6 @@ void OverviewChartWidget::setUpChart()
         connect(chart, &ChartWidget::expanded, this, &OverviewChartWidget::onExpanded);
         m_previewLayout->addWidget(chart, i / 2, i % 2);
     }
-
-    if(m_isPreview)
-        setPreviewMode();
-    else
-        setExpandedMode();
 }
 
 void OverviewChartWidget::setPreview()
@@ -135,8 +141,9 @@ void OverviewChartWidget::setExpanded(int index)
 
 void OverviewChartWidget::setPreviewMode()
 {
-    for (auto chart : *m_listChart)
-        chart->setMode(ChartWidget::PREVIEW);
+    auto chart = m_listChart->at(m_interactiveIndex);
+    chart->setMode(ChartWidget::PREVIEW);
+    m_previewLayout->addWidget(chart, m_interactiveIndex / 2, m_interactiveIndex % 2);
 }
 
 void OverviewChartWidget::setExpandedMode()
