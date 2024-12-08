@@ -25,4 +25,14 @@
 #define SETTING_COLLAPSED "setting_collapsed"
 
 
+// Enum
+enum FilterType {
+    PASS
+};
+
+#define SHOW_PROGESS_VALUE 0
+#define HIDE_PROGRESS_VALUE -1
+
+
+
 #endif // COMMON_H

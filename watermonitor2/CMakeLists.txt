@@ -25,6 +25,8 @@ set(TS_FILES
 
 file(GLOB CHART_SOURCES charts/*.cpp)
 file(GLOB CHART_HEADERS charts/*.h)
+file(GLOB HANDLERS_SOURCES handlers/*.cpp)
+file(GLOB HANDLERS_HEADERS handlers/*.hpp)
 
 # Source files
 set(PROJECT_SOURCES
@@ -42,6 +44,10 @@ set(PROJECT_SOURCES
     images.qrc
     common.h
     common.cpp
+    expendablewidget.h
+    expendablewidget.cpp
+    ${HANDLERS_SOURCES}
+    ${HANDLERS_HEADERS}
     ${CHART_SOURCES}
     ${CHART_HEADERS}
 )
@@ -53,7 +59,6 @@ qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(water
         ${PROJECT_SOURCES}
-        expendablewidget.h expendablewidget.cpp
 
     )
 else()

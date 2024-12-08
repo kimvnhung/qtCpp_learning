@@ -179,6 +179,6 @@ void ChartHolderBaseWidget::mousePressEvent(QMouseEvent *event)
 
 void ChartHolderBaseWidget::resizeEvent(QResizeEvent *event)
 {
-    LOGD(QString("size %1x%2").arg(width()).arg(height()));
+    // LOGD(QString("size %1x%2").arg(width()).arg(height()));
     QWidget::resizeEvent(event);
 }

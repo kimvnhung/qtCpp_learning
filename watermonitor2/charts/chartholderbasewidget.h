@@ -44,11 +44,12 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
 
     void resizeEvent(QResizeEvent *event) override;
+
 private:
     QGridLayout *m_mainLayout;
 
-    QWidget *m_previewWidget;
-    QWidget *m_expandedWidget;
+    QWidget *m_previewWidget = nullptr;
+    QWidget *m_expandedWidget = nullptr;
 
     QChartView *m_chartContent = nullptr;
 

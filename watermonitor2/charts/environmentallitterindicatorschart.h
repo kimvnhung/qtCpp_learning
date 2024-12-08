@@ -9,6 +9,9 @@ class EnvironmentalLitterIndicatorsChart : public ChartHolderBaseWidget
 public:
     explicit EnvironmentalLitterIndicatorsChart(QWidget *parent = nullptr);
 
+public slots:
+    void updateChart();
+
 protected:
     void setUpChart() override;
 };

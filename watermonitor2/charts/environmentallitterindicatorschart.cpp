@@ -21,8 +21,8 @@ void EnvironmentalLitterIndicatorsChart::setUpChart()
 {
     LOG();
     // Create bar sets for materials
-    QBarSet *material1 = new QBarSet("Material 1");
-    QBarSet *material2 = new QBarSet("Material 2");
+    QBarSet *material1 = new QBarSet("Platics");
+    QBarSet *material2 = new QBarSet("Organics");
     QBarSet *material3 = new QBarSet("Material 3");
 
     // Add data for locations and times
@@ -39,11 +39,11 @@ void EnvironmentalLitterIndicatorsChart::setUpChart()
     // Create the chart
     QChart *chart = new QChart();
     chart->addSeries(stackedSeries);
-    chart->setTitle("Stacked Bar Chart");
+    chart->setTitle("Environmental Litter Indicators");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
     // Set categories for X-axis (e.g., times)
-    QStringList categories = {"Time 1", "Time 2", "Time 3"};
+    QStringList categories = {"NewYour", "Paris", "Somewhere"};
     QBarCategoryAxis *axisX = new QBarCategoryAxis();
     axisX->append(categories);
     chart->addAxis(axisX, Qt::AlignBottom);
@@ -58,4 +58,25 @@ void EnvironmentalLitterIndicatorsChart::setUpChart()
     // Create a chart view
     setChartWidget(new QChartView(chart));
     chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
+}
+
+void EnvironmentalLitterIndicatorsChart::updateChart()
+{
+    LOG();
+    // Update the chart data
+    QChart *chart = static_cast<QChartView *>(chartWidget())->chart();
+    QStackedBarSeries *stackedSeries = static_cast<QStackedBarSeries *>(chart->series().at(0));
+
+    // Update the data for each material
+    QBarSet *material1 = stackedSeries->barSets().at(0);
+    QBarSet *material2 = stackedSeries->barSets().at(1);
+    QBarSet *material3 = stackedSeries->barSets().at(2);
+
+    // Update the data for locations and times
+    *material1 << 40 << 50 << 60;  // New data for time 1, 2, 3
+    *material2 << 45 << 55 << 65;
+    *material3 << 35 << 45 << 55;
+
+    // Update the chart
+    chart->update();
 }
