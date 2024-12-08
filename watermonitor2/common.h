@@ -13,7 +13,7 @@
 #define GET_BOOL(key) GET_VALUE(key).toBool()
 #define GET_DOUBLE(key) GET_VALUE(key).toDouble()
 
-#define LOGE(msg) qCritical() << __FUNCTION__ << __LINE__ << msg
+#define LOGE(msg) qCritical() <<__FUNCTION__ << __LINE__ << msg
 #define LOGD(msg) qDebug() << __FUNCTION__ << __LINE__ << msg
 #define LOGI(msg) qInfo() << __FUNCTION__ << __LINE__ << msg
 #define LOGW(msg) qWarning() << __FUNCTION__ << __LINE__ << msg

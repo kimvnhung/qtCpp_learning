@@ -5,6 +5,7 @@
 
 class QChartView;
 class QGridLayout;
+class QPropertyAnimation;
 
 class ChartHolderBaseWidget : public QWidget
 {
@@ -12,12 +13,37 @@ class ChartHolderBaseWidget : public QWidget
 public:
     explicit ChartHolderBaseWidget(QWidget *parent = nullptr);
 
-    void setMode(bool isPreview);
+    enum ViewMode {
+        UNDEFINED,
+        PREVIEW,
+        EXPANDED
+    };
+
+    void setMode(ViewMode mode);
 
 signals:
     void expanded();
     void collapsed();
 
+protected:
+    virtual void setUpChart() = 0;
+    void initializeUi();
+
+    QGridLayout *mainLayout() const;
+    QWidget *previewWidget() const;
+    QWidget *expandedWidget() const;
+
+    void setChartWidget(QChartView *chartContent);
+    QChartView *chartWidget() const ;
+
+
+    // Handle extended functionality
+    void enterEvent(QEnterEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+
+    void resizeEvent(QResizeEvent *event) override;
 private:
     QGridLayout *m_mainLayout;
 
@@ -26,11 +52,11 @@ private:
 
     QChartView *m_chartContent = nullptr;
 
-    bool m_isPreview;
+    ViewMode m_viewMode = UNDEFINED;
+
+    bool m_isHovered;
 
 private:
-    void initializeUi();
-
     void setUpPreviewWidget();
 
     void setUpExpandedWidget();

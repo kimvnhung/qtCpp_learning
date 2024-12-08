@@ -1,50 +1,184 @@
 #include "chartholderbasewidget.h"
 
+
+#include "../common.h"
 #include <QGridLayout>
+#include <QLabel>
+#include <QChartView>
+#include <QPropertyAnimation>
+
+#define PREVIEW_WIDTH 400
+#define PREVIEW_HEIGHT 200
+
+#define EXPANDED_WIDTH 900
+#define EXPANDED_HEIGHT 500
+
+#define DEFAULT_COLOR QColor(255, 255, 255,0)
+// Grey background when hovered
+#define HOVER_COLOR QColor(220, 220, 220)
+
 
 ChartHolderBaseWidget::ChartHolderBaseWidget(QWidget *parent)
     : QWidget{parent}
-    , m_isPreview{true}
+    , m_viewMode{UNDEFINED}
+    , m_isHovered{false}
 {
-    initializeUi();
 }
 
-void ChartHolderBaseWidget::setMode(bool isPreview)
+void ChartHolderBaseWidget::setMode(ViewMode mode)
 {
-    m_isPreview = isPreview;
+    LOGD(QString("mode %1").arg(mode));
+    if(m_viewMode == mode)
+        return;
+
+    m_viewMode = mode;
     switchMode();
 }
 
 void ChartHolderBaseWidget::initializeUi()
 {
+    LOG();
     m_mainLayout = new QGridLayout;
 
+    setUpChart();
     setUpPreviewWidget();
     setUpExpandedWidget();
 
     setLayout(m_mainLayout);
+
+    setMode(PREVIEW);
 }
 
 void ChartHolderBaseWidget::setUpPreviewWidget()
 {
+    LOG();
     // Set Size Policy
-    setBaseSize(400,200);
+    setBaseSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    if(m_previewWidget)
+    {
+        if(m_chartContent)
+            m_previewWidget->layout()->addWidget(chartWidget());
+    }
+    else
+    {
+        m_previewWidget = new QWidget;
+        m_previewWidget->setStyleSheet("background-color: #ffffff;");
+        QVBoxLayout *layout = new QVBoxLayout;
+        m_previewWidget->setLayout(layout);
+        if(m_chartContent)
+            layout->addWidget(m_chartContent);
+    }
 }
 
 void ChartHolderBaseWidget::setUpExpandedWidget()
 {
     // Set Size Policy
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    if(m_expandedWidget)
+    {
+        if(m_chartContent)
+            m_expandedWidget->layout()->addWidget(chartWidget());
+    }
+    else
+    {
+        m_expandedWidget = new QWidget;
+        m_expandedWidget->setStyleSheet("background-color: #ffffff;");
+        QVBoxLayout *layout = new QVBoxLayout;
+        m_expandedWidget->setLayout(layout);
+        if(m_chartContent)
+            layout->addWidget(m_chartContent);
+    }
 }
 
 void ChartHolderBaseWidget::switchMode()
 {
-    if (m_isPreview) {
+    LOGD(QString("m_isPreview %1").arg(m_viewMode));
+    if(m_viewMode == PREVIEW)
+    {
+        setFixedSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
         setUpPreviewWidget();
-    } else {
-        setUpExpandedWidget();
+        m_mainLayout->removeWidget(m_expandedWidget);
+        m_mainLayout->addWidget(m_previewWidget);
     }
+    else
+    {
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        setFixedSize(EXPANDED_WIDTH, EXPANDED_HEIGHT);
+        setUpExpandedWidget();
+        m_mainLayout->removeWidget(m_previewWidget);
+        m_mainLayout->addWidget(m_expandedWidget);
+    }
+
 }
 
+QGridLayout *ChartHolderBaseWidget::mainLayout() const
+{
+    return m_mainLayout;
+}
 
+QWidget *ChartHolderBaseWidget::previewWidget() const
+{
+    return m_previewWidget;
+}
+
+QWidget *ChartHolderBaseWidget::expandedWidget() const
+{
+    return m_expandedWidget;
+}
+
+void ChartHolderBaseWidget::setChartWidget(QChartView *chartContent)
+{
+    m_chartContent = chartContent;
+}
+
+QChartView *ChartHolderBaseWidget::chartWidget() const
+{
+    return m_chartContent;
+}
+
+void ChartHolderBaseWidget::enterEvent(QEnterEvent *event)
+{
+    // Set the target size for expansion (PREVIEW_WIDTH*1.2, PREVIEW_HEIGHT*1.2)
+    // setFixedSize(PREVIEW_WIDTH*1.2, PREVIEW_HEIGHT*1.2);
+    m_isHovered = true;
+    update();
+    raise();
+    QWidget::enterEvent(event);
+}
+
+void ChartHolderBaseWidget::leaveEvent(QEvent *event)
+{
+    // setFixedSize(PREVIEW_WIDTH, PREVIEW_HEIGHT); // Reset the size to the original size
+    m_isHovered = false;
+    update();
+    QWidget::leaveEvent(event);
+}
+
+void ChartHolderBaseWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+
+    if (m_isHovered) {
+        // Set the background color when hovered (highlight color)
+        painter.fillRect(rect(), HOVER_COLOR); // Light green background when hovered
+    } else {
+        // Default background color
+        painter.fillRect(rect(), DEFAULT_COLOR); // White background when not hovered
+    }
+
+    // Continue with the default painting
+    QWidget::paintEvent(event);
+}
+
+void ChartHolderBaseWidget::mousePressEvent(QMouseEvent *event)
+{
+    if (m_viewMode == PREVIEW)
+        emit expanded();
+}
+
+void ChartHolderBaseWidget::resizeEvent(QResizeEvent *event)
+{
+    LOGD(QString("size %1x%2").arg(width()).arg(height()));
+    QWidget::resizeEvent(event);
+}

@@ -27,7 +27,7 @@ void GeneralDashboard::initializeUi()
     setUpStatusBar();
 
     setLayout(m_mainLayout);
-    setMinimumSize(800,600);
+    setMinimumSize(1280,720);
 }
 
 void GeneralDashboard::setUpHeader()

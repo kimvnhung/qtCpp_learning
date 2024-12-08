@@ -1,15 +1,17 @@
 #ifndef POLLUTANTOVERVIEWCHART_H
 #define POLLUTANTOVERVIEWCHART_H
 
-#include <QWidget>
+#include "chartholderbasewidget.h"
 
-class PollutantOverviewChart : public QWidget
+class PollutantOverviewChart : public ChartHolderBaseWidget
+
 {
     Q_OBJECT
 public:
     explicit PollutantOverviewChart(QWidget *parent = nullptr);
 
-signals:
+protected:
+    void setUpChart() override;
 };
 
 #endif // POLLUTANTOVERVIEWCHART_H

@@ -13,6 +13,7 @@ StatusBar::StatusBar(QWidget *parent)
 
 void StatusBar::initializeUi()
 {
+    setMinimumHeight(70);
     m_mainLayout = new QVBoxLayout;
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
 
