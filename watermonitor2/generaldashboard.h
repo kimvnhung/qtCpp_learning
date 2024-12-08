@@ -14,13 +14,18 @@ class GeneralDashboard : public QWidget
 public:
     explicit GeneralDashboard(QWidget *parent = nullptr);
 
+
+public slots:
+    void onProcessing(int percent);
+    void setProcessingMessage(QString message);
+
 private:
     void initializeUi();
     void setUpHeader();
     void setUpSettingPanel();
     void setUpChartPanel();
     void setUpStatusBar();
-
+    void setUpPreventDialog();
 private:
     QVBoxLayout *m_mainLayout;
     QHBoxLayout *m_contentLayout;
@@ -28,6 +33,7 @@ private:
     OverviewChartWidget *m_chartPanel;
     StatusBar *m_statusBar;
 
+    QDialog *m_dialog;
 };
 
 #endif // GENERALDASHBOARD_H

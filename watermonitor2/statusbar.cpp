@@ -57,3 +57,13 @@ void StatusBar::setUpOverlayText()
 
     m_mainLayout->addWidget(m_overlayText);
 }
+
+void StatusBar::setValue(int value)
+{
+    m_progressBar->setValue(value);
+}
+
+void StatusBar::setText(const QString &text)
+{
+    m_overlayText->setText(text);
+}
