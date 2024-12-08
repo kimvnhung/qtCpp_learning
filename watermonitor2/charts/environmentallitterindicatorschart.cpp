@@ -2,9 +2,13 @@
 
 #include "../common.h"
 
+#include <QBarCategoryAxis>
+#include <QBarSet>
 #include <QChart>
 #include <QChartView>
 #include <QPieSeries>
+#include <QStackedBarSeries>
+#include <QValueAxis>
 
 EnvironmentalLitterIndicatorsChart::EnvironmentalLitterIndicatorsChart(QWidget *parent)
     : ChartHolderBaseWidget{parent}
@@ -16,25 +20,40 @@ EnvironmentalLitterIndicatorsChart::EnvironmentalLitterIndicatorsChart(QWidget *
 void EnvironmentalLitterIndicatorsChart::setUpChart()
 {
     LOG();
-    // Create a pie series
-    QPieSeries *series = new QPieSeries();
-    series->append("Category A", 40); // Add slices
-    series->append("Category B", 30);
-    series->append("Category C", 20);
-    series->append("Category D", 10);
+    // Create bar sets for materials
+    QBarSet *material1 = new QBarSet("Material 1");
+    QBarSet *material2 = new QBarSet("Material 2");
+    QBarSet *material3 = new QBarSet("Material 3");
 
-    // Highlight a slice (optional)
-    QPieSlice *slice = series->slices().at(1); // Second slice (Category B)
-    slice->setExploded(true);
-    slice->setLabelVisible(true);
-    slice->setPen(QPen(Qt::darkGreen, 2));
-    slice->setBrush(Qt::green);
+    // Add data for locations and times
+    *material1 << 10 << 20 << 30;  // Data for time 1, 2, 3
+    *material2 << 15 << 25 << 35;
+    *material3 << 5 << 15 << 25;
 
-    // Create a chart and add the pie series
+    // Create a stacked bar series
+    QStackedBarSeries *stackedSeries = new QStackedBarSeries();
+    stackedSeries->append(material1);
+    stackedSeries->append(material2);
+    stackedSeries->append(material3);
+
+    // Create the chart
     QChart *chart = new QChart();
-    chart->addSeries(series);
-    chart->setTitle("Environmental Litter Indicators");
-    chart->legend()->setAlignment(Qt::AlignBottom);
+    chart->addSeries(stackedSeries);
+    chart->setTitle("Stacked Bar Chart");
+    chart->setAnimationOptions(QChart::SeriesAnimations);
+
+    // Set categories for X-axis (e.g., times)
+    QStringList categories = {"Time 1", "Time 2", "Time 3"};
+    QBarCategoryAxis *axisX = new QBarCategoryAxis();
+    axisX->append(categories);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    stackedSeries->attachAxis(axisX);
+
+    // Set Y-axis
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setRange(0, 100);  // Adjust range as needed
+    chart->addAxis(axisY, Qt::AlignLeft);
+    stackedSeries->attachAxis(axisY);
 
     // Create a chart view
     setChartWidget(new QChartView(chart));

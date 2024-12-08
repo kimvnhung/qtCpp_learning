@@ -111,6 +111,7 @@ void OverviewChartWidget::setUpChart()
     for (int i = 0; i < m_listChart->size(); ++i) {
         auto chart = m_listChart->at(i);
         connect(chart, &ChartWidget::expanded, this, &OverviewChartWidget::onExpanded);
+        m_previewLayout->addWidget(chart, i / 2, i % 2);
     }
 
     if(m_isPreview)
@@ -134,9 +135,8 @@ void OverviewChartWidget::setExpanded(int index)
 
 void OverviewChartWidget::setPreviewMode()
 {
-    for (int i = 0; i < m_listChart->size(); i++) {
-
-    }
+    for (auto chart : *m_listChart)
+        chart->setMode(ChartWidget::PREVIEW);
 }
 
 void OverviewChartWidget::setExpandedMode()
