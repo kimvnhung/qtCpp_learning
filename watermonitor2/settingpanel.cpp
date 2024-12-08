@@ -134,6 +134,10 @@ void SettingPanel::setUpContent()
     m_filePathEdit->setPlaceholderText("Select a file...");
     m_filePathEdit->setReadOnly(true);
 
+    if(!GET_STRING(CSV_FILE_PATH).isEmpty()) {
+        m_filePathEdit->setText(GET_STRING(CSV_FILE_PATH));
+    }
+
     QHBoxLayout *openFileButtonLayout = new QHBoxLayout;
     QPushButton *openFileButton = new QPushButton("Open", this);
     connect(openFileButton, &QPushButton::clicked, this, &SettingPanel::onOpenFileClicked);
@@ -157,5 +161,6 @@ void SettingPanel::onOpenFileClicked()
     QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::homePath());
     if (!filePath.isEmpty()) {
         m_filePathEdit->setText(filePath);
+        SET_VALUE(CSV_FILE_PATH, filePath);
     }
 }
