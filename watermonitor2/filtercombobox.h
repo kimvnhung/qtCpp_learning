@@ -17,8 +17,6 @@ signals:
     void checkedItemsChanged(const QStringList& checkedItems);
 
 private slots:
-    // Filter items based on user input
-    void filterItems(const QString& text);
     void handleActivatedItem(int index);
 private:
     void setAllItemsCheckState(Qt::CheckState state);

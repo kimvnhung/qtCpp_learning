@@ -252,8 +252,11 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
             LOGD("Material not found");
             continue;
         }
-        avgResults[QString::fromStdString(water.getLocation())][materialIndex] += water.getResult();
-        counts[QString::fromStdString(water.getLocation())][materialIndex] += 1;
+
+        if(locations.contains(QString::fromStdString(water.getLocation()))){
+            avgResults[QString::fromStdString(water.getLocation())][materialIndex] += water.getResult();
+            counts[QString::fromStdString(water.getLocation())][materialIndex] += 1;
+        }
     }
 
     // Calculate average
@@ -274,12 +277,15 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
     double maxValue = 0;
     for (const auto &location : locations)
     {
+        double sum = 0;
         for (int i = 0; i < materials.size(); ++i)
         {
-            if(avgResults[location][i] > maxValue)
-            {
-                maxValue = avgResults[location][i];
-            }
+            sum += avgResults[location][i];
+        }
+
+        if(sum > maxValue)
+        {
+            maxValue = sum;
         }
     }
 
