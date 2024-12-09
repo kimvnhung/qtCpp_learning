@@ -194,6 +194,9 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
     QStringList locations;
     QStringList materials;
 
+    emit handling(SHOW_PROGESS_VALUE);
+    emit processingMessage("Processing chart data...");
+
     if(isFilteredChanged())
     {
         locations = m_filteredLocations;
@@ -223,6 +226,8 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
         m_filteredMaterials = materials;
     }
 
+    emit handling(30);
+
     // Init map
     QMap<QString,QList<double>> avgResults; // <location, <material,results>>
     // Number of material sample at location
@@ -235,10 +240,13 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
         counts[location] = QList<int>(materials.size(), 0);
     }
 
+    emit handling(50);
+
     if(locations.isEmpty())
     {
         emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, 100);
         setIsFilteredChanged(false);
+        emit handling(HIDE_PROGRESS_VALUE);
         return;
     }
 
@@ -259,6 +267,8 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
         }
     }
 
+    emit handling(70);
+
     // Calculate average
     for (const auto &location : locations)
     {
@@ -272,6 +282,8 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
                 avgResults[location][i] = 0;
         }
     }
+
+    emit handling(90);
 
     // Find max value
     double maxValue = 0;
@@ -288,21 +300,22 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
             maxValue = sum;
         }
     }
-
+    emit handling(HIDE_PROGRESS_VALUE);
+    emit processingMessage("");
     emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, maxValue);
     setIsFilteredChanged(false);
 }
 
 void DataHandler::setIsFilteredChanged(bool changed)
 {
-    QMutexLocker locker(&mutex);
+    // QMutexLocker locker(&mutex);
     LOGD(QString("changed %1").arg(changed));
     m_isFilteredChanged = changed;
 }
 
 bool DataHandler::isFilteredChanged()
 {
-    QMutexLocker locker(&mutex);
+    // QMutexLocker locker(&mutex);
     return m_isFilteredChanged;
 }
 

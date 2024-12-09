@@ -10,6 +10,7 @@ class PollutantOverviewChart : public ChartHolderBaseWidget
 public:
     explicit PollutantOverviewChart(QWidget *parent = nullptr);
 
+    QString summary() const override;
 protected:
     void setUpChart() override;
 };

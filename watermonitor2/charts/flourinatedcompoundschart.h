@@ -9,6 +9,7 @@ class FlourinatedCompoundsChart : public ChartHolderBaseWidget
 public:
     explicit FlourinatedCompoundsChart(QWidget *parent = nullptr);
 
+    QString summary() const override;
 protected:
     void setUpChart() override;
 };

@@ -61,3 +61,8 @@ void FlourinatedCompoundsChart::setUpChart()
     setChartWidget(new QChartView(chart));
     chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
+
+QString FlourinatedCompoundsChart::summary() const
+{
+    return "This chart displays the frequency of flourinated compounds in different bins.";
+}

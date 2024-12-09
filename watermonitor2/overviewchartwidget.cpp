@@ -68,8 +68,19 @@ void OverviewChartWidget::setUpExpandedWidget()
     backButton->setMinimumSize(100, 30);
     connect(backButton, &QPushButton::clicked, this, &OverviewChartWidget::onBackButtonClicked);
     QHBoxLayout *buttonLayout = new QHBoxLayout;
+
+    QLabel *sumaryText = new QLabel("Summary");
+    sumaryText->setStyleSheet("font-size: 20px; font-weight: bold;");
+    sumaryText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    sumaryText->setMinimumSize(100, 30);
+    sumaryText->setAlignment(Qt::AlignCenter);
+
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(sumaryText);
     buttonLayout->addStretch();
     buttonLayout->addWidget(backButton);
+
+    LOGD(QString("Children count: %1").arg(buttonLayout->count()));
 
     layout->addLayout(buttonLayout);
 
@@ -98,6 +109,20 @@ void OverviewChartWidget::onExpanded()
     auto chart = qobject_cast<ChartWidget*>(sender());
     chart->setMode(ChartWidget::EXPANDED);
     static_cast<QVBoxLayout*>(m_expandedWidget->layout())->addWidget(chart->chartWidget());
+
+    auto buttonLayout = m_expandedWidget->layout()->itemAt(0);
+    if(buttonLayout == nullptr)
+        LOGD("No button layout found");
+    else {
+        LOGD(QString("Children count: %1").arg(buttonLayout->layout()->count()));
+
+        auto summaryText = qobject_cast<QLabel*>(buttonLayout->layout()->itemAt(1)->widget());
+        if(summaryText)
+            summaryText->setText(chart->summary());
+        else
+            LOGD("No summary text found");
+    }
+
 
     //Find the interactive index
     for (int i = 0; i < m_listChart->size(); ++i) {

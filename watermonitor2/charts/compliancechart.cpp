@@ -56,3 +56,8 @@ void ComplianceChart::setUpChart()
     setChartWidget(new QChartView(chart));
     chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
+
+QString ComplianceChart::summary() const
+{
+    return "This chart shows compliance data.";
+}

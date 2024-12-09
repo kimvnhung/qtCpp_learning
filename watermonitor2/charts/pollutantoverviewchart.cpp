@@ -35,3 +35,8 @@ void PollutantOverviewChart::setUpChart()
     setChartWidget(new QChartView(chart));
     chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
+
+QString PollutantOverviewChart::summary() const
+{
+    return "This chart provides an overview of pollutants.";
+}

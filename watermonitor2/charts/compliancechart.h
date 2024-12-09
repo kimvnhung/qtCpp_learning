@@ -11,6 +11,7 @@ class ComplianceChart : public ChartHolderBaseWidget
 public:
     explicit ComplianceChart(QWidget *parent = nullptr);
 
+    QString summary() const override;
 private:
     void setUpChart() override;
 };

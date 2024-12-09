@@ -9,6 +9,7 @@ class POPsChart : public ChartHolderBaseWidget
 public:
     explicit POPsChart(QWidget *parent = nullptr);
 
+    QString summary() const override;
 protected:
     void setUpChart() override;
 };

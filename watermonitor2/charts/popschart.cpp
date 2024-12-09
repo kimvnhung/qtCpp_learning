@@ -53,3 +53,8 @@ void POPsChart::setUpChart()
     setChartWidget(new QChartView(chart));
     chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
+
+QString POPsChart::summary() const
+{
+    return "This chart displays Persistent Organic Pollutants (POPs) data.";
+}

@@ -21,6 +21,7 @@ public:
 
     void setMode(ViewMode mode);
     QChartView *chartWidget() const ;
+    virtual QString summary() const = 0;
 
 signals:
     void expanded();

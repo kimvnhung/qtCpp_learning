@@ -9,6 +9,7 @@ class EnvironmentalLitterIndicatorsChart : public ChartHolderBaseWidget
 public:
     explicit EnvironmentalLitterIndicatorsChart(QWidget *parent = nullptr);
 
+    QString summary() const override;
 public slots:
     void updateChart(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
 

@@ -116,7 +116,7 @@ void GeneralDashboard::setUpPreventDialog()
 
 void GeneralDashboard::onProcessing(int percent)
 {
-    LOGD(QString("percent %1").arg(percent));
+    // LOGD(QString("percent %1").arg(percent));
     if(percent == HIDE_PROGRESS_VALUE)
     {
         m_dialog->close();
@@ -133,5 +133,8 @@ void GeneralDashboard::onProcessing(int percent)
 void GeneralDashboard::setProcessingMessage(QString message)
 {
     LOGD(message);
-    m_statusBar->setText(message);
+    if(!message.isEmpty())
+        m_statusBar->setText(message);
+    else
+        m_statusBar->setText("Processing...");
 }
