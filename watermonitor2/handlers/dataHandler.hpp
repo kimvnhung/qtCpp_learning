@@ -3,6 +3,7 @@
 #ifndef DATAHANDLER_HPP
 #define DATAHANDLER_HPP
 
+#include <QMutex>
 #include <QObject>
 #include <QThread>
 #include <vector>
@@ -44,6 +45,7 @@ protected:
     void run() override;
 
 private:
+    QMutex mutex;
     std::vector<Water> m_data;
     QString m_filename;
     bool m_isRunning;
@@ -57,6 +59,8 @@ private:
     bool m_isEnvironmentalLitterIndicatorsTriggered;
 
     bool m_isFilteredChanged;
+    void setIsFilteredChanged(bool changed);
+    bool isFilteredChanged();
 
     bool loading();
 

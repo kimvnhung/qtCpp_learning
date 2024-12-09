@@ -13,6 +13,16 @@ GeneralDashboard::GeneralDashboard(QWidget *parent)
     setUpDataHandler();
 }
 
+GeneralDashboard::~GeneralDashboard()
+{
+    if(m_dataHandler)
+    {
+        m_dataHandler->stop();
+        m_dataHandler->wait();
+        delete m_dataHandler;
+    }
+}
+
 //private
 void GeneralDashboard::initializeUi()
 {

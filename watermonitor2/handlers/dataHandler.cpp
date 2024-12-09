@@ -17,7 +17,7 @@ void DataHandler::run()
     LOG();
     m_isRunning = true;
     bool markedForReloadChart = false;
-    m_isFilteredChanged = false;
+    setIsFilteredChanged(false);
     while (m_isRunning)
     {
         // Do something
@@ -36,7 +36,7 @@ void DataHandler::run()
 
         if(m_isLoaded)
         {
-            if(markedForReloadChart || m_isFilteredChanged)
+            if(markedForReloadChart || isFilteredChanged())
             {
                 // takeGeographicalData();
                 // takePollutantOverviewData();
@@ -47,9 +47,7 @@ void DataHandler::run()
                 markedForReloadChart = false;
             }
         }
-
-
-
+        QThread::msleep(100);
     }
     stop();
 }
@@ -192,10 +190,11 @@ void DataHandler::takeFluorinatedCompoundsData()
 
 void DataHandler::takeEnvironmentalLitterIndicatorsData()
 {
+    LOGD(QString("m_isFilteredChanged %1").arg(m_isFilteredChanged));
     QStringList locations;
     QStringList materials;
 
-    if(m_isFilteredChanged)
+    if(isFilteredChanged())
     {
         locations = m_filteredLocations;
         materials = m_filteredMaterials;
@@ -219,6 +218,9 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
 
         emit locationsChanged(locations);
         emit materialsChanged(materials);
+
+        m_filteredLocations = locations;
+        m_filteredMaterials = materials;
     }
 
     // Init map
@@ -232,6 +234,14 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
         avgResults[location] = QList<double>(materials.size(), 0);
         counts[location] = QList<int>(materials.size(), 0);
     }
+
+    if(locations.isEmpty())
+    {
+        emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, 100);
+        setIsFilteredChanged(false);
+        return;
+    }
+
 
     for(const auto &water : m_data)
     {
@@ -274,7 +284,20 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
     }
 
     emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, maxValue);
-    m_isFilteredChanged = false;
+    setIsFilteredChanged(false);
+}
+
+void DataHandler::setIsFilteredChanged(bool changed)
+{
+    QMutexLocker locker(&mutex);
+    LOGD(QString("changed %1").arg(changed));
+    m_isFilteredChanged = changed;
+}
+
+bool DataHandler::isFilteredChanged()
+{
+    QMutexLocker locker(&mutex);
+    return m_isFilteredChanged;
 }
 
 
@@ -339,21 +362,23 @@ void DataHandler::loadData(QString filename)
 
 void DataHandler::setFilteredLocations(QStringList locations)
 {
-    LOG();
-    if(m_filteredLocations != locations)
+    LOGD(QString("locations.count %1").arg(locations.count()));
+    if(m_filteredLocations.count() != locations.count())
     {
-        m_filteredLocations = locations;
-        m_isFilteredChanged = true;
+        m_filteredLocations.clear();
+        m_filteredLocations.append(locations);
+        setIsFilteredChanged(true);
     }
 }
 
 void DataHandler::setFilteredMaterials(QStringList materials)
 {
-    LOG();
-    if(m_filteredMaterials != materials)
+    LOGD(QString("m_filteredMaterials.count %1, materials.count %2").arg(m_filteredMaterials.count()).arg(materials.count()));
+    if(m_filteredMaterials.count() != materials.count())
     {
-        m_filteredMaterials = materials;
-        m_isFilteredChanged = true;
+        m_filteredMaterials.clear();
+        m_filteredMaterials.append(materials);
+        setIsFilteredChanged(true);
     }
 }
 

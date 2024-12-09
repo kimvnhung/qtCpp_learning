@@ -63,7 +63,7 @@ void EnvironmentalLitterIndicatorsChart::setUpChart()
 // Result will be a map, with key is the location, and value is a list of double values (revelant to materials list index)
 void EnvironmentalLitterIndicatorsChart::updateChart(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue)
 {
-    LOG();
+    LOGD(QString("locations: %1, materials: %2, results: %3, maxValue: %4").arg(locations.size()).arg(materials.size()).arg(results.size()).arg(maxValue));
     // Update the chart data
     QChart *chart = static_cast<QChartView *>(chartWidget())->chart();
     // Remove all series

@@ -14,7 +14,7 @@ class GeneralDashboard : public QWidget
     Q_OBJECT
 public:
     explicit GeneralDashboard(QWidget *parent = nullptr);
-
+    ~GeneralDashboard();
 
 public slots:
     void onProcessing(int percent);
