@@ -38,6 +38,8 @@ void DataHandler::run()
         {
             if(markedForReloadChart || isFilteredChanged())
             {
+                // for waiting change in filter in fast way
+                QThread::msleep(500);
                 // takeGeographicalData();
                 // takePollutantOverviewData();
                 // takeComplianceDashboardData();
