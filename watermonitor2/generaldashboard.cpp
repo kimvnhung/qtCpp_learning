@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QLabel>
 
+#include "handlers/filter.hpp"
+
 GeneralDashboard::GeneralDashboard(QWidget *parent)
     : QWidget{parent}
     , m_dataHandler{new DataHandler}
@@ -51,12 +53,20 @@ void GeneralDashboard::setUpDataHandler()
     connect(m_settingPanel, &SettingPanel::csvFileAvailable, m_dataHandler, &DataHandler::loadData);
     connect(m_dataHandler, &DataHandler::processingMessage, this, &GeneralDashboard::setProcessingMessage);
     connect(m_dataHandler, &DataHandler::handling, this, &GeneralDashboard::onProcessing);
+
     connect(m_dataHandler, &DataHandler::environmentalLitterIndicatorsDataReady, m_chartPanel, &OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated);
+    connect(m_dataHandler, &DataHandler::rawDataReady, m_chartPanel, &OverviewChartWidget::onRawDataUpdated);
+
+
     connect(m_dataHandler, &DataHandler::locationsChanged, m_settingPanel, &SettingPanel::setLocationsFilter);
     connect(m_dataHandler, &DataHandler::materialsChanged, m_settingPanel, &SettingPanel::setMaterialFilter);
 
-    connect(m_settingPanel, &SettingPanel::materialFilterChanged, m_dataHandler, &DataHandler::setFilteredMaterials);
-    connect(m_settingPanel, &SettingPanel::locationFilterChanged, m_dataHandler, &DataHandler::setFilteredLocations);
+    connect(m_settingPanel, &SettingPanel::materialFilterChanged, [this](const QStringList &materials){
+        m_dataHandler->addFilter(Filter{Filter::FilterType::MATERIALS_SET, QVariant(materials)});
+    });
+    connect(m_settingPanel, &SettingPanel::locationFilterChanged, [this](const QStringList &locations){
+        m_dataHandler->addFilter(Filter{Filter::FilterType::LOCATIONS_SET, QVariant(locations)});
+    });
 
     m_dataHandler->start();
 }

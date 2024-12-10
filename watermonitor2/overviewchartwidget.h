@@ -1,6 +1,7 @@
 #ifndef OVERVIEWCHARTWIDGET_H
 #define OVERVIEWCHARTWIDGET_H
 
+#include "handlers/water.hpp"
 #include <QWidget>
 
 class QGridLayout;
@@ -25,6 +26,8 @@ public slots:
     void onExpanded();
 
     void onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
+
+    void onRawDataUpdated(std::vector<Water> data);
 private:
     QStackedWidget *m_stackWidget;
     QGridLayout *m_previewLayout;

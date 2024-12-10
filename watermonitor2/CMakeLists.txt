@@ -43,7 +43,7 @@ set(PROJECT_SOURCES
     statusbar.cpp
     images.qrc
     common.h
-    common.cpp
+
     expendablewidget.h
     expendablewidget.cpp
     filtercombobox.h

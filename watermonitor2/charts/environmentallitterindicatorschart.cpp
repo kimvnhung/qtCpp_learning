@@ -59,8 +59,9 @@ void EnvironmentalLitterIndicatorsChart::setUpChart()
     stackedSeries->attachAxis(axisY);
 
     // Create a chart view
-    setChartWidget(new QChartView(chart));
-    chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
+    auto chartView = new QChartView(chart);
+    setChartWidget(chartView);
+    chartView->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
 
 // Result will be a map, with key is the location, and value is a list of double values (revelant to materials list index)

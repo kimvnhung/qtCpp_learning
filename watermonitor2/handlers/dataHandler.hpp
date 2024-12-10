@@ -9,6 +9,9 @@
 #include <vector>
 #include "water.hpp"
 
+struct Filter;
+enum class FilterType;
+
 class DataHandler : public QThread
 {
     Q_OBJECT
@@ -16,51 +19,42 @@ public:
     DataHandler(QObject *parent = nullptr);
     ~DataHandler();
 
-    std::vector<Water> getData() const { return m_data; }
+    QList<Filter> filters() const;
 
 signals:
     void dataReady();
-    void chartDataReady();
     void handling(int percent);
     void processingMessage(QString message);
-    void environmentalLitterIndicatorsDataReady(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
 
     void locationsChanged(QStringList locations);
     void materialsChanged(QStringList materials);
+
+    void environmentalLitterIndicatorsDataReady(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
+    void rawDataReady(std::vector<Water> data);
+
 public slots:
     void stop();
 
-    void triggerGeographicalHotspots();
-    void triggerPollutantOverview();
-    void triggerComplianceDashboard();
-    void triggerPOP();
-    void triggerFluorinatedCompounds();
-    void triggerEnvironmentalLitterIndicators();
-
     void loadData(QString filename);
-    void setFilteredLocations(QStringList locations);
-    void setFilteredMaterials(QStringList materials);
+
+    void addFilter(const Filter& filter);
+    void removeFilter(const Filter& filter);
 
 protected:
     void run() override;
 
 private:
-    QMutex mutex;
-    std::vector<Water> m_data;
+    std::vector<Water> m_rootData;
+    std::vector<Water> m_filteredData;
     QString m_filename;
     bool m_isRunning;
-
     bool m_isLoaded;
-    bool m_isGeographicalHotspotsTriggered;
-    bool m_isPollutantOverviewTriggered;
-    bool m_isComplianceDashboardTriggered;
-    bool m_isPOPTriggered;
-    bool m_isFluorinatedCompoundsTriggered;
-    bool m_isEnvironmentalLitterIndicatorsTriggered;
 
     bool m_isFilteredChanged;
     void setIsFilteredChanged(bool changed);
     bool isFilteredChanged();
+    QList<Filter> m_filters;
+    void doFilter();
 
     bool loading();
 
@@ -70,9 +64,6 @@ private:
     void takePOPData();
     void takeFluorinatedCompoundsData();
     void takeEnvironmentalLitterIndicatorsData();
-
-    QStringList m_filteredLocations;
-    QStringList m_filteredMaterials;
 };
 
 #endif // DATAHANDLER_HPP

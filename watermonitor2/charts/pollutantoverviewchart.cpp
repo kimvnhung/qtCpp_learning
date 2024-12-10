@@ -32,8 +32,9 @@ void PollutantOverviewChart::setUpChart()
     chart->createDefaultAxes();
 
     // Create the chart view
-    setChartWidget(new QChartView(chart));
-    chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
+    auto chartView = new QChartView(chart);
+    setChartWidget(chartView);
+    chartView->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
 
 QString PollutantOverviewChart::summary() const

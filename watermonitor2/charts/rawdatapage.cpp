@@ -2,8 +2,11 @@
 
 #include "../common.h"
 
+#include <QTableView>
+
 RawDataPage::RawDataPage(QWidget *parent)
     : ChartHolderBaseWidget(parent)
+    , m_waterModel(new WaterModel(this))
 {
     LOG();
     initializeUi();
@@ -27,4 +30,15 @@ QString RawDataPage::name() const
 void RawDataPage::setUpChart()
 {
     LOG();
+    //
+    QTableView *table = new QTableView(this);
+    table->setModel(m_waterModel);
+    setChartWidget(table);
 }
+
+void RawDataPage::updateChart(std::vector<Water> data)
+{
+    LOG();
+    m_waterModel->updateData(data);
+}
+

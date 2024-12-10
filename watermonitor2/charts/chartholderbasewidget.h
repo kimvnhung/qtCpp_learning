@@ -29,7 +29,7 @@ public:
 
     void setMode(ViewMode mode);
     ViewMode mode() const;
-    QChartView *chartWidget() const ;
+    QWidget *chartWidget() const ;
     virtual QString summary() const = 0;
     virtual QString name() const = 0;
 
@@ -45,7 +45,7 @@ protected:
     QWidget *previewWidget() const;
     QWidget *expandedWidget() const;
 
-    void setChartWidget(QChartView *chartContent);
+    void setChartWidget(QWidget *chartContent);
 
 
 
@@ -63,7 +63,7 @@ private:
     QWidget *m_previewWidget = nullptr;
     QWidget *m_expandedWidget = nullptr;
 
-    QChartView *m_chartContent = nullptr;
+    QWidget *m_chartContent = nullptr;
 
     ViewMode m_viewMode = UNDEFINED;
 

@@ -10,6 +10,7 @@
 #include <QStackedWidget>
 #include <QChartView>
 #include "charts/popschart.h"
+#include "charts/rawdatapage.h"
 #include "common.h"
 
 #define INTERACTIVE_INDEX_EMPTY -1
@@ -137,10 +138,21 @@ void OverviewChartWidget::onExpanded()
 
 void OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString, QList<double>> results, double maxValue)
 {
+    LOG();
     auto chart = m_listChart->at(2);
     auto environmentalLitterChart = dynamic_cast<EnvironmentalLitterIndicatorsChart*>(chart);
     if (environmentalLitterChart) {
         environmentalLitterChart->updateChart(locations, materials, results, maxValue);
+    }
+}
+
+void OverviewChartWidget::onRawDataUpdated(std::vector<Water> data)
+{
+    LOG();
+    auto chart = m_listChart->at(5);
+    auto rawDataPage = dynamic_cast<RawDataPage*>(chart);
+    if (rawDataPage) {
+        rawDataPage->updateChart(data);
     }
 }
 
@@ -152,6 +164,7 @@ void OverviewChartWidget::setUpChart()
     m_listChart->append(new EnvironmentalLitterIndicatorsChart(this));
     m_listChart->append(new FlourinatedCompoundsChart(this));
     m_listChart->append(new POPsChart(this));
+    m_listChart->append(new RawDataPage(this));
 
     for (int i = 0; i < m_listChart->size(); ++i) {
         auto chart = m_listChart->at(i);

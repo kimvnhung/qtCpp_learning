@@ -18,6 +18,21 @@
 #define HOVER_COLOR QColor(220, 220, 220)
 
 
+void acceptClickEvents(QWidget *widget, bool isAccept = true)
+{
+    // Disable all mouse interactions
+    widget->setAttribute(Qt::WA_TransparentForMouseEvents, !isAccept);
+
+    // Optionally disable focus
+    widget->setFocusPolicy(isAccept ? Qt::StrongFocus : Qt::NoFocus);
+    widget->setAttribute(Qt::WA_AcceptTouchEvents, isAccept);
+    // Loop in children
+    for (auto child : widget->findChildren<QWidget *>())
+    {
+        child->setAttribute(Qt::WA_AcceptTouchEvents, isAccept);
+    }
+}
+
 ChartHolderBaseWidget::ChartHolderBaseWidget(QWidget *parent)
     : QWidget{parent}
     , m_viewMode{UNDEFINED}
@@ -115,12 +130,12 @@ QWidget *ChartHolderBaseWidget::expandedWidget() const
     return m_expandedWidget;
 }
 
-void ChartHolderBaseWidget::setChartWidget(QChartView *chartContent)
+void ChartHolderBaseWidget::setChartWidget(QWidget *chartContent)
 {
     m_chartContent = chartContent;
 }
 
-QChartView *ChartHolderBaseWidget::chartWidget() const
+QWidget *ChartHolderBaseWidget::chartWidget() const
 {
     return m_chartContent;
 }

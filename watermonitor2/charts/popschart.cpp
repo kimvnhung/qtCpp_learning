@@ -50,8 +50,9 @@ void POPsChart::setUpChart()
     series->attachAxis(radialAxis);
 
     // Create a chart view
-    setChartWidget(new QChartView(chart));
-    chartWidget()->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
+    auto chartView = new QChartView(chart);
+    setChartWidget(chartView);
+    chartView->setRenderHint(QPainter::Antialiasing); // Enable smooth rendering
 }
 
 QString POPsChart::summary() const
