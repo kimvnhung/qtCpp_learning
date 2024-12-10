@@ -15,6 +15,7 @@ public:
         MATERIALS,
         MATERIALS_CONTAIN,
         MATERIALS_SET,
+        TIME
     };
 
     // Constructor

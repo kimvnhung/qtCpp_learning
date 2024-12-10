@@ -163,8 +163,14 @@ void SettingPanel::setUpContent()
 
     // Setup time combo box
     m_timeComboBox = new QComboBox{m_content};
+    connect(m_timeComboBox, &QComboBox::currentIndexChanged, this, &SettingPanel::timeFilterChanged);
+    m_timeComboBox->addItem(tr("All Time"), "at");
+    m_timeComboBox->addItem(tr("Last Week"), "lw");
     m_timeComboBox->addItem(tr("Last Month"), "lm");
+    m_timeComboBox->addItem(tr("Last 3 Months"), "lq");
+    m_timeComboBox->addItem(tr("Last 6 Months"), "ly");
     m_timeComboBox->addItem(tr("Last Year"), "ly");
+
 
     QVBoxLayout *timeLayout = new QVBoxLayout;
     timeLayout->setContentsMargins(0,0,0,0);

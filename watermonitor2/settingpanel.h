@@ -30,6 +30,7 @@ signals:
 
     void materialFilterChanged(const QStringList &materials);
     void locationFilterChanged(const QStringList &locations);
+    void timeFilterChanged(int index);
 
 private:
     QHBoxLayout *m_mainLayout;

@@ -68,6 +68,9 @@ void GeneralDashboard::setUpDataHandler()
     connect(m_settingPanel, &SettingPanel::locationFilterChanged, [this](const QStringList &locations){
         m_dataHandler->addFilter(Filter{Filter::FilterType::LOCATIONS_SET, QVariant(locations)});
     });
+    connect(m_settingPanel, &SettingPanel::timeFilterChanged, [this](int index){
+        m_dataHandler->addFilter(Filter{Filter::FilterType::TIME, QVariant(index)});
+    });
 
     m_dataHandler->start();
 }

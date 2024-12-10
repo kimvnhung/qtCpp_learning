@@ -26,10 +26,17 @@
 #define SETTING_COLLAPSED "setting_collapsed"
 
 
-
-
 #define SHOW_PROGESS_VALUE 0
 #define HIDE_PROGRESS_VALUE -1
+
+#define ALL_TIME_TF_INDEX 0
+#define LAST_WEEK_TF_INDEX 1
+#define LAST_MONTH_TF_INDEX 2
+#define LAST_3_MONTHS_TF_INDEX 3
+#define LAST_6_MONTHS_TF_INDEX 4
+#define LAST_YEAR_TF_INDEX 5
+
+
 
 
 #endif // COMMON_H

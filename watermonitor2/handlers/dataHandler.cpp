@@ -31,8 +31,6 @@ void DataHandler::run()
             continue;
         }
 
-
-
         if(!m_isLoaded)
         {
             m_isLoaded = loading();
@@ -42,10 +40,11 @@ void DataHandler::run()
         {
             if(isFilteredChanged())
             {
+                QThread::msleep(500);
                 doFilter();
             }
         }
-        QThread::msleep(500);
+        QThread::msleep(100);
     }
 
 }
@@ -259,26 +258,137 @@ void DataHandler::doFilter()
     {
         m_filteredData = m_rootData;
     }else{
+        m_filteredData = m_rootData;
+        std::vector<Water> tempFilter;
         for(int i=0; i<m_filters.size();i++)
         {
             auto filter = m_filters[i];
             switch (filter.type())
             {
             case Filter::FilterType::LOCATIONS:
+            {
+                QString location = filter.value().toString();
+                for(const auto &water : m_filteredData)
+                {
+                    if(QString::fromStdString(water.getLocation()) == location)
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
                 break;
+            }
             case Filter::FilterType::MATERIALS:
+            {
+                QString material = filter.value().toString();
+                for(const auto &water : m_filteredData)
+                {
+                    if(QString::fromStdString(water.getDeterminand()) == material)
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
                 break;
+            }
             case Filter::FilterType::LOCATIONS_CONTAIN:
+            {
+                QString location = filter.value().toString();
+                for(const auto &water : m_filteredData)
+                {
+                    if(QString::fromStdString(water.getLocation()).contains(location))
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
                 break;
+            }
             case Filter::FilterType::MATERIALS_CONTAIN:
+            {
+                QString material = filter.value().toString();
+                for(const auto &water : m_filteredData)
+                {
+                    if(QString::fromStdString(water.getDeterminand()).contains(material))
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
                 break;
+            }
             case Filter::FilterType::LOCATIONS_SET:
+            {
+                QStringList locations = filter.value().toStringList();
+                for(const auto &water : m_filteredData)
+                {
+                    if(locations.contains(QString::fromStdString(water.getLocation())))
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
                 break;
+            }
             case Filter::FilterType::MATERIALS_SET:
+            {
+                QStringList materials = filter.value().toStringList();
+                for(const auto &water : m_filteredData)
+                {
+                    if(materials.contains(QString::fromStdString(water.getDeterminand())))
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
                 break;
+            }
+            case Filter::FilterType::TIME:
+            {
+                LOGD(QString("Before filter time: m_filteredData.size() %1").arg(m_filteredData.size()));
+                int time = filter.value().toInt();
+                QDateTime compareDate = QDateTime::currentDateTime();
+                switch (time)
+                {
+                case LAST_WEEK_TF_INDEX:
+                {
+                    compareDate = QDateTime::currentDateTime().addDays(-7);
+                    break;
+                }
+                case LAST_MONTH_TF_INDEX:
+                {
+                    compareDate = QDateTime::currentDateTime().addMonths(-1);
+                    break;
+                }
+                case LAST_3_MONTHS_TF_INDEX:
+                {
+                    compareDate = QDateTime::currentDateTime().addMonths(-3);
+                    break;
+                }
+                case LAST_6_MONTHS_TF_INDEX:
+                {
+                    compareDate = QDateTime::currentDateTime().addMonths(-6);
+                    break;
+                }
+                case LAST_YEAR_TF_INDEX:
+                {
+                    compareDate = QDateTime::currentDateTime().addYears(-1);
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                for(const auto &water : m_filteredData)
+                {
+                    if(time != ALL_TIME_TF_INDEX && water.getDateTime() >= compareDate)
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
+                break;
+            }
             default:
                 break;
             }
+
+            LOGD(QString("After filter %1, m_filteredData.size() %2").arg((int)filter.type()).arg(tempFilter.size()));
+            m_filteredData = tempFilter;
+            tempFilter.clear();
         }
     }
 
@@ -366,7 +476,61 @@ void DataHandler::loadData(QString filename)
 void DataHandler::addFilter(const Filter& filter)
 {
     LOG();
-    m_filters.push_back(filter);
+    switch (filter.type())
+    {
+    case Filter::FilterType::LOCATIONS_SET:
+    case Filter::FilterType::LOCATIONS:
+    case Filter::FilterType::LOCATIONS_CONTAIN:
+    {
+        // Loop in filters
+        for (int i = 0; i < m_filters.size(); ++i)
+        {
+            if(m_filters[i].type() == Filter::FilterType::LOCATIONS ||
+                    m_filters[i].type() == Filter::FilterType::LOCATIONS_CONTAIN ||
+                    m_filters[i].type() == Filter::FilterType::LOCATIONS_SET)
+            {
+                m_filters.removeAt(i);
+                break;
+            }
+        }
+        break;
+    }
+    case Filter::FilterType::MATERIALS:
+    case Filter::FilterType::MATERIALS_CONTAIN:
+    case Filter::FilterType::MATERIALS_SET:
+    {
+        // Loop in filters
+        for (int i = 0; i < m_filters.size(); ++i)
+        {
+            if(m_filters[i].type() == Filter::FilterType::MATERIALS ||
+                    m_filters[i].type() == Filter::FilterType::MATERIALS_CONTAIN ||
+                    m_filters[i].type() == Filter::FilterType::MATERIALS_SET)
+            {
+                m_filters.removeAt(i);
+                break;
+            }
+        }
+        break;
+    }
+    case Filter::FilterType::TIME:
+    {
+        // Loop in filters
+        for (int i = 0; i < m_filters.size(); ++i)
+        {
+            if(m_filters[i].type() == Filter::FilterType::TIME)
+            {
+                m_filters.removeAt(i);
+                break;
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    m_filters.append(filter);
+
     setIsFilteredChanged(true);
 }
 
