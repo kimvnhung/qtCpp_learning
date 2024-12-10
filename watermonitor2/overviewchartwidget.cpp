@@ -136,6 +136,16 @@ void OverviewChartWidget::onExpanded()
     m_stackWidget->setCurrentIndex(1);
 }
 
+void OverviewChartWidget::onPollutantOverviewChartUpdated(QStringList pollutants, QList<QList<double>> valuesByMonth, double maxValue)
+{
+    LOG();
+    auto chart = m_listChart->at(0);
+    auto pollutantOverviewChart = dynamic_cast<PollutantOverviewChart*>(chart);
+    if (pollutantOverviewChart) {
+        pollutantOverviewChart->updateChart(pollutants, valuesByMonth, maxValue);
+    }
+}
+
 void OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString, QList<double>> results, double maxValue)
 {
     LOG();

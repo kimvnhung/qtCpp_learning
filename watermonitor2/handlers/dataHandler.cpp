@@ -60,7 +60,55 @@ void DataHandler::stop()
 void DataHandler::takePollutantOverviewData()
 {
     LOG();
+    emit handling(SHOW_PROGESS_VALUE);
 
+    QStringList pollutants;
+    for(const auto &water : m_filteredData)
+    {
+        if(!pollutants.contains(QString::fromStdString(water.getDeterminand())))
+        {
+            pollutants.append(QString::fromStdString(water.getDeterminand()));
+        }
+    }
+
+    QList<QList<double>> valuesByMonth = QList<QList<double>>(12, QList<double>(pollutants.size(), 0));
+
+    emit handling(30);
+
+    for(const auto &water : m_filteredData)
+    {
+        int month = water.getDateTime().date().month();
+        int pollutantIndex = pollutants.indexOf(QString::fromStdString(water.getDeterminand()));
+
+        if(pollutantIndex == -1)
+        {
+            LOGD("Pollutant not found");
+            continue;
+        }
+
+        valuesByMonth[month-1][pollutantIndex] += water.getResult();
+    }
+
+    emit handling(70);
+
+    // Find max value
+    double maxValue = 0;
+    // Loop in months
+    for (int i = 0; i < 12; ++i)
+    {
+        // Loop in pollutants
+        for (int j = 0; j < pollutants.size(); ++j)
+        {
+            if(valuesByMonth[i][j] > maxValue)
+            {
+                maxValue = valuesByMonth[i][j];
+            }
+        }
+    }
+
+    emit handling(HIDE_PROGRESS_VALUE);
+
+    emit pollutantOverviewDataReady(pollutants, valuesByMonth, maxValue);
 }
 
 void DataHandler::takeComplianceDashboardData()
@@ -120,6 +168,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
 
     emit handling(50);
 
+    LOGD(QString("locations.size() %1, materials.size() %2").arg(locations.size()).arg(materials.size()));
     if(locations.isEmpty())
     {
         emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, 100);
@@ -209,36 +258,34 @@ void DataHandler::doFilter()
     if(m_filters.size() == 0)
     {
         m_filteredData = m_rootData;
-        emit rawDataReady(m_filteredData);
-        setIsFilteredChanged(false);
-        return;
-    }
-
-    for(int i=0; i<m_filters.size();i++)
-    {
-        auto filter = m_filters[i];
-        switch (filter.type())
+    }else{
+        for(int i=0; i<m_filters.size();i++)
         {
-        case Filter::FilterType::LOCATIONS:
-            break;
-        case Filter::FilterType::MATERIALS:
-            break;
-        case Filter::FilterType::LOCATIONS_CONTAIN:
-            break;
-        case Filter::FilterType::MATERIALS_CONTAIN:
-            break;
-        case Filter::FilterType::LOCATIONS_SET:
-            break;
-        case Filter::FilterType::MATERIALS_SET:
-            break;
-        default:
-            break;
+            auto filter = m_filters[i];
+            switch (filter.type())
+            {
+            case Filter::FilterType::LOCATIONS:
+                break;
+            case Filter::FilterType::MATERIALS:
+                break;
+            case Filter::FilterType::LOCATIONS_CONTAIN:
+                break;
+            case Filter::FilterType::MATERIALS_CONTAIN:
+                break;
+            case Filter::FilterType::LOCATIONS_SET:
+                break;
+            case Filter::FilterType::MATERIALS_SET:
+                break;
+            default:
+                break;
+            }
         }
     }
 
     LOGD(QString("m_filteredData.size() %1").arg(m_filteredData.size()));
     emit rawDataReady(m_filteredData);
 
+    takePollutantOverviewData();
     takeEnvironmentalLitterIndicatorsData();
     setIsFilteredChanged(false);
 }

@@ -25,8 +25,8 @@ public slots:
     void onBackButtonClicked();
     void onExpanded();
 
+    void onPollutantOverviewChartUpdated(QStringList pollutants, QList<QList<double>> valuesByMonth, double maxValue);
     void onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
-
     void onRawDataUpdated(std::vector<Water> data);
 private:
     QStackedWidget *m_stackWidget;

@@ -29,6 +29,7 @@ signals:
     void locationsChanged(QStringList locations);
     void materialsChanged(QStringList materials);
 
+    void pollutantOverviewDataReady(QStringList pollutants, QList<QList<double>> valuesByMonth, double maxValue);
     void environmentalLitterIndicatorsDataReady(QStringList locations, QStringList materials, QMap<QString,QList<double>> results, double maxValue);
     void rawDataReady(std::vector<Water> data);
 

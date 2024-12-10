@@ -114,13 +114,21 @@ void SettingPanel::setUpContent()
 
     // Set up language combo box
     m_languageComboBox = new QComboBox{m_content};
+    QVBoxLayout *languageLayout = new QVBoxLayout;
+    languageLayout->setContentsMargins(0,0,0,0);
+    languageLayout->setSpacing(5);
     m_languageComboBox->addItem(tr("English"), "en");
     m_languageComboBox->addItem(tr("Spanish"), "es");
     m_languageComboBox->addItem(tr("French"), "fr");
     m_languageComboBox->addItem(tr("German"), "de");
     // Set for text in the middle
     m_languageComboBox->setStyleSheet("QComboBox { text-align: center; }");
-    contentLayout->addWidget(m_languageComboBox);
+
+    QLabel *languageLabel = new QLabel("Language:");
+    languageLayout->addWidget(languageLabel);
+    languageLayout->addWidget(m_languageComboBox);
+
+    contentLayout->addLayout(languageLayout);
 
     // Setup region combo box
     // m_regionComboBox = new QComboBox{m_content};
@@ -129,22 +137,42 @@ void SettingPanel::setUpContent()
     // m_regionComboBox->addItem(tr("Region 3"), "r3");
     // contentLayout->addWidget(m_regionComboBox);
 
-    // Set up material filter
-    m_materialFilter = new FilterComboBox{m_content};
-    connect(m_materialFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::materialFilterChanged);
-    contentLayout->addWidget(m_materialFilter);
-    m_materialFilter->hide();
-
     // Set up location filter
     m_locationFilter = new FilterComboBox{m_content};
+    QVBoxLayout *locationLayout = new QVBoxLayout;
+    locationLayout->setContentsMargins(0,0,0,0);
+    locationLayout->setSpacing(5);
+
+    QLabel *locationLabel = new QLabel("Location:");
+    locationLayout->addWidget(locationLabel);
+    locationLayout->addWidget(m_locationFilter);
     connect(m_locationFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::locationFilterChanged);
-    contentLayout->addWidget(m_locationFilter);
+    contentLayout->addLayout(locationLayout);
+
+    // Set up material filter
+    m_materialFilter = new FilterComboBox{m_content};
+    QVBoxLayout *materialLayout = new QVBoxLayout;
+    materialLayout->setContentsMargins(0,0,0,0);
+    materialLayout->setSpacing(5);
+
+    QLabel *materialLabel = new QLabel("Material:");
+    materialLayout->addWidget(materialLabel);
+    materialLayout->addWidget(m_materialFilter);
+    connect(m_materialFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::materialFilterChanged);
+    contentLayout->addLayout(materialLayout);
 
     // Setup time combo box
     m_timeComboBox = new QComboBox{m_content};
     m_timeComboBox->addItem(tr("Last Month"), "lm");
     m_timeComboBox->addItem(tr("Last Year"), "ly");
-    contentLayout->addWidget(m_timeComboBox);
+
+    QVBoxLayout *timeLayout = new QVBoxLayout;
+    timeLayout->setContentsMargins(0,0,0,0);
+    timeLayout->setSpacing(5);
+    QLabel *timeLabel = new QLabel("Time:");
+    timeLayout->addWidget(timeLabel);
+    timeLayout->addWidget(m_timeComboBox);
+    contentLayout->addLayout(timeLayout);
 
     // Add file path label
     QVBoxLayout *filePathLayout = new QVBoxLayout;

@@ -54,6 +54,7 @@ void GeneralDashboard::setUpDataHandler()
     connect(m_dataHandler, &DataHandler::processingMessage, this, &GeneralDashboard::setProcessingMessage);
     connect(m_dataHandler, &DataHandler::handling, this, &GeneralDashboard::onProcessing);
 
+    connect(m_dataHandler, &DataHandler::pollutantOverviewDataReady, m_chartPanel, &OverviewChartWidget::onPollutantOverviewChartUpdated);
     connect(m_dataHandler, &DataHandler::environmentalLitterIndicatorsDataReady, m_chartPanel, &OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated);
     connect(m_dataHandler, &DataHandler::rawDataReady, m_chartPanel, &OverviewChartWidget::onRawDataUpdated);
 
