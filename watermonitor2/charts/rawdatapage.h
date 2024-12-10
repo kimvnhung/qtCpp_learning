@@ -1,13 +1,13 @@
-#ifndef POPSCHART_H
-#define POPSCHART_H
+#ifndef RAWDATAPAGE_H
+#define RAWDATAPAGE_H
 
 #include "chartholderbasewidget.h"
 
-class POPsChart : public ChartHolderBaseWidget
+class RawDataPage : public ChartHolderBaseWidget
 {
     Q_OBJECT
 public:
-    explicit POPsChart(QWidget *parent = nullptr);
+    explicit RawDataPage(QWidget *parent = nullptr);
 
     QString summary() const override;
     QString name() const override;
@@ -15,4 +15,4 @@ protected:
     void setUpChart() override;
 };
 
-#endif // POPSCHART_H
+#endif // RAWDATAPAGE_H

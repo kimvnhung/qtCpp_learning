@@ -61,3 +61,11 @@ QString ComplianceChart::summary() const
 {
     return "This chart shows compliance data.";
 }
+
+QString ComplianceChart::name() const
+{
+    if (mode() == PREVIEW)
+        return PREVIEW_MODE_NAME;
+    else
+        return COMPLIANCE_CHART;
+}

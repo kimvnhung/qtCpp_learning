@@ -175,3 +175,15 @@ QString EnvironmentalLitterIndicatorsChart::summary() const
 {
     return "Summary of Environmental Litter Indicators Chart";
 }
+
+QString EnvironmentalLitterIndicatorsChart::name() const
+{
+    if(mode() == PREVIEW)
+    {
+        return PREVIEW_MODE_NAME;
+    }
+    else
+    {
+        return ENVIRONMENT_LITTER_INDICATOR_CHART;
+    }
+}

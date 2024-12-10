@@ -14,6 +14,9 @@ class OverviewChartWidget : public QWidget
 public:
     explicit OverviewChartWidget(QWidget *parent = nullptr);
 
+signals:
+    void pageChanged(QString pageName);
+
 public slots:
     void setPreview();
     void setExpanded(int index);

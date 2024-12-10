@@ -10,6 +10,7 @@ public:
     explicit FlourinatedCompoundsChart(QWidget *parent = nullptr);
 
     QString summary() const override;
+    QString name() const override;
 protected:
     void setUpChart() override;
 };

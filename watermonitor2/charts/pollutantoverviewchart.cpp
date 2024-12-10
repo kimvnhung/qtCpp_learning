@@ -40,3 +40,11 @@ QString PollutantOverviewChart::summary() const
 {
     return "This chart provides an overview of pollutants.";
 }
+
+QString PollutantOverviewChart::name() const
+{
+    if(mode() == PREVIEW)
+        return PREVIEW_MODE_NAME;
+    else
+        return POLLUTANT_OVERVIEW_CHART;
+}

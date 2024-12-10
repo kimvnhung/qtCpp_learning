@@ -12,6 +12,7 @@ public:
     explicit ComplianceChart(QWidget *parent = nullptr);
 
     QString summary() const override;
+    QString name() const override;
 private:
     void setUpChart() override;
 };

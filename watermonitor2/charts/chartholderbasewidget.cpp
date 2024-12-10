@@ -35,6 +35,11 @@ void ChartHolderBaseWidget::setMode(ViewMode mode)
     switchMode();
 }
 
+ChartHolderBaseWidget::ViewMode ChartHolderBaseWidget::mode() const
+{
+    return m_viewMode;
+}
+
 void ChartHolderBaseWidget::initializeUi()
 {
     LOG();

@@ -10,6 +10,7 @@
 
 #include "common.h"
 #include "filtercombobox.h"
+#include "charts/chartholderbasewidget.h"
 
 #define COLLAPSED_WIDTH 25
 #define EXPANDED_WIDTH 200
@@ -19,6 +20,7 @@
 
 SettingPanel::SettingPanel(QWidget *parent)
     : QWidget{parent}
+    , m_currentChartName{PREVIEW_MODE_NAME}
 {
     initializeUi();
 }
@@ -121,16 +123,17 @@ void SettingPanel::setUpContent()
     contentLayout->addWidget(m_languageComboBox);
 
     // Setup region combo box
-    m_regionComboBox = new QComboBox{m_content};
-    m_regionComboBox->addItem(tr("Region 1"), "r1");
-    m_regionComboBox->addItem(tr("Region 2"), "r2");
-    m_regionComboBox->addItem(tr("Region 3"), "r3");
-    contentLayout->addWidget(m_regionComboBox);
+    // m_regionComboBox = new QComboBox{m_content};
+    // m_regionComboBox->addItem(tr("Region 1"), "r1");
+    // m_regionComboBox->addItem(tr("Region 2"), "r2");
+    // m_regionComboBox->addItem(tr("Region 3"), "r3");
+    // contentLayout->addWidget(m_regionComboBox);
 
     // Set up material filter
     m_materialFilter = new FilterComboBox{m_content};
     connect(m_materialFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::materialFilterChanged);
     contentLayout->addWidget(m_materialFilter);
+    m_materialFilter->hide();
 
     // Set up location filter
     m_locationFilter = new FilterComboBox{m_content};
@@ -191,4 +194,9 @@ void SettingPanel::onOpenFileClicked()
         SET_VALUE(CSV_FILE_PATH, filePath);
         emit csvFileAvailable(filePath);
     }
+}
+
+void SettingPanel::onPageChanged(const QString &pageName)
+{
+    LOGD(pageName);
 }

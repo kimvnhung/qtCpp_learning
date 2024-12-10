@@ -23,6 +23,8 @@ public slots:
     void setMaterialFilter(const QStringList &materials);
     void setLocationsFilter(const QStringList &locations);
 
+    void onPageChanged(const QString &pageName);
+
 signals:
     void csvFileAvailable(const QString &filePath);
 
@@ -41,9 +43,12 @@ private:
 
     bool m_isCollapsed = false;
 
+    QString m_currentChartName;
     // For filter
     FilterComboBox *m_materialFilter;
     FilterComboBox *m_locationFilter;
+
+
 
 
 private:

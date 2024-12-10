@@ -66,3 +66,11 @@ QString FlourinatedCompoundsChart::summary() const
 {
     return "This chart displays the frequency of flourinated compounds in different bins.";
 }
+
+QString FlourinatedCompoundsChart::name() const
+{
+    if(mode() == PREVIEW)
+        return PREVIEW_MODE_NAME;
+    else
+        return FLOURINATED_COMPOUNDS_CHART;
+}

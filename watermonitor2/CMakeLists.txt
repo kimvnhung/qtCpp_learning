@@ -61,8 +61,6 @@ qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(water
         ${PROJECT_SOURCES}
-
-
     )
 else()
     add_executable(water

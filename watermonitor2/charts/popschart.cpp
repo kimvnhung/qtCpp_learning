@@ -58,3 +58,11 @@ QString POPsChart::summary() const
 {
     return "This chart displays Persistent Organic Pollutants (POPs) data.";
 }
+
+QString POPsChart::name() const
+{
+    if(mode() == PREVIEW)
+        return PREVIEW_MODE_NAME;
+    else
+        return POPS_CHART;
+}
