@@ -60,7 +60,7 @@ private:
     void setUpContent();
 private slots:
     void onOpenFileClicked();
-
+    void onReloadClicked();
 };
 
 #endif // SETTINGPANEL_H

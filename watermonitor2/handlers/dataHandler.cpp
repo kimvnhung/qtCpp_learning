@@ -79,7 +79,36 @@ void DataHandler::takePollutantOverviewData()
     emit handling(HIDE_PROGRESS_VALUE);
     emit pollutantOverviewDataReady(pollutants, valuesByMonth, maxValue);
 }
-void DataHandler::takeComplianceDashboardData() {}
+
+void DataHandler::takeComplianceDashboardData()
+{
+    LOG();
+    emit handling(SHOW_PROGESS_VALUE);
+
+    int trueCount = 0;
+    int falseCount = 0;
+
+    int count = 0;
+
+    for (auto &water : m_filteredData)
+    {
+        if (water.isComplianceSample())
+        {
+            trueCount++;
+        }
+        else
+        {
+            falseCount++;
+        }
+
+        emit handling(count++ * 100 / m_filteredData.size());
+    }
+
+    emit handling(HIDE_PROGRESS_VALUE);
+    emit complianceChartDataReady(trueCount, falseCount);
+
+}
+
 void DataHandler::takePOPsData()
 {
     LOG();
@@ -120,6 +149,8 @@ void DataHandler::takePOPsData()
     emit handling(HIDE_PROGRESS_VALUE);
     emit popsDataReady(locations, valuesByMonth, maxValue);
 }
+
+
 void DataHandler::takeFluorinatedCompoundsData()
 {
     LOG();
@@ -421,6 +452,7 @@ void DataHandler::doFilter()
     takePollutantOverviewData();
     takeEnvironmentalLitterIndicatorsData();
     takeFluorinatedCompoundsData();
+    takeComplianceDashboardData();
     takePOPsData();
     setIsFilteredChanged(false);
 }

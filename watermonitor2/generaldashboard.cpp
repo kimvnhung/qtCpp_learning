@@ -27,9 +27,7 @@ void GeneralDashboard::initializeUi()
     // Set up  the content
     m_contentLayout = new QHBoxLayout;
     setUpSettingPanel();
-    m_contentLayout->addStretch();
     setUpChartPanel();
-    m_contentLayout->addStretch();
     m_mainLayout->addLayout(m_contentLayout);
     // Set up the status bar
     setUpStatusBar();
@@ -42,11 +40,15 @@ void GeneralDashboard::setUpDataHandler()
     connect(m_settingPanel, &SettingPanel::csvFileAvailable, m_dataHandler, &DataHandler::loadData);
     connect(m_dataHandler, &DataHandler::processingMessage, this, &GeneralDashboard::setProcessingMessage);
     connect(m_dataHandler, &DataHandler::handling, this, &GeneralDashboard::onProcessing);
+
     connect(m_dataHandler, &DataHandler::pollutantOverviewDataReady, m_chartPanel, &OverviewChartWidget::onPollutantOverviewChartUpdated);
     connect(m_dataHandler, &DataHandler::environmentalLitterIndicatorsDataReady, m_chartPanel, &OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated);
     connect(m_dataHandler, &DataHandler::flourinatedCompoundsChartDataReady, m_chartPanel, &OverviewChartWidget::onFlourinatedCompoundsChartUpdated);
-        connect(m_dataHandler, &DataHandler::popsDataReady, m_chartPanel, &OverviewChartWidget::onPOPsChartUpdated);
+    connect(m_dataHandler, &DataHandler::popsDataReady, m_chartPanel, &OverviewChartWidget::onPOPsChartUpdated);
+    connect(m_dataHandler, &DataHandler::complianceChartDataReady, m_chartPanel, &OverviewChartWidget::onComplianceChartUpdated);
     connect(m_dataHandler, &DataHandler::rawDataReady, m_chartPanel, &OverviewChartWidget::onRawDataUpdated);
+
+
     connect(m_dataHandler, &DataHandler::locationsChanged, m_settingPanel, &SettingPanel::setLocationsFilter);
     connect(m_dataHandler, &DataHandler::materialsChanged, m_settingPanel, &SettingPanel::setMaterialFilter);
     connect(m_settingPanel, &SettingPanel::materialFilterChanged, [this](const QStringList &materials)

@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QChartView>
+#include <QPlainTextEdit>
 #include "charts/popschart.h"
 #include "charts/rawdatapage.h"
 #include "common.h"
@@ -51,21 +52,35 @@ void OverviewChartWidget::setUpExpandedWidget()
     m_expandedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout = new QVBoxLayout;
     m_expandedWidget->setLayout(layout);
+
     QPushButton *backButton = new QPushButton("Back");
     backButton->setMinimumSize(100, 30);
     connect(backButton, &QPushButton::clicked, this, &OverviewChartWidget::onBackButtonClicked);
     QHBoxLayout *buttonLayout = new QHBoxLayout;
-    QLabel *sumaryText = new QLabel("Summary");
-    sumaryText->setStyleSheet("font-size: 20px; font-weight: bold;");
-    sumaryText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    sumaryText->setMinimumSize(100, 30);
-    sumaryText->setAlignment(Qt::AlignCenter);
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(sumaryText);
     buttonLayout->addStretch();
     buttonLayout->addWidget(backButton);
     LOGD(QString("Children count: %1").arg(buttonLayout->count()));
     layout->addLayout(buttonLayout);
+
+    // Add a summary text
+    QHBoxLayout *contentLayout = new QHBoxLayout;
+
+    QVBoxLayout *summaryLayout = new QVBoxLayout;
+    QLabel *summaryText = new QLabel("Summary:");
+    QPlainTextEdit *editText = new QPlainTextEdit;
+    editText->setFixedWidth(200);
+    editText->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    editText->setReadOnly(true);
+    summaryLayout->addWidget(summaryText);
+    summaryLayout->addWidget(editText);
+    summaryLayout->addStretch();
+
+    contentLayout->addLayout(summaryLayout);
+
+    layout->addLayout(contentLayout);
+
+    // m_expandedWidget->setStyleSheet("background-color: #000000;");
+
     m_stackWidget->addWidget(m_expandedWidget);
 }
 void OverviewChartWidget::onBackButtonClicked()
@@ -82,25 +97,30 @@ void OverviewChartWidget::onBackButtonClicked()
 void OverviewChartWidget::onExpanded()
 {
     // Embbed the chart into the expanded widget
-    // Remove widget at index 1 of m_expandedWidget
-    auto item = m_expandedWidget->layout()->takeAt(1);
-    if (item == nullptr)
-        LOGD("No item to take");
+
     auto chart = qobject_cast<ChartWidget *>(sender());
     chart->setMode(ChartWidget::EXPANDED);
-    static_cast<QVBoxLayout *>(m_expandedWidget->layout())->addWidget(chart->chartWidget());
-    auto buttonLayout = m_expandedWidget->layout()->itemAt(0);
-    if (buttonLayout == nullptr)
-        LOGD("No button layout found");
+
+    auto contentLayout = dynamic_cast<QHBoxLayout *>(m_expandedWidget->layout()->itemAt(1)->layout());
+    if (contentLayout == nullptr)
+        LOGD("No content layout");
     else
     {
-        LOGD(QString("Children count: %1").arg(buttonLayout->layout()->count()));
-        auto summaryText = qobject_cast<QLabel *>(buttonLayout->layout()->itemAt(1)->widget());
-        if (summaryText)
-            summaryText->setText(chart->summary());
+        contentLayout->insertWidget(0,chart->chartWidget());
+        contentLayout->layout()->itemAt(0)->widget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        auto summaryLayout = dynamic_cast<QVBoxLayout *>(contentLayout->itemAt(1)->layout());
+        if (summaryLayout == nullptr)
+            LOGD("No summary layout");
         else
-            LOGD("No summary text found");
+        {
+            auto summaryText = dynamic_cast<QPlainTextEdit *>(summaryLayout->itemAt(1)->widget());
+            if (summaryText == nullptr)
+                LOGD("No summary text");
+            else
+                summaryText->setPlainText(chart->summary());
+        }
     }
+
     // Find the interactive index
     for (int i = 0; i < m_listChart->size(); ++i)
     {
@@ -148,6 +168,16 @@ void OverviewChartWidget::onPOPsChartUpdated(QStringList locations, QList<QList<
     if (popschart)
         popschart->updateChart(locations, valuesByMonth, maxValue);
 }
+
+void OverviewChartWidget::onComplianceChartUpdated(int trueCount, int falseCount)
+{
+    LOG();
+    auto chart = m_listChart->at(1);
+    auto complianceChart = dynamic_cast<ComplianceChart *>(chart);
+    if (complianceChart)
+        complianceChart->updateChart(trueCount, falseCount);
+}
+
 void OverviewChartWidget::onRawDataUpdated(std::vector<Water> data)
 {
     LOG();

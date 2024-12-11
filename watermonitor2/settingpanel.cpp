@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QTimer>
+#include <QMessageBox>
 
 #include "common.h"
 #include "filtercombobox.h"
@@ -164,12 +165,12 @@ void SettingPanel::setUpContent()
     // Setup time combo box
     m_timeComboBox = new QComboBox{m_content};
     connect(m_timeComboBox, &QComboBox::currentIndexChanged, this, &SettingPanel::timeFilterChanged);
-    m_timeComboBox->addItem(tr("All Time"), "at");
-    m_timeComboBox->addItem(tr("Last Week"), "lw");
-    m_timeComboBox->addItem(tr("Last Month"), "lm");
-    m_timeComboBox->addItem(tr("Last 3 Months"), "lq");
-    m_timeComboBox->addItem(tr("Last 6 Months"), "ly");
-    m_timeComboBox->addItem(tr("Last Year"), "ly");
+    m_timeComboBox->addItem("All Time");
+    m_timeComboBox->addItem("Last Week");
+    m_timeComboBox->addItem("Last Month");
+    m_timeComboBox->addItem("Last 3 Months");
+    m_timeComboBox->addItem("Last 6 Months");
+    m_timeComboBox->addItem("Last Year");
 
 
     QVBoxLayout *timeLayout = new QVBoxLayout;
@@ -195,18 +196,18 @@ void SettingPanel::setUpContent()
 
     if(!GET_STRING(CSV_FILE_PATH).isEmpty()) {
         m_filePathEdit->setText(GET_STRING(CSV_FILE_PATH));
-
-        //Delay the signal
-        QTimer::singleShot(500, this, [this] {
-            emit csvFileAvailable(GET_STRING(CSV_FILE_PATH));
-        });
     }
 
     QHBoxLayout *openFileButtonLayout = new QHBoxLayout;
     QPushButton *openFileButton = new QPushButton("Open", this);
     connect(openFileButton, &QPushButton::clicked, this, &SettingPanel::onOpenFileClicked);
+
+    QPushButton *reloadButton = new QPushButton("Reload", this);
+    connect(reloadButton, &QPushButton::clicked, this, &SettingPanel::onReloadClicked);
+
     openFileButtonLayout->addStretch();
     openFileButtonLayout->addWidget(openFileButton);
+    openFileButtonLayout->addWidget(reloadButton);
 
     filePathLayout->addWidget(m_filePathEdit);
     filePathLayout->addLayout(openFileButtonLayout);
@@ -228,6 +229,19 @@ void SettingPanel::onOpenFileClicked()
         SET_VALUE(CSV_FILE_PATH, filePath);
         emit csvFileAvailable(filePath);
     }
+}
+
+void SettingPanel::onReloadClicked()
+{
+    if(!m_filePathEdit->text().isEmpty())
+        emit csvFileAvailable(m_filePathEdit->text());
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The csv file path is empty. Select file path firstly!");
+        msgBox.exec();
+    }
+
 }
 
 void SettingPanel::onPageChanged(const QString &pageName)

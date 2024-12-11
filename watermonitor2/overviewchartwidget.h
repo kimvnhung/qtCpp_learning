@@ -25,6 +25,7 @@ public slots:
                                            QList<double> values, double minLat, double minLon,
                                            double maxLat, double maxLon, double maxValue);
     void onPOPsChartUpdated(QStringList locations, QList<QList<double>> valuesByMonth, double maxValue);
+    void onComplianceChartUpdated(int trueCount, int falseCount);
     void onRawDataUpdated(std::vector<Water> data);
 
 private:

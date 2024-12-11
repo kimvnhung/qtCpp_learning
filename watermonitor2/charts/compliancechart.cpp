@@ -19,38 +19,27 @@ ComplianceChart::ComplianceChart(QWidget *parent)
 void ComplianceChart::setUpChart()
 {
     LOG();
-    // Create bar sets
-    QBarSet *set0 = new QBarSet("Series 1");
-    QBarSet *set1 = new QBarSet("Series 2");
+    // Create pie series
+    pieSeries = new QPieSeries();
+    pieSeries->append("TRUE", 0);
+    pieSeries->append("FALSE", 0);
 
-    // Add data to bar sets
-    *set0 << 1 << 2 << 3 << 4 << 5;
-    *set1 << 5 << 0 << 0 << 4 << 1;
+    // Customize slices
+    QPieSlice *trueSlice = pieSeries->slices().at(0);
+    trueSlice->setLabel("True: " + QString::number(0));
+    trueSlice->setBrush(Qt::green);
+    trueSlice->setExploded(); // Optional: highlight the slice
 
-    // Create a bar series and append sets
-    QBarSeries *series = new QBarSeries();
-    series->append(set0);
-    series->append(set1);
+    QPieSlice *falseSlice = pieSeries->slices().at(1);
+    falseSlice->setLabel("False: " + QString::number(0));
+    falseSlice->setBrush(Qt::red);
 
-    // Create a chart
+    // Create chart
     QChart *chart = new QChart();
-    chart->addSeries(series);
-    chart->setTitle("Compliance Chart");
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-
-    // Create category axis for X-axis
-    QStringList categories;
-    categories << "Jan" << "Feb" << "Mar" << "Apr" << "May";
-    QBarCategoryAxis *axisX = new QBarCategoryAxis();
-    axisX->append(categories);
-    chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
-
-    // Create value axis for Y-axis
-    QValueAxis *axisY = new QValueAxis();
-    axisY->setRange(0, 6);
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
+    chart->addSeries(pieSeries);
+    chart->setTitle("Compliance Status (e.g., Compliant vs. Non-compliant)");
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
 
     // Create a chart view
     auto chartView = new QChartView(chart);
@@ -69,4 +58,30 @@ QString ComplianceChart::name() const
         return PREVIEW_MODE_NAME;
     else
         return COMPLIANCE_CHART;
+}
+
+void ComplianceChart::updateChart(int trueCount, int falseCount)
+{
+    LOGD(QString("True: %1, False: %2").arg(trueCount).arg(falseCount));
+    // Update chart data
+    QPieSlice *trueSlice = pieSeries->slices().at(0);
+    QPieSlice *falseSlice = pieSeries->slices().at(1);
+
+    trueSlice->setValue(trueCount);
+    trueSlice->setLabel("True: " + QString::number(trueCount));
+
+    falseSlice->setValue(falseCount);
+    falseSlice->setLabel("False: " + QString::number(falseCount));
+
+    double total = 0;
+    for (QPieSlice *slice : pieSeries->slices()) {
+        total += slice->value();
+    }
+
+    for (QPieSlice *slice : pieSeries->slices()) {
+        double percentage = (slice->value() / total) * 100;
+        slice->setLabel(slice->label().split(":")[0] + QString(": %1 (%2%)")
+                                                           .arg(slice->value())
+                                                           .arg(percentage, 0, 'f', 1));
+    }
 }

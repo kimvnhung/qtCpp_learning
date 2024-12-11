@@ -3,6 +3,8 @@
 
 #include "chartholderbasewidget.h"
 
+#include <QPieSeries>
+
 
 
 class ComplianceChart : public ChartHolderBaseWidget
@@ -13,8 +15,14 @@ public:
 
     QString summary() const override;
     QString name() const override;
+public slots:
+    void updateChart(int trueCount, int falseCount);
+
 private:
     void setUpChart() override;
+
+    QPieSeries *pieSeries;
+
 };
 
 #endif // COMPLIANCECHART_H

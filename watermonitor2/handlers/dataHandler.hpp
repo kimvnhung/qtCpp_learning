@@ -25,6 +25,7 @@ signals:
     void environmentalLitterIndicatorsDataReady(QStringList locations, QStringList materials, QMap<QString, QList<double>> results, double maxValue);
     void flourinatedCompoundsChartDataReady(QStringList locations, QList<double> lats, QList<double> lons, QList<double> values, double minLat, double minLon, double maxLat, double maxLon, double maxValue);
     void popsDataReady(QStringList locations, QList<QList<double>> valuesByMonth, double maxValue);
+    void complianceChartDataReady(int trueCount, int falseCount);
     void rawDataReady(std::vector<Water> data);
 public slots:
     void stop();
