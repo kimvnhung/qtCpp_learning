@@ -13,11 +13,15 @@ public:
     void addCheckableItems(const QStringList& items);
     // Get all checked items
     QStringList checkedItems() const;
+public slots:
+    void filterItems(const QString& text);
+
 signals:
     void checkedItemsChanged(const QStringList& checkedItems);
 
 private slots:
     void handleActivatedItem(int index);
+
 private:
     void setAllItemsCheckState(Qt::CheckState state);
 };

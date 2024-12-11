@@ -2,6 +2,7 @@
 
 #include <QLineEdit>
 #include <QStandardItemModel>
+#include <QTimer>
 #include "common.h"
 
 FilterComboBox::FilterComboBox(QWidget *parent)
@@ -9,7 +10,10 @@ FilterComboBox::FilterComboBox(QWidget *parent)
 {
     QStandardItemModel* model = new QStandardItemModel(this);
     setModel(model);
-    setEditable(true);
+    setEditable(false);
+
+    // connect(this, &FilterComboBox::editTextChanged,this, &FilterComboBox::filterItems);
+    // connect(this, &QComboBox::textActivated)
 
     // Connect model's dataChanged signal to track changes in check state
     connect(this, &QComboBox::activated, this, &FilterComboBox::handleActivatedItem);
@@ -103,3 +107,23 @@ void FilterComboBox::setAllItemsCheckState(Qt::CheckState state)
 }
 
 
+void FilterComboBox::filterItems(const QString& text)
+{
+    LOGD(QString("text %1").arg(text));
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(this->model());
+    if (!model) return;
+
+    for (int i = 2; i < model->rowCount(); ++i) { // Skip "Check All" and "Uncheck All"
+        QStandardItem* item = model->item(i);
+        if (item) {
+            bool match = item->text().contains(text, Qt::CaseInsensitive);
+            item->setData(QVariant(match), Qt::UserRole +1);
+        }
+    }
+    showPopup();
+
+    // Restore focus to the line edit with a slight delay
+    QTimer::singleShot(0, [this]() {
+        lineEdit()->setFocus();
+    });
+}
