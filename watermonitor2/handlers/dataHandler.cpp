@@ -446,6 +446,12 @@ void DataHandler::doFilter()
                 {
                     break;
                 }
+
+                if(maxLocations == -1)
+                {
+                    tempFilter = m_filteredData;
+                    break;
+                }
                 QStringList locations;
                 for (const auto &water : m_filteredData)
                 {
@@ -477,6 +483,12 @@ void DataHandler::doFilter()
                 {
                     break;
                 }
+                if(maxMaterials == -1)
+                {
+                    tempFilter = m_filteredData;
+                    break;
+                }
+
                 QStringList materials;
                 for (const auto &water : m_filteredData)
                 {
@@ -621,10 +633,12 @@ void DataHandler::addFilter(const Filter &filter)
         break;
     }
     case Filter::FilterType::TIME:
+    case Filter::FilterType::LOCATIONS_MAX:
+    case Filter::FilterType::MATERIALS_MAX:
     {
         for (int i = 0; i < m_filters.size(); ++i)
         {
-            if (m_filters[i].type() == Filter::FilterType::TIME)
+            if (m_filters[i].type() == filter.type())
             {
                 m_filters.removeAt(i);
                 break;
@@ -635,6 +649,7 @@ void DataHandler::addFilter(const Filter &filter)
     default:
         break;
     }
+
     m_filters.append(filter);
     setIsFilteredChanged(true);
 }

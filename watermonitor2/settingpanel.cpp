@@ -153,7 +153,7 @@ void SettingPanel::setUpContent()
     QLabel *maxLocationLabel = new QLabel("Max locations:");
     QSpinBox *maxLocationSpinBox = new QSpinBox{m_content};
     connect(maxLocationSpinBox, &QSpinBox::valueChanged,this, &SettingPanel::maxLocationsChanged);
-    maxLocationSpinBox->setMinimum(0);
+    maxLocationSpinBox->setMinimum(-1);
     maxLocationSpinBox->setValue(10);
     // Disable editing
     // maxLocationSpinBox->setReadOnly(true);
@@ -182,7 +182,7 @@ void SettingPanel::setUpContent()
     QLabel *maxMaterialLabel = new QLabel("Max materials:");
     QSpinBox *maxMaterialSpinBox = new QSpinBox{m_content};
     connect(maxMaterialSpinBox, &QSpinBox::valueChanged,this, &SettingPanel::maxMaterialsChanged);
-    maxMaterialSpinBox->setMinimum(0);
+    maxMaterialSpinBox->setMinimum(-1);
     maxMaterialSpinBox->setValue(10);
     // Disable editing
     // maxMaterialSpinBox->setReadOnly(true);
