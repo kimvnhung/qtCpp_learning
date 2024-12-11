@@ -18,7 +18,10 @@ void DataHandler::run()
         }
         if (!m_isLoaded)
         {
+            // For refreshing UI
+            setIsFilteredChanged(true);
             m_isLoaded = loading();
+
         }
         if (m_isLoaded)
         {
@@ -129,6 +132,9 @@ void DataHandler::takeFluorinatedCompoundsData()
             locations.append(QString::fromStdString(water.getLocation()));
         }
     }
+
+    emit handling(30);
+
     QList<double> lats = QList<double>(locations.size(), 0);
     QList<double> lons = QList<double>(locations.size(), 0);
     QList<double> values = QList<double>(locations.size(), 0);
@@ -146,7 +152,11 @@ void DataHandler::takeFluorinatedCompoundsData()
             lons[locationIndex] = water.getLong();
         values[locationIndex] += water.getResult();
     }
+
+    emit handling(60);
+
     double minLat = 0, minLon = 0, maxLat = 0, maxLon = 0, maxValue = 0;
+
     for (int i = 0; i < locations.size(); i++)
     {
         if (i == 0)
@@ -165,7 +175,10 @@ void DataHandler::takeFluorinatedCompoundsData()
         if (values[i] > maxValue)
             maxValue = values[i];
     }
-    emit
+    emit handling(90);
+
+    emit handling(HIDE_PROGRESS_VALUE);
+    emit flourinatedCompoundsChartDataReady(locations, lats, lons, values, minLat, minLon, maxLat, maxLon, maxValue);
 }
 void DataHandler::takeEnvironmentalLitterIndicatorsData()
 {
@@ -246,7 +259,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
     emit handling(HIDE_PROGRESS_VALUE);
     emit processingMessage("");
     emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, maxValue);
-    setIsFilteredChanged(false);
+
 }
 void DataHandler::setIsFilteredChanged(bool changed)
 {
@@ -407,11 +420,13 @@ void DataHandler::doFilter()
     emit rawDataReady(m_filteredData);
     takePollutantOverviewData();
     takeEnvironmentalLitterIndicatorsData();
+    takeFluorinatedCompoundsData();
     takePOPsData();
     setIsFilteredChanged(false);
 }
 bool DataHandler::loading()
 {
+    LOGD(QString("Loading data with file %1").arg(m_filename));
     std::ifstream file(m_filename.toStdString());
     size_t rowCount = 0;
     std::string line;
@@ -421,6 +436,11 @@ bool DataHandler::loading()
     }
     if (rowCount == 0)
     {
+        SET_VALUE(CSV_FILE_PATH, "");
+        m_filename = "";
+        emit handling(SHOW_PROGESS_VALUE);
+        emit processingMessage("No data found in the file or file is empty");
+        QThread::msleep(3000);
         emit handling(HIDE_PROGRESS_VALUE);
         return false;
     }
@@ -440,6 +460,8 @@ bool DataHandler::loading()
             row["result"].get<double>(),
             row["determinand.unit.label"].get<std::string>(),
             row["sample.sampledMaterialType.label"].get<std::string>(),
+            row["sample.samplingPoint.easting"].get<double>(),
+            row["sample.samplingPoint.northing"].get<double>(),
             QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"};
         m_rootData.push_back(water);
         if (!locations.contains(QString::fromStdString(water.getLocation())))

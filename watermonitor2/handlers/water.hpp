@@ -9,7 +9,7 @@
 class Water
 {
 public:
-  Water(const std::string &, const std::string &, const std::string &, const std::string &, double, const std::string &, const std::string &, bool);
+  Water(const std::string &, const std::string &, const std::string &, const std::string &, double, const std::string &, const std::string &, const double lat,const double lon, bool);
   std::string getID() const { return ID; }
   std::string getLocation() const { return location; }
   std::string getTime() const { return time; }

@@ -21,7 +21,7 @@ public slots:
     void onExpanded();
     void onPollutantOverviewChartUpdated(QStringList pollutants, QList<QList<double>> valuesByMonth, double maxValue);
     void onEnvironmentalLitterIndicatorsChartUpdated(QStringList locations, QStringList materials, QMap<QString, QList<double>> results, double maxValue);
-    void onFlourinatedCompoundsChartUpdate(QStringList locations, QList<double> lats, QList<double> lons,
+    void onFlourinatedCompoundsChartUpdated(QStringList locations, QList<double> lats, QList<double> lons,
                                            QList<double> values, double minLat, double minLon,
                                            double maxLat, double maxLon, double maxValue);
     void onPOPsChartUpdated(QStringList locations, QList<QList<double>> valuesByMonth, double maxValue);

@@ -132,7 +132,7 @@ void OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated(QStringLis
         environmentalLitterChart->updateChart(locations, materials, results, maxValue);
     }
 }
-void OverviewChartWidget::onFlourinatedCompoundsChartUpdate(QStringList locations, QList<double> lats, QList<double> lons, QList<double> values, double minLat, double minLon, double maxLat, double maxLon, double maxValue)
+void OverviewChartWidget::onFlourinatedCompoundsChartUpdated(QStringList locations, QList<double> lats, QList<double> lons, QList<double> values, double minLat, double minLon, double maxLat, double maxLon, double maxValue)
 {
     LOG();
     auto chart = m_listChart->at(3);

@@ -7,7 +7,8 @@
 #include <QChartView>
 #include <QScatterSeries>
 #include <QValueAxis>
-#define MAX_BUBBLE_SIZE 25
+#define MAX_BUBBLE_SIZE 100
+#define MAX_LOCATIONS 20
 
 FlourinatedCompoundsChart::FlourinatedCompoundsChart(QWidget *parent)
     : ChartHolderBaseWidget{parent}
@@ -44,15 +45,15 @@ void FlourinatedCompoundsChart::setUpChart()
     {
         chart->addSeries(ser);
     }
-    chart->setTitle("Bubble Chart Example");
+    chart->setTitle("Flourinated Compounds Chart");
     chart->setAnimationOptions(QChart::SeriesAnimations);
     // Create axes and set them to the chart
     QValueAxis *axisX = new QValueAxis();
-    axisX->setTitleText("X Axis");
+    axisX->setTitleText("Latitude");
     axisX->setLabelFormat("%i");
     axisX->setRange(0, 50);
     QValueAxis *axisY = new QValueAxis();
-    axisY->setTitleText("Y Axis");
+    axisY->setTitleText("Longtitude");
     axisY->setLabelFormat("%i");
     axisY->setRange(0, 50);
     chart->addAxis(axisX, Qt::AlignBottom);
@@ -86,7 +87,19 @@ void FlourinatedCompoundsChart::updateChart(
     QList<double> values, double minLat, double minLon,
     double maxLat, double maxLon, double maxValue)
 {
-    LOG();
+    LOGD(QString("locations.size() %1, lats.size() %2, lons.size() %3, values.size() %4, minLat %5, minLon %6, maxLat %7, maxLon %8, maxValue %9")
+             .arg(locations.size())
+             .arg(lats.size())
+             .arg(lons.size())
+             .arg(values.size())
+             .arg(minLat)
+             .arg(minLon)
+             .arg(maxLat)
+             .arg(maxLon)
+             .arg(maxValue));
+
+
+
     auto chart = static_cast<QChartView *>(chartWidget())->chart();
     auto axisXs = chart->axes(Qt::Horizontal);
     auto axisYs = chart->axes(Qt::Vertical);
@@ -94,11 +107,13 @@ void FlourinatedCompoundsChart::updateChart(
     QList<QScatterSeries *> series;
     for (int i = 0; i < locations.size(); i++)
     {
+        if(i >= MAX_LOCATIONS)
+            break;
+
         auto bubble = new QScatterSeries(this);
         bubble->setName(locations[i]);
         bubble->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-        double maxBubbleSize = std::min(maxLat - minLat, maxLon - minLon);
-        double pollutantValue = maxBubbleSize * values[i] / maxValue;
+        double pollutantValue = MAX_BUBBLE_SIZE * values[i]*0.5 / maxValue;
         // if(pollutantValue/MAX_BUBBLE_SIZE <= 0.33)
         //     bubble->setColor(LOW_LEVEL_COLOR);
         // else if (pollutantValue/MAX_BUBBLE_SIZE <= 0.66)
@@ -115,7 +130,7 @@ void FlourinatedCompoundsChart::updateChart(
     }
     for (auto axisX : axisXs)
     {
-        axisX->setRange(minLat, maxLat);
+        axisX->setRange(minLat*0.9, maxLat*1.1);
         for (auto ser : series)
         {
             ser->attachAxis(axisX);
@@ -123,7 +138,7 @@ void FlourinatedCompoundsChart::updateChart(
     }
     for (auto axisY : axisYs)
     {
-        axisY->setRange(minLon, maxLon);
+        axisY->setRange(minLon*0.9, maxLon*1.1);
         for (auto ser : series)
         {
             ser->attachAxis(axisY);

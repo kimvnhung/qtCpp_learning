@@ -44,7 +44,7 @@ void GeneralDashboard::setUpDataHandler()
     connect(m_dataHandler, &DataHandler::handling, this, &GeneralDashboard::onProcessing);
     connect(m_dataHandler, &DataHandler::pollutantOverviewDataReady, m_chartPanel, &OverviewChartWidget::onPollutantOverviewChartUpdated);
     connect(m_dataHandler, &DataHandler::environmentalLitterIndicatorsDataReady, m_chartPanel, &OverviewChartWidget::onEnvironmentalLitterIndicatorsChartUpdated);
-    connect
+    connect(m_dataHandler, &DataHandler::flourinatedCompoundsChartDataReady, m_chartPanel, &OverviewChartWidget::onFlourinatedCompoundsChartUpdated);
         connect(m_dataHandler, &DataHandler::popsDataReady, m_chartPanel, &OverviewChartWidget::onPOPsChartUpdated);
     connect(m_dataHandler, &DataHandler::rawDataReady, m_chartPanel, &OverviewChartWidget::onRawDataUpdated);
     connect(m_dataHandler, &DataHandler::locationsChanged, m_settingPanel, &SettingPanel::setLocationsFilter);

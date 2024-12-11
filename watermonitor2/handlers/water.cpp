@@ -8,6 +8,7 @@ using namespace std;
 
 Water::Water(const string &id, const string &loc, const string &tm
              , const string &det, double res, const string &uni, const string &ty
+             , const double lat, const double lon
              , bool isCompliance)
     : ID(id)
     , location(loc)
@@ -16,8 +17,8 @@ Water::Water(const string &id, const string &loc, const string &tm
     , result(res)
     , unit(uni)
     , type(ty)
-    , latitude(0)
-    , longitude(0)
+    , latitude(lat)
+    , longitude(lon)
     , m_isComplianceSample(isCompliance)
 
 {
