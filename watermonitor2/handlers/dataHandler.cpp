@@ -1,23 +1,10 @@
 #include "dataHandler.hpp"
-
 #include "csv.hpp"
 #include "filter.hpp"
 #include "../common.h"
-
-DataHandler::DataHandler(QObject *parent)
-    : QThread(parent)
-{
-}
-
-DataHandler::~DataHandler()
-{
-}
-
-QList<Filter> DataHandler::filters() const
-{
-    return m_filters;
-}
-
+DataHandler::DataHandler(QObject *parent) : QThread(parent) {}
+DataHandler::~DataHandler() {}
+QList<Filter> DataHandler::filters() const { return m_filters; }
 void DataHandler::run()
 {
     LOG();
@@ -25,20 +12,17 @@ void DataHandler::run()
     setIsFilteredChanged(true);
     while (m_isRunning)
     {
-        // Do something
-        if(m_filename.isEmpty())
+        if (m_filename.isEmpty())
         {
             continue;
         }
-
-        if(!m_isLoaded)
+        if (!m_isLoaded)
         {
             m_isLoaded = loading();
         }
-
-        if(m_isLoaded)
+        if (m_isLoaded)
         {
-            if(isFilteredChanged())
+            if (isFilteredChanged())
             {
                 QThread::msleep(500);
                 doFilter();
@@ -46,160 +30,198 @@ void DataHandler::run()
         }
         QThread::msleep(100);
     }
-
 }
-
 void DataHandler::stop()
 {
     LOG();
     m_isRunning = false;
 }
-
-
 void DataHandler::takePollutantOverviewData()
 {
     LOG();
     emit handling(SHOW_PROGESS_VALUE);
-
     QStringList pollutants;
-    for(const auto &water : m_filteredData)
+    for (const auto &water : m_filteredData)
     {
-        if(!pollutants.contains(QString::fromStdString(water.getDeterminand())))
+        if (!pollutants.contains(QString::fromStdString(water.getDeterminand())))
         {
             pollutants.append(QString::fromStdString(water.getDeterminand()));
         }
     }
-
     QList<QList<double>> valuesByMonth = QList<QList<double>>(12, QList<double>(pollutants.size(), 0));
-
     emit handling(30);
-
-    for(const auto &water : m_filteredData)
+    for (const auto &water : m_filteredData)
     {
         int month = water.getDateTime().date().month();
         int pollutantIndex = pollutants.indexOf(QString::fromStdString(water.getDeterminand()));
-
-        if(pollutantIndex == -1)
+        if (pollutantIndex == -1)
         {
             LOGD("Pollutant not found");
             continue;
         }
-
-        valuesByMonth[month-1][pollutantIndex] += water.getResult();
+        valuesByMonth[month - 1][pollutantIndex] += water.getResult();
     }
-
     emit handling(70);
-
-    // Find max value
     double maxValue = 0;
-    // Loop in months
     for (int i = 0; i < 12; ++i)
     {
-        // Loop in pollutants
         for (int j = 0; j < pollutants.size(); ++j)
         {
-            if(valuesByMonth[i][j] > maxValue)
+            if (valuesByMonth[i][j] > maxValue)
             {
                 maxValue = valuesByMonth[i][j];
             }
         }
     }
-
     emit handling(HIDE_PROGRESS_VALUE);
-
     emit pollutantOverviewDataReady(pollutants, valuesByMonth, maxValue);
 }
-
-void DataHandler::takeComplianceDashboardData()
+void DataHandler::takeComplianceDashboardData() {}
+void DataHandler::takePOPsData()
 {
-
+    LOG();
+    emit handling(SHOW_PROGESS_VALUE);
+    QStringList locations;
+    for (const auto &water : m_filteredData)
+    {
+        if (!locations.contains(QString::fromStdString(water.getLocation())))
+        {
+            locations.append(QString::fromStdString(water.getLocation()));
+        }
+    }
+    QList<QList<double>> valuesByMonth = QList<QList<double>>(12, QList<double>(locations.size(), 0));
+    emit handling(30);
+    for (const auto &water : m_filteredData)
+    {
+        int month = water.getDateTime().date().month();
+        int locationIndex = locations.indexOf(QString::fromStdString(water.getLocation()));
+        if (locationIndex == -1)
+        {
+            LOGD("Location not found");
+            continue;
+        }
+        valuesByMonth[month - 1][locationIndex] += water.getResult();
+    }
+    emit handling(70);
+    double maxValue = 0;
+    for (int i = 0; i < 12; ++i)
+    {
+        for (int j = 0; j < locations.size(); ++j)
+        {
+            if (valuesByMonth[i][j] > maxValue)
+            {
+                maxValue = valuesByMonth[i][j];
+            }
+        }
+    }
+    emit handling(HIDE_PROGRESS_VALUE);
+    emit popsDataReady(locations, valuesByMonth, maxValue);
 }
-
-void DataHandler::takePOPData()
-{
-
-
-}
-
 void DataHandler::takeFluorinatedCompoundsData()
 {
-
-
+    LOG();
+    emit handling(SHOW_PROGESS_VALUE);
+    QStringList locations;
+    for (const auto &water : m_filteredData)
+    {
+        if (!locations.contains(QString::fromStdString(water.getLocation())))
+        {
+            locations.append(QString::fromStdString(water.getLocation()));
+        }
+    }
+    QList<double> lats = QList<double>(locations.size(), 0);
+    QList<double> lons = QList<double>(locations.size(), 0);
+    QList<double> values = QList<double>(locations.size(), 0);
+    for (const auto &water : m_filteredData)
+    {
+        int locationIndex = locations.indexOf(QString::fromStdString(water.getLocation()));
+        if (locationIndex == -1)
+        {
+            LOGD("Location not found");
+            continue;
+        }
+        if (lats[locationIndex] == 0)
+            lats[locationIndex] = water.getLat();
+        if (lons[locationIndex] == 0)
+            lons[locationIndex] = water.getLong();
+        values[locationIndex] += water.getResult();
+    }
+    double minLat = 0, minLon = 0, maxLat = 0, maxLon = 0, maxValue = 0;
+    for (int i = 0; i < locations.size(); i++)
+    {
+        if (i == 0)
+        {
+            minLat = lats[i];
+            minLon = lons[i];
+        }
+        if (lats[i] < minLat)
+            minLat = lats[i];
+        if (lats[i] > maxLat)
+            maxLat = lats[i];
+        if (lons[i] < minLon)
+            minLon = lons[i];
+        if (lons[i] > maxLon)
+            maxLon = lons[i];
+        if (values[i] > maxValue)
+            maxValue = values[i];
+    }
+    emit
 }
-
 void DataHandler::takeEnvironmentalLitterIndicatorsData()
 {
     LOGD(QString("m_isFilteredChanged %1").arg(m_isFilteredChanged));
     QStringList locations;
     QStringList materials;
-
     emit handling(SHOW_PROGESS_VALUE);
     emit processingMessage("Processing chart data...");
-
-    for(const auto &water : m_filteredData)
+    for (const auto &water : m_filteredData)
     {
-        // Get unqiue locations and materials
-
-        if(!locations.contains(QString::fromStdString(water.getLocation())))
+        if (!locations.contains(QString::fromStdString(water.getLocation())))
         {
             locations.append(QString::fromStdString(water.getLocation()));
         }
-
-        if(!materials.contains(QString::fromStdString(water.getDeterminand())))
+        if (!materials.contains(QString::fromStdString(water.getDeterminand())))
         {
             materials.append(QString::fromStdString(water.getDeterminand()));
         }
     }
-
     emit handling(30);
-
-    // Init map
-    QMap<QString,QList<double>> avgResults; // <location, <material,results>>
-    // Number of material sample at location
-    QMap<QString,QList<int>> counts; // <location, <material,counts>>
-
-
+    QMap<QString, QList<double>> avgResults;
+    QMap<QString, QList<int>> counts;
     for (const auto &location : locations)
     {
         avgResults[location] = QList<double>(materials.size(), 0);
         counts[location] = QList<int>(materials.size(), 0);
     }
-
     emit handling(50);
-
     LOGD(QString("locations.size() %1, materials.size() %2").arg(locations.size()).arg(materials.size()));
-    if(locations.isEmpty())
+    if (locations.isEmpty())
     {
         emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, 100);
         setIsFilteredChanged(false);
         emit handling(HIDE_PROGRESS_VALUE);
         return;
     }
-
-    for(const auto &water : m_filteredData)
+    for (const auto &water : m_filteredData)
     {
         int materialIndex = materials.indexOf(QString::fromStdString(water.getDeterminand()));
-
-        if(materialIndex == -1)
+        if (materialIndex == -1)
         {
             LOGD("Material not found");
             continue;
         }
-
-        if(locations.contains(QString::fromStdString(water.getLocation()))){
+        if (locations.contains(QString::fromStdString(water.getLocation())))
+        {
             avgResults[QString::fromStdString(water.getLocation())][materialIndex] += water.getResult();
             counts[QString::fromStdString(water.getLocation())][materialIndex] += 1;
         }
     }
-
     emit handling(70);
-
-    // Calculate average
     for (const auto &location : locations)
     {
         for (int i = 0; i < materials.size(); ++i)
         {
-            if(counts[location][i] != 0)
+            if (counts[location][i] != 0)
             {
                 avgResults[location][i] /= counts[location][i];
             }
@@ -207,10 +229,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
                 avgResults[location][i] = 0;
         }
     }
-
     emit handling(90);
-
-    // Find max value
     double maxValue = 0;
     for (const auto &location : locations)
     {
@@ -219,8 +238,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
         {
             sum += avgResults[location][i];
         }
-
-        if(sum > maxValue)
+        if (sum > maxValue)
         {
             maxValue = sum;
         }
@@ -230,37 +248,33 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
     emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, maxValue);
     setIsFilteredChanged(false);
 }
-
 void DataHandler::setIsFilteredChanged(bool changed)
 {
-    // QMutexLocker locker(&mutex);
     LOGD(QString("changed %1").arg(changed));
     m_isFilteredChanged = changed;
 }
-
 bool DataHandler::isFilteredChanged()
 {
-    // QMutexLocker locker(&mutex);
     return m_isFilteredChanged;
 }
-
 void DataHandler::doFilter()
 {
     LOGD(QString("m_filters.size() %1, m_rootData.size() %2").arg(m_filters.size()).arg(m_rootData.size()));
     m_filteredData.clear();
-    if(m_rootData.empty())
+    if (m_rootData.empty())
     {
         setIsFilteredChanged(false);
         return;
     }
-
-    if(m_filters.size() == 0)
+    if (m_filters.size() == 0)
     {
         m_filteredData = m_rootData;
-    }else{
+    }
+    else
+    {
         m_filteredData = m_rootData;
         std::vector<Water> tempFilter;
-        for(int i=0; i<m_filters.size();i++)
+        for (int i = 0; i < m_filters.size(); i++)
         {
             auto filter = m_filters[i];
             switch (filter.type())
@@ -268,9 +282,9 @@ void DataHandler::doFilter()
             case Filter::FilterType::LOCATIONS:
             {
                 QString location = filter.value().toString();
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(QString::fromStdString(water.getLocation()) == location)
+                    if (QString::fromStdString(water.getLocation()) == location)
                     {
                         tempFilter.push_back(water);
                     }
@@ -280,9 +294,9 @@ void DataHandler::doFilter()
             case Filter::FilterType::MATERIALS:
             {
                 QString material = filter.value().toString();
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(QString::fromStdString(water.getDeterminand()) == material)
+                    if (QString::fromStdString(water.getDeterminand()) == material)
                     {
                         tempFilter.push_back(water);
                     }
@@ -292,9 +306,9 @@ void DataHandler::doFilter()
             case Filter::FilterType::LOCATIONS_CONTAIN:
             {
                 QString location = filter.value().toString();
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(QString::fromStdString(water.getLocation()).contains(location))
+                    if (QString::fromStdString(water.getLocation()).contains(location))
                     {
                         tempFilter.push_back(water);
                     }
@@ -304,9 +318,9 @@ void DataHandler::doFilter()
             case Filter::FilterType::MATERIALS_CONTAIN:
             {
                 QString material = filter.value().toString();
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(QString::fromStdString(water.getDeterminand()).contains(material))
+                    if (QString::fromStdString(water.getDeterminand()).contains(material))
                     {
                         tempFilter.push_back(water);
                     }
@@ -316,9 +330,9 @@ void DataHandler::doFilter()
             case Filter::FilterType::LOCATIONS_SET:
             {
                 QStringList locations = filter.value().toStringList();
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(locations.contains(QString::fromStdString(water.getLocation())))
+                    if (locations.contains(QString::fromStdString(water.getLocation())))
                     {
                         tempFilter.push_back(water);
                     }
@@ -328,9 +342,9 @@ void DataHandler::doFilter()
             case Filter::FilterType::MATERIALS_SET:
             {
                 QStringList materials = filter.value().toStringList();
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(materials.contains(QString::fromStdString(water.getDeterminand())))
+                    if (materials.contains(QString::fromStdString(water.getDeterminand())))
                     {
                         tempFilter.push_back(water);
                     }
@@ -372,10 +386,9 @@ void DataHandler::doFilter()
                 default:
                     break;
                 }
-
-                for(const auto &water : m_filteredData)
+                for (const auto &water : m_filteredData)
                 {
-                    if(time != ALL_TIME_TF_INDEX && water.getDateTime() >= compareDate)
+                    if (time != ALL_TIME_TF_INDEX && water.getDateTime() >= compareDate)
                     {
                         tempFilter.push_back(water);
                     }
@@ -385,47 +398,38 @@ void DataHandler::doFilter()
             default:
                 break;
             }
-
             LOGD(QString("After filter %1, m_filteredData.size() %2").arg((int)filter.type()).arg(tempFilter.size()));
             m_filteredData = tempFilter;
             tempFilter.clear();
         }
     }
-
     LOGD(QString("m_filteredData.size() %1").arg(m_filteredData.size()));
     emit rawDataReady(m_filteredData);
-
     takePollutantOverviewData();
     takeEnvironmentalLitterIndicatorsData();
+    takePOPsData();
     setIsFilteredChanged(false);
 }
-
 bool DataHandler::loading()
 {
     std::ifstream file(m_filename.toStdString());
     size_t rowCount = 0;
     std::string line;
-
-    while (std::getline(file, line)) {
+    while (std::getline(file, line))
+    {
         ++rowCount;
     }
-
-    if(rowCount == 0)
+    if (rowCount == 0)
     {
         emit handling(HIDE_PROGRESS_VALUE);
         return false;
     }
-
     csv::CSVReader reader(m_filename.toStdString());
     m_rootData.clear();
-
     int count = 0;
-
     QDateTime compareDate = QDateTime::currentDateTime();
-
     QStringList locations;
     QStringList materials;
-
     for (const auto &row : reader)
     {
         Water water{
@@ -436,44 +440,34 @@ bool DataHandler::loading()
             row["result"].get<double>(),
             row["determinand.unit.label"].get<std::string>(),
             row["sample.sampledMaterialType.label"].get<std::string>(),
-            QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"
-        };
-
+            QString::fromStdString(row["sample.isComplianceSample"].get<std::string>()).toLower() == "true"};
         m_rootData.push_back(water);
-        if(!locations.contains(QString::fromStdString(water.getLocation())))
+        if (!locations.contains(QString::fromStdString(water.getLocation())))
         {
             locations.append(QString::fromStdString(water.getLocation()));
         }
-
-        if(!materials.contains(QString::fromStdString(water.getDeterminand())))
+        if (!materials.contains(QString::fromStdString(water.getDeterminand())))
         {
             materials.append(QString::fromStdString(water.getDeterminand()));
         }
-
-        emit handling((int)(count++*100/rowCount));
-        if(!m_isRunning)
+        emit handling((int)(count++ * 100 / rowCount));
+        if (!m_isRunning)
             return false;
     }
-
     emit locationsChanged(locations);
     emit materialsChanged(materials);
-
     emit handling(HIDE_PROGRESS_VALUE);
     emit dataReady();
-
     file.close();
-
     return !m_rootData.empty();
 }
-
 void DataHandler::loadData(QString filename)
 {
     LOG();
     m_filename = filename;
     m_isLoaded = false;
 }
-
-void DataHandler::addFilter(const Filter& filter)
+void DataHandler::addFilter(const Filter &filter)
 {
     LOG();
     switch (filter.type())
@@ -482,12 +476,11 @@ void DataHandler::addFilter(const Filter& filter)
     case Filter::FilterType::LOCATIONS:
     case Filter::FilterType::LOCATIONS_CONTAIN:
     {
-        // Loop in filters
         for (int i = 0; i < m_filters.size(); ++i)
         {
-            if(m_filters[i].type() == Filter::FilterType::LOCATIONS ||
-                    m_filters[i].type() == Filter::FilterType::LOCATIONS_CONTAIN ||
-                    m_filters[i].type() == Filter::FilterType::LOCATIONS_SET)
+            if (m_filters[i].type() == Filter::FilterType::LOCATIONS ||
+                m_filters[i].type() == Filter::FilterType::LOCATIONS_CONTAIN ||
+                m_filters[i].type() == Filter::FilterType::LOCATIONS_SET)
             {
                 m_filters.removeAt(i);
                 break;
@@ -499,12 +492,11 @@ void DataHandler::addFilter(const Filter& filter)
     case Filter::FilterType::MATERIALS_CONTAIN:
     case Filter::FilterType::MATERIALS_SET:
     {
-        // Loop in filters
         for (int i = 0; i < m_filters.size(); ++i)
         {
-            if(m_filters[i].type() == Filter::FilterType::MATERIALS ||
-                    m_filters[i].type() == Filter::FilterType::MATERIALS_CONTAIN ||
-                    m_filters[i].type() == Filter::FilterType::MATERIALS_SET)
+            if (m_filters[i].type() == Filter::FilterType::MATERIALS ||
+                m_filters[i].type() == Filter::FilterType::MATERIALS_CONTAIN ||
+                m_filters[i].type() == Filter::FilterType::MATERIALS_SET)
             {
                 m_filters.removeAt(i);
                 break;
@@ -514,10 +506,9 @@ void DataHandler::addFilter(const Filter& filter)
     }
     case Filter::FilterType::TIME:
     {
-        // Loop in filters
         for (int i = 0; i < m_filters.size(); ++i)
         {
-            if(m_filters[i].type() == Filter::FilterType::TIME)
+            if (m_filters[i].type() == Filter::FilterType::TIME)
             {
                 m_filters.removeAt(i);
                 break;
@@ -528,20 +519,12 @@ void DataHandler::addFilter(const Filter& filter)
     default:
         break;
     }
-
     m_filters.append(filter);
-
     setIsFilteredChanged(true);
 }
-
-void DataHandler::removeFilter(const Filter& filter)
+void DataHandler::removeFilter(const Filter &filter)
 {
     LOG();
     m_filters.removeAll(filter);
 }
-
-void DataHandler::takeGeographicalData()
-{
-
-
-}
+void DataHandler::takeGeographicalData() {}
