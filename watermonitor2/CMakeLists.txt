@@ -31,8 +31,6 @@ file(GLOB HANDLERS_HEADERS handlers/*.hpp)
 # Source files
 set(PROJECT_SOURCES
     main.cpp
-    dashboard.cpp
-    dashboard.h
     settingpanel.h
     settingpanel.cpp
     overviewchartwidget.h
