@@ -10,9 +10,6 @@
 #include <QStackedBarSeries>
 #include <QValueAxis>
 
-#define MAX_LOCATIONS_ALLOWED 10
-#define MAX_MATERIALS_ALLOWED 20
-
 EnvironmentalLitterIndicatorsChart::EnvironmentalLitterIndicatorsChart(QWidget *parent)
     : ChartHolderBaseWidget{parent}
 {
@@ -82,17 +79,17 @@ void EnvironmentalLitterIndicatorsChart::updateChart(QStringList locations, QStr
     LOGD("Removed all series and axes");
 
     // Check if the number of locations and materials exceeds the maximum allowed
-    if (locations.size() > MAX_LOCATIONS_ALLOWED)
-    {
-        LOGE("Number of locations or materials exceeds the maximum allowed");
-        locations = locations.mid(0, MAX_LOCATIONS_ALLOWED);
-    }
+    // if (locations.size() > MAX_LOCATIONS_ALLOWED)
+    // {
+    //     LOGE("Number of locations or materials exceeds the maximum allowed");
+    //     locations = locations.mid(0, MAX_LOCATIONS_ALLOWED);
+    // }
 
-    if (materials.size() > MAX_MATERIALS_ALLOWED)
-    {
-        LOGE("Number of locations or materials exceeds the maximum allowed");
-        materials = materials.mid(0, MAX_MATERIALS_ALLOWED);
-    }
+    // if (materials.size() > MAX_MATERIALS_ALLOWED)
+    // {
+    //     LOGE("Number of locations or materials exceeds the maximum allowed");
+    //     materials = materials.mid(0, MAX_MATERIALS_ALLOWED);
+    // }
 
     // concat result if need
     QMap<QString, QList<double>> newResults;
@@ -108,23 +105,23 @@ void EnvironmentalLitterIndicatorsChart::updateChart(QStringList locations, QStr
     }
 
     // Recalculate the maximum value
-    if(locations.size() == MAX_LOCATIONS_ALLOWED || materials.size() == MAX_MATERIALS_ALLOWED)
-    {
-        maxValue = 0;
-        for(auto location : locations)
-        {
-            double sum = 0;
-            for (auto value : newResults[location])
-            {
-                sum += value;
-            }
+    // if(locations.size() == MAX_LOCATIONS_ALLOWED || materials.size() == MAX_MATERIALS_ALLOWED)
+    // {
+    //     maxValue = 0;
+    //     for(auto location : locations)
+    //     {
+    //         double sum = 0;
+    //         for (auto value : newResults[location])
+    //         {
+    //             sum += value;
+    //         }
 
-            if (sum > maxValue)
-            {
-                maxValue = sum;
-            }
-        }
-    }
+    //         if (sum > maxValue)
+    //         {
+    //             maxValue = sum;
+    //         }
+    //     }
+    // }
 
     QList<QBarSet *> barSets;
     for (int i = 0; i < materials.size(); ++i)

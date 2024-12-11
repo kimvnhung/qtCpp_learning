@@ -57,6 +57,11 @@ void GeneralDashboard::setUpDataHandler()
             { m_dataHandler->addFilter(Filter{Filter::FilterType::LOCATIONS_SET, QVariant(locations)}); });
     connect(m_settingPanel, &SettingPanel::timeFilterChanged, [this](int index)
             { m_dataHandler->addFilter(Filter{Filter::FilterType::TIME, QVariant(index)}); });
+    connect(m_settingPanel, &SettingPanel::maxLocationsChanged, [this](int maxLocations)
+            { m_dataHandler->addFilter(Filter{Filter::FilterType::LOCATIONS_MAX, QVariant(maxLocations)}); });
+    connect(m_settingPanel, &SettingPanel::maxMaterialsChanged, [this](int maxMaterials)
+            { m_dataHandler->addFilter(Filter{Filter::FilterType::MATERIALS_MAX, QVariant(maxMaterials)}); });
+
     m_dataHandler->start();
 }
 void GeneralDashboard::setUpHeader()

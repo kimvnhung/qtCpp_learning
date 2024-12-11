@@ -32,6 +32,9 @@ signals:
     void locationFilterChanged(const QStringList &locations);
     void timeFilterChanged(int index);
 
+    void maxLocationsChanged(int maxLocations);
+    void maxMaterialsChanged(int maxMaterials);
+
 private:
     QHBoxLayout *m_mainLayout;
     QWidget *m_content;

@@ -15,7 +15,9 @@ public:
         MATERIALS,
         MATERIALS_CONTAIN,
         MATERIALS_SET,
-        TIME
+        TIME,
+        LOCATIONS_MAX,
+        MATERIALS_MAX,
     };
 
     // Constructor

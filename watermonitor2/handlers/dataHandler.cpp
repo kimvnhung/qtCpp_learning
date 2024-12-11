@@ -42,7 +42,7 @@ void DataHandler::stop()
 void DataHandler::takePollutantOverviewData()
 {
     LOG();
-    emit handling(SHOW_PROGESS_VALUE);
+    // emit handling(SHOW_PROGESS_VALUE);
     QStringList pollutants;
     for (const auto &water : m_filteredData)
     {
@@ -52,7 +52,7 @@ void DataHandler::takePollutantOverviewData()
         }
     }
     QList<QList<double>> valuesByMonth = QList<QList<double>>(12, QList<double>(pollutants.size(), 0));
-    emit handling(30);
+    // emit handling(30);
     for (const auto &water : m_filteredData)
     {
         int month = water.getDateTime().date().month();
@@ -64,7 +64,7 @@ void DataHandler::takePollutantOverviewData()
         }
         valuesByMonth[month - 1][pollutantIndex] += water.getResult();
     }
-    emit handling(70);
+    // emit handling(70);
     double maxValue = 0;
     for (int i = 0; i < 12; ++i)
     {
@@ -76,14 +76,14 @@ void DataHandler::takePollutantOverviewData()
             }
         }
     }
-    emit handling(HIDE_PROGRESS_VALUE);
+    // emit handling(HIDE_PROGRESS_VALUE);
     emit pollutantOverviewDataReady(pollutants, valuesByMonth, maxValue);
 }
 
 void DataHandler::takeComplianceDashboardData()
 {
     LOG();
-    emit handling(SHOW_PROGESS_VALUE);
+    // emit handling(SHOW_PROGESS_VALUE);
 
     int trueCount = 0;
     int falseCount = 0;
@@ -101,10 +101,10 @@ void DataHandler::takeComplianceDashboardData()
             falseCount++;
         }
 
-        emit handling(count++ * 100 / m_filteredData.size());
+        // emit handling(count++ * 100 / m_filteredData.size());
     }
 
-    emit handling(HIDE_PROGRESS_VALUE);
+    // emit handling(HIDE_PROGRESS_VALUE);
     emit complianceChartDataReady(trueCount, falseCount);
 
 }
@@ -112,7 +112,7 @@ void DataHandler::takeComplianceDashboardData()
 void DataHandler::takePOPsData()
 {
     LOG();
-    emit handling(SHOW_PROGESS_VALUE);
+    // emit handling(SHOW_PROGESS_VALUE);
     QStringList locations;
     for (const auto &water : m_filteredData)
     {
@@ -122,7 +122,7 @@ void DataHandler::takePOPsData()
         }
     }
     QList<QList<double>> valuesByMonth = QList<QList<double>>(12, QList<double>(locations.size(), 0));
-    emit handling(30);
+    // emit handling(30);
     for (const auto &water : m_filteredData)
     {
         int month = water.getDateTime().date().month();
@@ -134,7 +134,7 @@ void DataHandler::takePOPsData()
         }
         valuesByMonth[month - 1][locationIndex] += water.getResult();
     }
-    emit handling(70);
+    // emit handling(70);
     double maxValue = 0;
     for (int i = 0; i < 12; ++i)
     {
@@ -146,7 +146,7 @@ void DataHandler::takePOPsData()
             }
         }
     }
-    emit handling(HIDE_PROGRESS_VALUE);
+    // emit handling(HIDE_PROGRESS_VALUE);
     emit popsDataReady(locations, valuesByMonth, maxValue);
 }
 
@@ -154,7 +154,7 @@ void DataHandler::takePOPsData()
 void DataHandler::takeFluorinatedCompoundsData()
 {
     LOG();
-    emit handling(SHOW_PROGESS_VALUE);
+    // emit handling(SHOW_PROGESS_VALUE);
     QStringList locations;
     for (const auto &water : m_filteredData)
     {
@@ -164,7 +164,7 @@ void DataHandler::takeFluorinatedCompoundsData()
         }
     }
 
-    emit handling(30);
+    // emit handling(30);
 
     QList<double> lats = QList<double>(locations.size(), 0);
     QList<double> lons = QList<double>(locations.size(), 0);
@@ -184,7 +184,7 @@ void DataHandler::takeFluorinatedCompoundsData()
         values[locationIndex] += water.getResult();
     }
 
-    emit handling(60);
+    // emit handling(60);
 
     double minLat = 0, minLon = 0, maxLat = 0, maxLon = 0, maxValue = 0;
 
@@ -206,9 +206,9 @@ void DataHandler::takeFluorinatedCompoundsData()
         if (values[i] > maxValue)
             maxValue = values[i];
     }
-    emit handling(90);
+    // emit handling(90);
 
-    emit handling(HIDE_PROGRESS_VALUE);
+    // emit handling(HIDE_PROGRESS_VALUE);
     emit flourinatedCompoundsChartDataReady(locations, lats, lons, values, minLat, minLon, maxLat, maxLon, maxValue);
 }
 void DataHandler::takeEnvironmentalLitterIndicatorsData()
@@ -216,8 +216,8 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
     LOGD(QString("m_isFilteredChanged %1").arg(m_isFilteredChanged));
     QStringList locations;
     QStringList materials;
-    emit handling(SHOW_PROGESS_VALUE);
-    emit processingMessage("Processing chart data...");
+    // emit handling(SHOW_PROGESS_VALUE);
+    // emit processingMessage("Processing chart data...");
     for (const auto &water : m_filteredData)
     {
         if (!locations.contains(QString::fromStdString(water.getLocation())))
@@ -229,7 +229,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
             materials.append(QString::fromStdString(water.getDeterminand()));
         }
     }
-    emit handling(30);
+    // emit handling(30);
     QMap<QString, QList<double>> avgResults;
     QMap<QString, QList<int>> counts;
     for (const auto &location : locations)
@@ -237,13 +237,13 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
         avgResults[location] = QList<double>(materials.size(), 0);
         counts[location] = QList<int>(materials.size(), 0);
     }
-    emit handling(50);
+    // emit handling(50);
     LOGD(QString("locations.size() %1, materials.size() %2").arg(locations.size()).arg(materials.size()));
     if (locations.isEmpty())
     {
         emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, 100);
         setIsFilteredChanged(false);
-        emit handling(HIDE_PROGRESS_VALUE);
+        // emit handling(HIDE_PROGRESS_VALUE);
         return;
     }
     for (const auto &water : m_filteredData)
@@ -260,7 +260,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
             counts[QString::fromStdString(water.getLocation())][materialIndex] += 1;
         }
     }
-    emit handling(70);
+    // emit handling(70);
     for (const auto &location : locations)
     {
         for (int i = 0; i < materials.size(); ++i)
@@ -273,7 +273,7 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
                 avgResults[location][i] = 0;
         }
     }
-    emit handling(90);
+    // emit handling(90);
     double maxValue = 0;
     for (const auto &location : locations)
     {
@@ -287,8 +287,8 @@ void DataHandler::takeEnvironmentalLitterIndicatorsData()
             maxValue = sum;
         }
     }
-    emit handling(HIDE_PROGRESS_VALUE);
-    emit processingMessage("");
+    // emit handling(HIDE_PROGRESS_VALUE);
+    // emit processingMessage("");
     emit environmentalLitterIndicatorsDataReady(locations, materials, avgResults, maxValue);
 
 }
@@ -437,6 +437,68 @@ void DataHandler::doFilter()
                         tempFilter.push_back(water);
                     }
                 }
+                break;
+            }
+            case Filter::FilterType::LOCATIONS_MAX:
+            {
+                int maxLocations = filter.value().toInt();
+                if(maxLocations == 0)
+                {
+                    break;
+                }
+                QStringList locations;
+                for (const auto &water : m_filteredData)
+                {
+                    if(!locations.contains(QString::fromStdString(water.getLocation())))
+                    {
+                        locations.append(QString::fromStdString(water.getLocation()));
+                    }
+
+                    if(locations.size() >= maxLocations)
+                    {
+                        break;
+                    }
+                }
+
+                for (const auto &water : m_filteredData)
+                {
+                    if(locations.contains(QString::fromStdString(water.getLocation())))
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
+                LOGD(QString("maxLocations %1, locations.size() %2").arg(maxLocations).arg(locations.size()));
+                break;
+            }
+            case Filter::FilterType::MATERIALS_MAX:
+            {
+                int maxMaterials = filter.value().toInt();
+                if(maxMaterials == 0)
+                {
+                    break;
+                }
+                QStringList materials;
+                for (const auto &water : m_filteredData)
+                {
+                    if(!materials.contains(QString::fromStdString(water.getDeterminand())))
+                    {
+                        materials.append(QString::fromStdString(water.getDeterminand()));
+                    }
+
+                    if(materials.size() >= maxMaterials)
+                    {
+                        break;
+                    }
+                }
+
+                for (const auto &water : m_filteredData)
+                {
+                    if(materials.contains(QString::fromStdString(water.getDeterminand())))
+                    {
+                        tempFilter.push_back(water);
+                    }
+                }
+                LOGD(QString("maxMaterials %1, materials.size() %2").arg(maxMaterials).arg(materials.size()));
                 break;
             }
             default:

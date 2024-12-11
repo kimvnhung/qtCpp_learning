@@ -8,7 +8,7 @@
 #include <QScatterSeries>
 #include <QValueAxis>
 #define MAX_BUBBLE_SIZE 100
-#define MAX_LOCATIONS 20
+// #define MAX_LOCATIONS 5
 
 FlourinatedCompoundsChart::FlourinatedCompoundsChart(QWidget *parent)
     : ChartHolderBaseWidget{parent}
@@ -107,8 +107,8 @@ void FlourinatedCompoundsChart::updateChart(
     QList<QScatterSeries *> series;
     for (int i = 0; i < locations.size(); i++)
     {
-        if(i >= MAX_LOCATIONS)
-            break;
+        // if(i >= MAX_LOCATIONS)
+        //     break;
 
         auto bubble = new QScatterSeries(this);
         bubble->setName(locations[i]);

@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QTimer>
 #include <QMessageBox>
+#include <QSpinBox>
 
 #include "common.h"
 #include "filtercombobox.h"
@@ -148,6 +149,23 @@ void SettingPanel::setUpContent()
     locationLayout->addWidget(locationLabel);
     locationLayout->addWidget(m_locationFilter);
     connect(m_locationFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::locationFilterChanged);
+
+    QLabel *maxLocationLabel = new QLabel("Max locations:");
+    QSpinBox *maxLocationSpinBox = new QSpinBox{m_content};
+    connect(maxLocationSpinBox, &QSpinBox::valueChanged,this, &SettingPanel::maxLocationsChanged);
+    maxLocationSpinBox->setMinimum(0);
+    maxLocationSpinBox->setValue(10);
+    // Disable editing
+    // maxLocationSpinBox->setReadOnly(true);
+    QTimer::singleShot(500, [this](){
+        emit maxLocationsChanged(10);
+    });
+
+    QHBoxLayout *maxLocationLayout = new QHBoxLayout;
+    maxLocationLayout->addWidget(maxLocationLabel);
+    maxLocationLayout->addWidget(maxLocationSpinBox);
+    locationLayout->addLayout(maxLocationLayout);
+
     contentLayout->addLayout(locationLayout);
 
     // Set up material filter
@@ -160,6 +178,23 @@ void SettingPanel::setUpContent()
     materialLayout->addWidget(materialLabel);
     materialLayout->addWidget(m_materialFilter);
     connect(m_materialFilter, &FilterComboBox::checkedItemsChanged,this, &SettingPanel::materialFilterChanged);
+
+    QLabel *maxMaterialLabel = new QLabel("Max materials:");
+    QSpinBox *maxMaterialSpinBox = new QSpinBox{m_content};
+    connect(maxMaterialSpinBox, &QSpinBox::valueChanged,this, &SettingPanel::maxMaterialsChanged);
+    maxMaterialSpinBox->setMinimum(0);
+    maxMaterialSpinBox->setValue(10);
+    // Disable editing
+    // maxMaterialSpinBox->setReadOnly(true);
+    QTimer::singleShot(500, [this](){
+        emit maxMaterialsChanged(10);
+    });
+
+    QHBoxLayout *maxMaterialLayout = new QHBoxLayout;
+    maxMaterialLayout->addWidget(maxMaterialLabel);
+    maxMaterialLayout->addWidget(maxMaterialSpinBox);
+    materialLayout->addLayout(maxMaterialLayout);
+
     contentLayout->addLayout(materialLayout);
 
     // Setup time combo box

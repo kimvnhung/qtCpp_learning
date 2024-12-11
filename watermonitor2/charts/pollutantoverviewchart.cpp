@@ -5,7 +5,7 @@
 #include <QLineSeries>
 #include <QGridLayout>
 #include <QCategoryAxis>
-#define MAX_POLLUTANTS 10
+// #define MAX_POLLUTANTS 10
 PollutantOverviewChart::PollutantOverviewChart(QWidget *parent)
     : ChartHolderBaseWidget{parent}
 {
@@ -95,8 +95,8 @@ void PollutantOverviewChart::updateChart(QStringList pollutants, QList<QList<dou
     chart->removeAllSeries();
     for (int i = 0; i < pollutants.size(); i++)
     {
-        if (i >= MAX_POLLUTANTS)
-            break;
+        // if (i >= MAX_POLLUTANTS)
+        //     break;
         QLineSeries *series = new QLineSeries();
         series->setName(pollutants[i]);
         for (int j = 0; j < valuesByMonth.size(); j++)

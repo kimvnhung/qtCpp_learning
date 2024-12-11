@@ -4,7 +4,7 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QPolarChart>
-#define MAX_LOCATIONS 10
+// #define MAX_LOCATIONS 10
 POPsChart::POPsChart(QWidget *parent) : ChartHolderBaseWidget(parent)
 {
     LOG();
@@ -100,8 +100,8 @@ void POPsChart::updateChart(QStringList locations, QList<QList<double>> valuesBy
     chart->removeAllSeries();
     for (int i = 0; i < locations.size(); i++)
     {
-        if (i >= MAX_LOCATIONS)
-            break;
+        // if (i >= MAX_LOCATIONS)
+        //     break;
         QLineSeries *series = new QLineSeries();
         series->setName(locations[i]);
         for (int j = 0; j < valuesByMonth.size(); j++)
