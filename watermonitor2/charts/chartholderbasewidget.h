@@ -35,15 +35,10 @@ public:
 
 signals:
     void expanded();
-    void collapsed();
 
 protected:
     virtual void setUpChart() = 0;
     void initializeUi();
-
-    QGridLayout *mainLayout() const;
-    QWidget *previewWidget() const;
-    QWidget *expandedWidget() const;
 
     void setChartWidget(QWidget *chartContent);
 
@@ -54,8 +49,6 @@ protected:
     void leaveEvent(QEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
-
-    void resizeEvent(QResizeEvent *event) override;
 
 private:
     QGridLayout *m_mainLayout;
@@ -71,8 +64,6 @@ private:
 
 private:
     void setUpPreviewWidget();
-
-    void setUpExpandedWidget();
 
     void switchMode();
 };

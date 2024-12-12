@@ -12,11 +12,8 @@ class OverviewChartWidget : public QWidget
 
 public:
     explicit OverviewChartWidget(QWidget *parent = nullptr);
-signals:
-    void pageChanged(QString pageName);
+
 public slots:
-    void setPreview();
-    void setExpanded(int index);
     void onBackButtonClicked();
     void onExpanded();
     void onPollutantOverviewChartUpdated(QStringList pollutants, QList<QList<double>> valuesByMonth, double maxValue);
@@ -33,7 +30,6 @@ private:
     QGridLayout *m_previewLayout;
     QList<ChartWidget *> *m_listChart;
     QWidget *m_expandedWidget;
-    bool m_isPreview;
     int m_interactiveIndex;
 
 private:
@@ -41,6 +37,5 @@ private:
     void setUpChart();
     void setUpExpandedWidget();
     void setPreviewMode();
-    void setExpandedMode();
 };
 #endif // OVERVIEWCHARTWIDGET_H

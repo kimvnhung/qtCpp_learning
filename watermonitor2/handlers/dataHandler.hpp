@@ -31,7 +31,6 @@ public slots:
     void stop();
     void loadData(QString filename);
     void addFilter(const Filter &filter);
-    void removeFilter(const Filter &filter);
 
 protected:
     void run() override;
@@ -48,7 +47,6 @@ private:
     QList<Filter> m_filters;
     void doFilter();
     bool loading();
-    void takeGeographicalData();
     void takePollutantOverviewData();
     void takeComplianceDashboardData();
     void takePOPsData();

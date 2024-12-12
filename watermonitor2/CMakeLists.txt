@@ -42,8 +42,8 @@ set(PROJECT_SOURCES
     images.qrc
     common.h
 
-    expendablewidget.h
-    expendablewidget.cpp
+
+
     filtercombobox.h
     filtercombobox.cpp
     ${HANDLERS_SOURCES}

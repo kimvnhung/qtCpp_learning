@@ -27,21 +27,6 @@ SettingPanel::SettingPanel(QWidget *parent)
     initializeUi();
 }
 
-void SettingPanel::setCollapse(bool collapse)
-{
-    m_isCollapsed = collapse;
-
-    SET_VALUE(SETTING_COLLAPSED, m_isCollapsed);
-
-    if (m_isCollapsed) {
-        setFixedWidth(COLLAPSED_WIDTH);
-        m_settingButton->setIcon(COLLAPSED_ICON);
-    } else {
-        setFixedWidth(EXPANDED_WIDTH);
-        m_settingButton->setIcon(EXPANDED_ICON);
-    }
-}
-
 void SettingPanel::setMaterialFilter(const QStringList &materials)
 {
     m_materialFilter->addCheckableItems(materials);
@@ -59,46 +44,13 @@ void SettingPanel::initializeUi()
     m_mainLayout = new QHBoxLayout{this};
     m_mainLayout->setContentsMargins(0,0,0,0);
     m_mainLayout->setSpacing(0);
+    setFixedWidth(EXPANDED_WIDTH);
 
-    setUpSettingButton();
     setUpContent();
 
-    setCollapse(GET_BOOL(SETTING_COLLAPSED));
     setStyleSheet("SettingPanel { background-color: #ffffff; }");
 }
 
-void SettingPanel::setUpSettingButton()
-{
-    // Set stylesheet for showing area
-    // buttonContainer->setStyleSheet("background-color: #ff0000;");
-    QVBoxLayout *buttonContainerLayout = new QVBoxLayout;
-
-    // Remove magrins
-    buttonContainerLayout->setContentsMargins(0,0,0,0);
-    m_settingButton = new QPushButton{this};
-    // set image to button
-    m_settingButton->setFixedSize(COLLAPSED_WIDTH, COLLAPSED_WIDTH);
-    // Set style on hover
-    m_settingButton->setStyleSheet(R"(
-        QPushButton {
-            border: none;
-            background-color: transparent;
-            border-radius: 12px;
-        }
-
-        QPushButton:hover {
-            background-color: #ffffff;
-        }
-)");
-    m_settingButton->setIcon(QIcon{":/images/setting.png"});
-    m_settingButton->setIconSize(QSize{(int)(COLLAPSED_WIDTH*0.6), (int)(COLLAPSED_WIDTH*0.6)});
-
-    buttonContainerLayout->addWidget(m_settingButton);
-    // Add vertical spacer to the layout
-    buttonContainerLayout->addStretch();
-    m_mainLayout->addLayout(buttonContainerLayout);
-
-}
 
 void SettingPanel::setUpContent()
 {
@@ -277,9 +229,4 @@ void SettingPanel::onReloadClicked()
         msgBox.exec();
     }
 
-}
-
-void SettingPanel::onPageChanged(const QString &pageName)
-{
-    LOGD(pageName);
 }

@@ -86,8 +86,6 @@ void GeneralDashboard::setUpChartPanel()
     if (m_contentLayout)
         // Add the chart panel to the layout at row 2, column 0, and make it span 10 rows and 1 column
         m_contentLayout->addWidget(m_chartPanel);
-    if (m_settingPanel)
-        connect(m_chartPanel, &OverviewChartWidget::pageChanged, m_settingPanel, &SettingPanel::onPageChanged);
 }
 void GeneralDashboard::setUpStatusBar()
 {

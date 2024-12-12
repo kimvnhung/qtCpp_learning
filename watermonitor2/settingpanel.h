@@ -17,13 +17,9 @@ class SettingPanel : public QWidget
 public:
     explicit SettingPanel(QWidget *parent = nullptr);
 
-    void setCollapse(bool collapse);
-
 public slots:
     void setMaterialFilter(const QStringList &materials);
     void setLocationsFilter(const QStringList &locations);
-
-    void onPageChanged(const QString &pageName);
 
 signals:
     void csvFileAvailable(const QString &filePath);
@@ -38,14 +34,11 @@ signals:
 private:
     QHBoxLayout *m_mainLayout;
     QWidget *m_content;
-    QPushButton *m_settingButton;
 
     QComboBox *m_languageComboBox;
     QComboBox *m_regionComboBox;
     QComboBox *m_timeComboBox;
     QLineEdit *m_filePathEdit;
-
-    bool m_isCollapsed = false;
 
     QString m_currentChartName;
     // For filter
@@ -57,8 +50,6 @@ private:
 
 private:
     void initializeUi();
-
-    void setUpSettingButton();
 
     void setUpContent();
 private slots:

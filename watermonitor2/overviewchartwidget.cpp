@@ -14,7 +14,7 @@
 #include "common.h"
 #define INTERACTIVE_INDEX_EMPTY -1
 OverviewChartWidget::OverviewChartWidget(QWidget *parent)
-    : QWidget{parent}, m_isPreview(true), m_interactiveIndex(INTERACTIVE_INDEX_EMPTY)
+    : QWidget{parent}, m_interactiveIndex(INTERACTIVE_INDEX_EMPTY)
 {
     initializeUi();
 }
@@ -204,25 +204,11 @@ void OverviewChartWidget::setUpChart()
         m_previewLayout->addWidget(chart, i / 2, i % 2);
     }
 }
-void OverviewChartWidget::setPreview()
-{
-    m_isPreview = true;
-    setPreviewMode();
-}
-void OverviewChartWidget::setExpanded(int index)
-{
-    m_isPreview = false;
-    setExpandedMode();
-    m_listChart->at(index)->setMode(ChartWidget::EXPANDED);
-}
+
+
 void OverviewChartWidget::setPreviewMode()
 {
     auto chart = m_listChart->at(m_interactiveIndex);
     chart->setMode(ChartWidget::PREVIEW);
     m_previewLayout->addWidget(chart, m_interactiveIndex / 2, m_interactiveIndex % 2);
-}
-void OverviewChartWidget::setExpandedMode()
-{
-    for (auto chart : *m_listChart)
-        chart->setMode(ChartWidget::EXPANDED);
 }

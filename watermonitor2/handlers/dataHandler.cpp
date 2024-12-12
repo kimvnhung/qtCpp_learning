@@ -653,9 +653,4 @@ void DataHandler::addFilter(const Filter &filter)
     m_filters.append(filter);
     setIsFilteredChanged(true);
 }
-void DataHandler::removeFilter(const Filter &filter)
-{
-    LOG();
-    m_filters.removeAll(filter);
-}
-void DataHandler::takeGeographicalData() {}
+

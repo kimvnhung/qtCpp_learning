@@ -88,18 +88,6 @@ void ChartHolderBaseWidget::setUpPreviewWidget()
     acceptClickEvents(m_previewWidget,false);
 }
 
-void ChartHolderBaseWidget::setUpExpandedWidget()
-{
-    // Set Size Policy
-    // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // m_expandedWidget = new QWidget;
-    // m_expandedWidget->setStyleSheet("background-color: #ffffff;");
-    // QVBoxLayout *layout = new QVBoxLayout;
-    // m_expandedWidget->setLayout(layout);
-    // if(m_chartContent)
-    //     layout->addWidget(m_chartContent);
-}
-
 void ChartHolderBaseWidget::switchMode()
 {
     LOGD(QString("m_isPreview %1").arg(m_viewMode));
@@ -113,21 +101,6 @@ void ChartHolderBaseWidget::switchMode()
         m_mainLayout->addWidget(m_previewWidget);
         LOGD(QString("m_previewWidgetSize %1x%2").arg(m_previewWidget->width()).arg(m_previewWidget->height()));
     }
-}
-
-QGridLayout *ChartHolderBaseWidget::mainLayout() const
-{
-    return m_mainLayout;
-}
-
-QWidget *ChartHolderBaseWidget::previewWidget() const
-{
-    return m_previewWidget;
-}
-
-QWidget *ChartHolderBaseWidget::expandedWidget() const
-{
-    return m_expandedWidget;
 }
 
 void ChartHolderBaseWidget::setChartWidget(QWidget *chartContent)
@@ -180,8 +153,3 @@ void ChartHolderBaseWidget::mousePressEvent(QMouseEvent *event)
         emit expanded();
 }
 
-void ChartHolderBaseWidget::resizeEvent(QResizeEvent *event)
-{
-    // LOGD(QString("size %1x%2").arg(width()).arg(height()));
-    QWidget::resizeEvent(event);
-}
