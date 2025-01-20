@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStringListModel>
 #include "utils.h"
 
 using namespace Utils;
@@ -24,12 +25,24 @@ private slots:
     void on_selectBtn_clicked();
     void on_folderPathEdt_textChanged(const QString &arg1);
 
+    void on_imagesListView_clicked(const QModelIndex &index);
+
+    void on_addBtn_clicked();
+
+protected:
+    void keyReleaseEvent(QKeyEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
     void initUI();
     void setEnabledWidget(bool enabled);
 
-    FilterConfig *config = nullptr;
+    FilterConfig config;
+
+    // Define QStringListModel for images showing in list view
+    QStringListModel *model;
+
+    QString currentImagePath;
 };
 
 #endif // MAINWINDOW_H

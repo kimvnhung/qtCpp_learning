@@ -1,12 +1,17 @@
 #include "utils.h"
 
+#include <QDir>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonObject>
 
 namespace Utils {
 
-FilterConfig::FilterConfig(const FilterConfig::Tags& defaultTags)
-    : m_currentPath(""), m_tags(defaultTags) {}
+FilterConfig::FilterConfig(QString currentPath, const FilterConfig::Tags& defaultTags)
+    : m_currentPath(currentPath)
+    , m_tags(defaultTags) {
+
+}
 
 QString FilterConfig::currentPath() const {
     return m_currentPath;
@@ -26,17 +31,24 @@ void FilterConfig::deleteTag(QString tag) {
     m_tagValues.remove(tag);  // Remove the associated images as well
 }
 
+FilterConfig::Images FilterConfig::getImages(QString tag) {
+    if (!m_tagValues.contains(tag))
+        return {};
+
+    return m_tagValues.value(tag);
+}
+
 void FilterConfig::setImages(Images images, QString tag) {
     if (m_tagValues.contains(tag))
         qDebug() << "Replace existed values";
 
-    m_tagValues.insert(tag, images);
+    m_tagValues[tag] = images;
 }
 
 void FilterConfig::addImage(QString image, QString tag) {
     if (!m_tagValues.contains(tag)) {
         Images images = {image};
-        m_tagValues.insert(tag, images);
+        m_tagValues[tag] = images;
         return;
     }
 
@@ -45,7 +57,7 @@ void FilterConfig::addImage(QString image, QString tag) {
         return;
 
     images.append(image);
-    m_tagValues.insert(tag, images);
+    m_tagValues[tag] = images;
 }
 
 void FilterConfig::deleteImage(QString image, QString tag) {
@@ -57,7 +69,7 @@ void FilterConfig::deleteImage(QString image, QString tag) {
         return;
 
     images.removeAll(image);
-    m_tagValues.insert(tag, images);
+    m_tagValues[tag] = images;
 }
 
 QString FilterConfig::imagePath(QString tag, QString image) {
@@ -151,6 +163,18 @@ bool FilterConfig::exportToJson(const QString& filePath) const {
     return true;
 }
 
+void FilterConfig::updateImages()
+{
+    // List all image files in currentPath
+    QDir dir(m_currentPath);
+    QStringList filters;
+    filters << "*.jpg" << "*.jpeg" << "*.png";
+    QStringList images = dir.entryList(filters, QDir::Files);
+
+    // Add images name to "All" tag
+    setImages(images, "All");
+}
+
 // Import JSON data from a file and populate the object
 FilterConfig FilterConfig::importFromJson(const QString& filePath) {
     QFile file(filePath);
@@ -168,7 +192,10 @@ FilterConfig FilterConfig::importFromJson(const QString& filePath) {
         return FilterConfig();
     }
 
-    return fromJson(doc.object());
+    auto ret = fromJson(doc.object());
+    ret.m_currentPath = QFileInfo(filePath).absolutePath();
+
+    return ret;
 }
 
 }  // namespace Utils

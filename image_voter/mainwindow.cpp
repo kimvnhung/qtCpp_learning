@@ -3,6 +3,8 @@
 #include "common.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -27,6 +29,13 @@ void MainWindow::setEnabledWidget(bool enabled)
 
 void MainWindow::initUI()
 {
+    model = new QStringListModel(this);
+    ui->imagesListView->setModel(model);
+
+    // Make ui.imageDisplayLb expanding follow parent size but keep aspect
+    ui->imageDisplayLb->setScaledContents(true);
+
+
     QString oldFolder = GET_LAST_PATH();
 
     if (oldFolder.isEmpty())
@@ -61,4 +70,113 @@ void MainWindow::on_selectBtn_clicked()
 void MainWindow::on_folderPathEdt_textChanged(const QString &arg1)
 {
     qDebug() << __FUNCTION__ << arg1;
+    // Check if the path is valid
+    if (!QDir(arg1).exists())
+    {
+        setEnabledWidget(false);
+        return;
+    }
+
+    // Check if config.json exists in the selected folder
+    QString filePath = arg1 + "/config.json";
+    if (!QFile::exists(filePath))
+    {
+        // Create a new config file
+        config = FilterConfig(arg1);
+    }
+    else
+    {
+        config = FilterConfig::importFromJson(filePath);
+    }
+
+    config.updateImages();
+
+    if (config.currentPath().isEmpty())
+    {
+        SHOW_MESSAGE_BOX("Warning!", "No data found in the selected folder")
+        setEnabledWidget(false);
+        return;
+    }
+
+    setEnabledWidget(true);
+
+    // Save the last path
+    SET_LAST_PATH(arg1);
+
+    // Update the tag combobox
+    ui->tagCbb->clear();
+    ui->tagCbb->addItems(config.getAllTags());
+
+    // Update the list view QStringListModel
+    model->setStringList(config.getImages("All"));
+    ui->imagesListView->update();
 }
+
+void MainWindow::on_imagesListView_clicked(const QModelIndex &index)
+{
+    // Load image from the selected index
+    currentImagePath = config.currentPath() + "/" + model->data(index).toString();
+
+    // Load the image
+    QPixmap pixmap(currentImagePath);
+
+    // Scale the pixmap to fit the label but keep aspect ratio
+    QSize size = ui->imageDisplayLb->size();
+    QPixmap scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
+
+    // Set the scaled pixmap to the QLabel
+    ui->imageDisplayLb->setPixmap(scaledPixmap);
+
+}
+
+
+void MainWindow::on_addBtn_clicked()
+{
+    // Open dialog for input new tag
+    bool ok;
+    QString tag = QInputDialog::getText(
+        this,
+        "Add new tag",
+        "Tag name:",
+        QLineEdit::Normal,
+        "",
+        &ok
+    );
+
+    if (!ok || tag.isEmpty())
+        return;
+
+    // Add new tag to the combobox
+    ui->tagCbb->addItem(tag);
+
+    // Add new tag to the config
+    config.addTag(tag);
+
+    if(config.getAllTags().size() > 2)
+    {
+        ui->targetTagCbb->clear();
+        ui->targetTagCbb->addItems(config.getAllTags());
+        ui->targetTagCbb->removeItem(0);
+    }
+    else
+    {
+        ui->targetTagCbb->clear();
+    }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Space) {
+        qDebug() << "Space key released!";
+        // Handle space release logic here
+        // Get image name from currentImagePath
+        QString imageName = currentImagePath.split("/").last();
+        // Get current tag from targetTagCbb
+        QString currentTag = ui->targetTagCbb->currentText();
+        // Add the image to the current tag
+        config.addImage(imageName, currentTag);
+    } else {
+        QMainWindow::keyReleaseEvent(event);
+    }
+}
+

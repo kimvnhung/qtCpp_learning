@@ -15,7 +15,7 @@ class FilterConfig {
     using Tags = QStringList;
 
 public:
-    FilterConfig(const Tags& defaultTags = {"All"});
+    FilterConfig(QString currentPath = "", const Tags& defaultTags = {"All"});
 
     QString currentPath() const;
     Tags getAllTags();
@@ -23,6 +23,7 @@ public:
     void addTag(QString tag);
     void deleteTag(QString tag);
 
+    Images getImages(QString tag);
     void setImages(Images images, QString tag);
     void addImage(QString image, QString tag);
     void deleteImage(QString image, QString tag);
@@ -36,6 +37,7 @@ public:
     // Import JSON data from a file and populate the object
     static FilterConfig importFromJson(const QString& filePath);
 
+    void updateImages();
 private:
     QString m_currentPath;
     Tags m_tags;
