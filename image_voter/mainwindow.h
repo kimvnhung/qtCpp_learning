@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QStringListModel>
 #include "utils.h"
+#include "imagepreviewwidget.h"
 
 using namespace Utils;
 
@@ -52,6 +53,14 @@ private:
     QString showingImagePath;
     int fSelectedIndex = -1;
     int tSelectedIndex = -1;
+    enum SelectedType {
+        UNDEFINED,
+        FSELECTED,
+        TSELECTED
+    };
+
+    SelectedType lastSelection = UNDEFINED;
+    ImagePreviewWidget *previewWidget;
 
     void refreshView();
 };

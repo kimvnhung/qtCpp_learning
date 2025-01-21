@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QKeyEvent>
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -67,7 +68,10 @@ void MainWindow::initUI()
     ui->targetTagListView->setModel(targetModel);
 
     // Make ui.imageDisplayLb expanding follow parent size but keep aspect
-    ui->imageDisplayLb->setScaledContents(true);
+    previewWidget = new ImagePreviewWidget(this);
+    QGridLayout *layout = new QGridLayout;
+    ui->imageContainerWidget->setLayout(layout);
+    ui->imageContainerWidget->layout()->addWidget(previewWidget);
 
     QString oldFolder = GET_LAST_PATH();
 
@@ -153,19 +157,21 @@ void MainWindow::on_folderPathEdt_textChanged(const QString &arg1)
 
 void MainWindow::on_imagesListView_clicked(const QModelIndex &index)
 {
+    lastSelection = FSELECTED;
     fSelectedIndex = index.row();
     // Load image from the selected index
     showingImagePath = config.currentPath() + "/" + fromModel->data(index).toString();
 
-    // Load the image
-    QPixmap pixmap(showingImagePath);
+    // // Load the image
+    // QPixmap pixmap(showingImagePath);
 
-    // Scale the pixmap to fit the label but keep aspect ratio
-    QSize size = ui->imageDisplayLb->size();
-    QPixmap scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
+    // // Scale the pixmap to fit the label but keep aspect ratio
+    // QSize size = ui->imageDisplayLb->size();
+    // QPixmap scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
 
-    // Set the scaled pixmap to the QLabel
-    ui->imageDisplayLb->setPixmap(scaledPixmap);
+    // // Set the scaled pixmap to the QLabel
+    // ui->imageDisplayLb->setPixmap(scaledPixmap);
+    previewWidget->setImagePath(showingImagePath);
 
     currentImagePath = showingImagePath;
 }
@@ -211,6 +217,7 @@ void MainWindow::on_addBtn_clicked()
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
+    qDebug()<<"Key "<<event->key()<<" released!";
     if (event->key() == Qt::Key_Space)
     {
         qDebug() << "Space key released!";
@@ -235,6 +242,46 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         else
         {
             SHOW_MESSAGE_BOX("Warning!", "Select from tag images");
+        }
+    }
+    else if(event->key() == Qt::Key_Right || event->key() == Qt::Key_Down){
+        if(lastSelection == UNDEFINED)
+            return;
+
+        int currentIndex = lastSelection == FSELECTED ? fSelectedIndex : tSelectedIndex;
+        auto pListView = lastSelection == FSELECTED ? ui->imagesListView : ui->targetTagListView;
+
+        int nextIndex = currentIndex + 1;
+        if(nextIndex >= pListView->model()->rowCount())
+            nextIndex = 0;
+
+        pListView->setCurrentIndex(pListView->model()->index(nextIndex, 0));
+        emit pListView->clicked(pListView->model()->index(nextIndex, 0));
+
+    }
+    else if(event->key() == Qt::Key_Left || event->key() == Qt::Key_Up){
+        if(lastSelection == UNDEFINED)
+            return;
+
+        int currentIndex = lastSelection == FSELECTED ? fSelectedIndex : tSelectedIndex;
+        auto pListView = lastSelection == FSELECTED ? ui->imagesListView : ui->targetTagListView;
+
+        int nextIndex = currentIndex - 1;
+        if(nextIndex < 0)
+            nextIndex = pListView->model()->rowCount() - 1;
+
+        pListView->setCurrentIndex(pListView->model()->index(nextIndex, 0));
+        emit pListView->clicked(pListView->model()->index(nextIndex, 0));
+    }
+    else if(event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace){
+
+        if (lastSelection == FSELECTED)
+        {
+            on_deleteFImageBtn_clicked();
+        }
+        else if (lastSelection == TSELECTED)
+        {
+            on_deleteTImageBtn_clicked();
         }
     }
     else
@@ -272,19 +319,22 @@ void MainWindow::on_targetTagCbb_currentIndexChanged(int index)
 
 void MainWindow::on_targetTagListView_clicked(const QModelIndex &index)
 {
+    lastSelection = TSELECTED;
     tSelectedIndex = index.row();
     // Load image from the selected index
     showingImagePath = config.currentPath() + "/" + targetModel->data(index).toString();
 
-    // Load the image
-    QPixmap pixmap(showingImagePath);
+    // // Load the image
+    // QPixmap pixmap(showingImagePath);
 
-    // Scale the pixmap to fit the label but keep aspect ratio
-    QSize size = ui->imageDisplayLb->size();
-    QPixmap scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
+    // // Scale the pixmap to fit the label but keep aspect ratio
+    // QSize size = ui->imageDisplayLb->size();
+    // QPixmap scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
 
-    // Set the scaled pixmap to the QLabel
-    ui->imageDisplayLb->setPixmap(scaledPixmap);
+    // // Set the scaled pixmap to the QLabel
+    // ui->imageDisplayLb->setPixmap(scaledPixmap);
+
+    previewWidget->setImagePath(showingImagePath);
 }
 
 void MainWindow::on_exportBtn_clicked()

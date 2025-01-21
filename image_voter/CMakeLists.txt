@@ -20,14 +20,14 @@ set(PROJECT_SOURCES
         common.h
         utils.h 
         utils.cpp
+        imagepreviewwidget.h
+        imagepreviewwidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(image_voter
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        common.h
-        utils.h utils.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET image_voter APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
