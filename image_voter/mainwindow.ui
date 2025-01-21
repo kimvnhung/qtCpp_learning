@@ -2,197 +2,275 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>800</width>
-    <height>600</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_5">
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="geometry">
+     <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>800</width>
+        <height>600</height>
+     </rect>
+    </property>
+    <property name="windowTitle">
+     <string>MainWindow</string>
+    </property>
+    <widget class="QWidget" name="centralwidget">
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="QPushButton" name="selectBtn">
-          <property name="text">
-           <string>Select</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <widget class="QPushButton" name="selectBtn">
+                    <property name="text">
+                     <string>Select</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="folderPathEdt">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                 </widget>
+                </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <spacer name="horizontalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Policy::Minimum</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                        <width>40</width>
+                        <height>20</height>
+                     </size>
+                    </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="imageDisplayLb">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                        <width>16777215</width>
+                        <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="baseSize">
+                     <size>
+                        <width>500</width>
+                        <height>100</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Policy::Minimum</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                        <width>40</width>
+                        <height>20</height>
+                     </size>
+                    </property>
+                 </spacer>
+                </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                        <width>40</width>
+                        <height>20</height>
+                     </size>
+                    </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label">
+                    <property name="text">
+                     <string>Press &lt;Space&gt; to add image to tag</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="targetTagCbb"/>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_4">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                        <width>40</width>
+                        <height>20</height>
+                     </size>
+                    </property>
+                 </spacer>
+                </item>
+             </layout>
+            </item>
+         </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="folderPathEdt">
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QComboBox" name="tagCbb"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="addBtn">
+                    <property name="text">
+                     <string>Add</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="deleteBtn">
+                    <property name="text">
+                     <string>Delete</string>
+                    </property>
+                 </widget>
+                </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                    <property name="minimumSize">
+                     <size>
+                        <width>70</width>
+                        <height>0</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>From tag:</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="fromTagLb">
+                    <property name="text">
+                     <string>All</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="deleteFImageBtn">
+                    <property name="text">
+                     <string>Delete Image</string>
+                    </property>
+                 </widget>
+                </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QListView" name="imagesListView">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QLabel" name="label_3">
+                    <property name="minimumSize">
+                     <size>
+                        <width>70</width>
+                        <height>0</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>To tag:</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="toTagLb">
+                    <property name="text">
+                     <string>xxx</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="deleteTImageBtn">
+                    <property name="text">
+                     <string>Delete Image</string>
+                    </property>
+                 </widget>
+                </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QListView" name="targetTagListView">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="exportBtn">
+                <property name="text">
+                 <string>Export</string>
+                </property>
+             </widget>
+            </item>
+         </layout>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Policy::Minimum</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="imageDisplayLb">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>500</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Policy::Minimum</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Press &lt;Space&gt; to add image to tag</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="targetTagCbb"/>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
      </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QComboBox" name="tagCbb"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addBtn">
-          <property name="text">
-           <string>Add</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="deleteBtn">
-          <property name="text">
-           <string>Delete</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QListView" name="imagesListView">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="exportBtn">
-        <property name="text">
-         <string>Export</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>24</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+    </widget>
+    <widget class="QMenuBar" name="menubar">
+     <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>800</width>
+         <height>19</height>
+        </rect>
+     </property>
+     <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+     </property>
+    </widget>
+    <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

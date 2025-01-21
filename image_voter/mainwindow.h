@@ -24,10 +24,15 @@ public:
 private slots:
     void on_selectBtn_clicked();
     void on_folderPathEdt_textChanged(const QString &arg1);
-
     void on_imagesListView_clicked(const QModelIndex &index);
-
     void on_addBtn_clicked();
+    void on_deleteBtn_clicked();
+    void on_tagCbb_currentIndexChanged(int index);
+    void on_targetTagCbb_currentIndexChanged(int index);
+    void on_targetTagListView_clicked(const QModelIndex &index);
+    void on_exportBtn_clicked();
+    void on_deleteFImageBtn_clicked();
+    void on_deleteTImageBtn_clicked();
 
 protected:
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -40,9 +45,15 @@ private:
     FilterConfig config;
 
     // Define QStringListModel for images showing in list view
-    QStringListModel *model;
+    QStringListModel *fromModel;
+    QStringListModel *targetModel;
 
     QString currentImagePath;
+    QString showingImagePath;
+    int fSelectedIndex = -1;
+    int tSelectedIndex = -1;
+
+    void refreshView();
 };
 
 #endif // MAINWINDOW_H

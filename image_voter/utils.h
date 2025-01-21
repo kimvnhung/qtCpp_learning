@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QObject>
 #include <QMap>
+#include <QDir>
 
 namespace Utils {
 
@@ -38,6 +39,8 @@ public:
     static FilterConfig importFromJson(const QString& filePath);
 
     void updateImages();
+    void sync();
+
 private:
     QString m_currentPath;
     Tags m_tags;
@@ -46,6 +49,8 @@ private:
     QJsonObject toJson() const;
 };
 
-}
+bool copyFile2Folder(QString filePath, QString targetFolder);
+
+} // namespace Utils
 
 #endif // UTILS_H

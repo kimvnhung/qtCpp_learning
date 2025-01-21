@@ -8,10 +8,7 @@
 namespace Utils {
 
 FilterConfig::FilterConfig(QString currentPath, const FilterConfig::Tags& defaultTags)
-    : m_currentPath(currentPath)
-    , m_tags(defaultTags) {
-
-}
+    : m_currentPath(currentPath), m_tags(defaultTags) {}
 
 QString FilterConfig::currentPath() const {
     return m_currentPath;
@@ -34,14 +31,12 @@ void FilterConfig::deleteTag(QString tag) {
 FilterConfig::Images FilterConfig::getImages(QString tag) {
     if (!m_tagValues.contains(tag))
         return {};
-
     return m_tagValues.value(tag);
 }
 
 void FilterConfig::setImages(Images images, QString tag) {
     if (m_tagValues.contains(tag))
         qDebug() << "Replace existed values";
-
     m_tagValues[tag] = images;
 }
 
@@ -51,11 +46,9 @@ void FilterConfig::addImage(QString image, QString tag) {
         m_tagValues[tag] = images;
         return;
     }
-
     Images images = m_tagValues.value(tag);
     if (images.contains(image))
         return;
-
     images.append(image);
     m_tagValues[tag] = images;
 }
@@ -63,11 +56,9 @@ void FilterConfig::addImage(QString image, QString tag) {
 void FilterConfig::deleteImage(QString image, QString tag) {
     if (!m_tagValues.contains(tag))
         return;
-
     Images images = m_tagValues.value(tag);
     if (!images.contains(image))
         return;
-
     images.removeAll(image);
     m_tagValues[tag] = images;
 }
@@ -75,10 +66,8 @@ void FilterConfig::deleteImage(QString image, QString tag) {
 QString FilterConfig::imagePath(QString tag, QString image) {
     if (!m_tags.contains(tag) || !m_tagValues.value(tag).contains(image))
         return "";
-
     if (tag == "All")
         return m_currentPath + "/" + image;
-
     return m_currentPath + "/" + tag + "/" + image;
 }
 
@@ -124,7 +113,7 @@ FilterConfig FilterConfig::fromJson(const QJsonObject& jsonObj) {
         QJsonArray tagsArray = jsonObj["tags"].toArray();
         for (const auto& tagValue : tagsArray) {
             if (tagValue.isString()) {
-                config.m_tags.append(tagValue.toString());
+                config.addTag(tagValue.toString());
             }
         }
     }
@@ -163,8 +152,7 @@ bool FilterConfig::exportToJson(const QString& filePath) const {
     return true;
 }
 
-void FilterConfig::updateImages()
-{
+void FilterConfig::updateImages() {
     // List all image files in currentPath
     QDir dir(m_currentPath);
     QStringList filters;
@@ -173,6 +161,13 @@ void FilterConfig::updateImages()
 
     // Add images name to "All" tag
     setImages(images, "All");
+}
+
+void FilterConfig::sync() {
+    // Replace old file
+    QString filePath = m_currentPath + "/config.json";
+    if (!exportToJson(filePath))
+        qDebug() << "Sync failed";
 }
 
 // Import JSON data from a file and populate the object
@@ -196,6 +191,40 @@ FilterConfig FilterConfig::importFromJson(const QString& filePath) {
     ret.m_currentPath = QFileInfo(filePath).absolutePath();
 
     return ret;
+}
+
+bool copyFile2Folder(QString filePath, QString targetFolder) {
+    // Ensure the target directory exists, create it if it doesn't
+    QDir targetDir(targetFolder);
+    if (!targetDir.exists()) {
+        if (!targetDir.mkpath(".")) {
+            qDebug() << "Failed to create target directory.";
+            return false;
+        }
+    }
+
+    // Get the base name of the file (e.g., "file.txt" from "path/to/file.txt")
+    QFileInfo sourceFileInfo(filePath);
+    QString targetFilePath = targetFolder + QDir::separator() + sourceFileInfo.fileName();
+
+    // If the file already exists in the target folder, remove it
+    QFile targetFile(targetFilePath);
+    if (targetFile.exists()) {
+        if (!targetFile.remove()) {
+            qDebug() << "Failed to remove existing file.";
+            return false;
+        }
+    }
+
+    // Copy the file to the target directory
+    qDebug() << "filePath:" << filePath << "targetFilePath" << targetFilePath;
+    if (QFile::copy(filePath, targetFilePath)) {
+        qDebug() << "File copied successfully!";
+        return true;
+    } else {
+        qDebug() << "Failed to copy the file.";
+        return false;
+    }
 }
 
 }  // namespace Utils
