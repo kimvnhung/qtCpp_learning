@@ -54,6 +54,10 @@ void MainWindow::refreshView()
 
     targetModel->setStringList(config.getImages(ui->targetTagCbb->currentText()));
     ui->targetTagListView->update();
+
+    ui->fromAmountLb->setText(QString::number(config.getImages(ui->tagCbb->currentText()).size()));
+    if(ui->targetTagCbb->count() > 0)
+        ui->targetAmountLb->setText(QString::number(config.getImages(ui->targetTagCbb->currentText()).size()));
 }
 
 void MainWindow::initUI()
@@ -283,6 +287,14 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         {
             on_deleteTImageBtn_clicked();
         }
+    }
+    else if(event->key() == Qt::Key_QuoteLeft){
+        // Rotate 90 degree counter-clockwise current image
+        if(currentImagePath.isEmpty())
+            return;
+
+        // Rotate QLabel
+        previewWidget->rotate(-90);
     }
     else
     {

@@ -175,6 +175,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="fromAmountLb">
+          <property name="text">
+           <string>(0)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="deleteFImageBtn">
           <property name="text">
            <string>Delete Image</string>
@@ -212,6 +219,13 @@
          <widget class="QLabel" name="toTagLb">
           <property name="text">
            <string>xxx</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="targetAmountLb">
+          <property name="text">
+           <string>(0)</string>
           </property>
          </widget>
         </item>
