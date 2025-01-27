@@ -19,6 +19,9 @@ public:
     // Set the image path and load the image
     void setImagePath(const QString &path);
 
+    void zoomIn();
+    void zoomOut();
+
 protected:
     // Override wheel event for zooming
     void wheelEvent(QWheelEvent *event) override;

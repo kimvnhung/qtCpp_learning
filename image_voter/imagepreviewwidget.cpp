@@ -28,10 +28,22 @@ void ImagePreviewWidget::setImagePath(const QString &path) {
     resetView();
 }
 
+void ImagePreviewWidget::zoomIn() {
+    const double scaleFactor = 1.5;
+    scale(scaleFactor, scaleFactor);
+    m_scaleFactor *= scaleFactor;
+}
+
+void ImagePreviewWidget::zoomOut() {
+    const double scaleFactor = 1.5;
+    scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+    m_scaleFactor /= scaleFactor;
+}
+
 void ImagePreviewWidget::resetView() {
     m_scene->setSceneRect(m_pixmapItem->boundingRect());
     fitInView(m_scene->sceneRect(), Qt::KeepAspectRatio);
-    m_scaleFactor = 1.0;
+    scale(m_scaleFactor, m_scaleFactor);
 }
 
 void ImagePreviewWidget::wheelEvent(QWheelEvent *event) {

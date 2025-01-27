@@ -159,6 +159,26 @@ void MainWindow::on_folderPathEdt_textChanged(const QString &arg1)
     }
 }
 
+#ifdef Q_OS_ANDROID
+#include <QJniObject>
+
+QString getRealPathFromURI(const QUrl &contentUri) {
+    QJniObject uri = QJniObject::fromString(contentUri.toString());
+    QJniObject contentResolver = QNativeInterface::QAndroidApplication::context().callMethod<jobject>(
+        "getContentResolver");
+
+    QJniObject filePath = contentResolver.callObjectMethod(
+        "getType", "(Landroid/net/Uri;)Ljava/lang/String;", uri.object<jobject>());
+
+    if (filePath.isValid()) {
+        return filePath.toString();
+    }
+
+    qWarning() << "Failed to resolve file path!";
+    return QString();
+}
+#endif
+
 void MainWindow::on_imagesListView_clicked(const QModelIndex &index)
 {
     lastSelection = FSELECTED;
@@ -175,6 +195,10 @@ void MainWindow::on_imagesListView_clicked(const QModelIndex &index)
 
     // // Set the scaled pixmap to the QLabel
     // ui->imageDisplayLb->setPixmap(scaledPixmap);
+#ifdef Q_OS_ANDROID
+    // Get real path from content URI
+    showingImagePath = getRealPathFromURI(QUrl::fromLocalFile(showingImagePath));
+#endif
     previewWidget->setImagePath(showingImagePath);
 
     currentImagePath = showingImagePath;
@@ -296,6 +320,29 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         // Rotate QLabel
         previewWidget->rotate(-90);
     }
+    else if(event->key() == Qt::Key_1)
+    {
+        // Rotate 90 degree clockwise current image
+        if(currentImagePath.isEmpty())
+            return;
+
+        // Rotate QLabel
+        previewWidget->rotate(90);
+    }
+    else if(event->key() == Qt::Key_2){
+        // Zoom in current image
+        if(currentImagePath.isEmpty())
+            return;
+
+        previewWidget->zoomIn();
+    }
+    else if(event->key() == Qt::Key_3){
+        // Zoom out current image
+        if(currentImagePath.isEmpty())
+            return;
+
+        previewWidget->zoomOut();
+    }
     else
     {
         QMainWindow::keyReleaseEvent(event);
@@ -320,6 +367,7 @@ void MainWindow::on_tagCbb_currentIndexChanged(int index)
     ui->fromTagLb->setText(ui->tagCbb->currentText());
     fromModel->setStringList(config.getImages(ui->tagCbb->currentText()));
     ui->imagesListView->update();
+    refreshView();
 }
 
 void MainWindow::on_targetTagCbb_currentIndexChanged(int index)
@@ -327,6 +375,7 @@ void MainWindow::on_targetTagCbb_currentIndexChanged(int index)
     ui->toTagLb->setText(ui->targetTagCbb->currentText());
     targetModel->setStringList(config.getImages(ui->targetTagCbb->currentText()));
     ui->targetTagListView->update();
+    refreshView();
 }
 
 void MainWindow::on_targetTagListView_clicked(const QModelIndex &index)
