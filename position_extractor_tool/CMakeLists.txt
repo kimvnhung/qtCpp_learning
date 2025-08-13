@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 
 qt_add_executable(appposition_extractor_tool
@@ -39,6 +40,7 @@ target_link_libraries(appposition_extractor_tool
 )
 target_link_libraries(appposition_extractor_tool PRIVATE Qt6::Core)
 target_link_libraries(appposition_extractor_tool PRIVATE Qt6::Core)
+target_link_libraries(appposition_extractor_tool PRIVATE Qt6::Widgets)
 
 include(GNUInstallDirs)
 install(TARGETS appposition_extractor_tool

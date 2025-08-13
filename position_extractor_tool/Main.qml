@@ -43,6 +43,7 @@ Window {
             fillMode: Image.PreserveAspectFit
 
             MouseArea {
+                id: mouseArea
                 function isLandscape() {
                     return appModel.imageSize.width > appModel.imageSize.height;
                 }
@@ -59,6 +60,14 @@ Window {
                     return isLandscape() ? (parent.width / imageRatio()) : parent.height;
                 }
 
+                function toImageX(cordinateX) {
+                    return ((cordinateX / width) * appModel.imageSize.width).toFixed(0);
+                }
+
+                function toImageY(cordinateY) {
+                    return ((cordinateY / height) * appModel.imageSize.height).toFixed(0);
+                }
+
                 width: getWidth()
                 height: getHeight()
                 anchors {
@@ -72,14 +81,25 @@ Window {
                 hoverEnabled: true
 
                 onPositionChanged: function(mouse) {
-                    mousePos = `Mouse: ${Math.round(mouse.x)}, ${Math.round(mouse.y)}`
                     if (drawing) {
                         rectW = mouse.x - startX
                         rectH = mouse.y - startY
                     }
+
+                    if(!appModel.isInfoSaved){
+                        if(selectionRect.visible) {
+                            appModel.infoText = "("+ toImageX(mouseX) + ", " + toImageY(mouseY) + "," + toImageX(rectW) + ", " + toImageY(rectH) + ")";
+                        }else {
+                            appModel.infoText = "("+ toImageX(mouseX) + ", " + toImageY(mouseY) + ")";
+                        }
+                    }
+
+                    console.log("mouseArea.x, mouseX, infoTips.width, img.width:", mouseArea.x, mouseX, infoTips.width, img.width);
+                    appModel.infoRectX = (mouseArea.x + mouseX + infoTips.width) > img.width ? (img.width - infoTips.width) : (mouseArea.x+mouseX)
+                    appModel.infoRectY = (mouseArea.y + mouseY - 20 + infoTips.height) > img.height ? (img.height - infoTips.height) : (mouseArea.y+mouseY - 20)
                 }
 
-                onPressed: {
+                onPressed: function(mouse) {
                     startX = mouse.x
                     startY = mouse.y
                     rectX = startX
@@ -93,6 +113,9 @@ Window {
                     drawing = false
                     let info = `X:${Math.round(rectX)}, Y:${Math.round(rectY)}, W:${Math.round(rectW)}, H:${Math.round(rectH)}`
                     console.log("Rectangle:", info)
+                    if(rectW > 1 && rectH > 1) {
+                        appModel.saveRect()
+                    }
                 }
 
                 Rectangle {
@@ -103,20 +126,51 @@ Window {
                     height: rectH
                     color: "transparent"
                     border.color: "red"
-                    visible: rectW !== 0 && rectH !== 0
+                    border.width: 2
+                    visible: rectW > 1 && rectH > 1
+                    onVisibleChanged: {
+                        if(!visible)
+                            appModel.isInfoSaved = false;
+                    }
                 }
             }
 
 
         }
 
-        Text {
-            text: mousePos
+        Rectangle {
+            id: infoTips
+            width: appModel.infoRectWidth
+            height: 18
             color: "white"
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.margins: 8
-            font.pixelSize: 14
+            x: appModel.infoRectX
+            y: appModel.infoRectY
+            Text {
+                anchors.fill: parent
+                color: "black"
+                horizontalAlignment: Text.AlignHCenter
+                text: appModel.infoText
+                font {
+                    weight: Font.Bold
+                }
+            }
+        }
+
+        Text {
+            anchors {
+                bottom: parent.bottom
+                bottomMargin: 50
+            }
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            color: "green"
+            font {
+                pixelSize: 20
+                weight: Font.Bold
+            }
+
+            text: appModel.infoText +" saved to clipboard!"
+            visible: appModel.isInfoSaved
         }
 
         Row {
