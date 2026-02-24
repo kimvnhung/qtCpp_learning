@@ -6,12 +6,12 @@
     <message id="app.qml_hello_id">
         <location filename="../lib/qml/MainView.qml" line="22"/>
         <source>Hello from QML qsTrId()</source>
-        <translation>Xin chào từ qsTrId()</translation>
+        <translation>Xin chào từ QML qsTrId()</translation>
     </message>
     <message id="app.cxx_hello_id">
         <location filename="../lib/backend.cpp" line="18"/>
         <source>Hello from C++ qtTrId()</source>
-        <translation>Xin chào từ qtTrId()</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -27,12 +27,27 @@
     <message>
         <location filename="../lib/qml/MainView.qml" line="10"/>
         <source>Qt Translation Demo</source>
-        <translation>Bản dịch Qt thử nghiệm</translation>
+        <translation>Bản dịch thử nghiệm Qt</translation>
     </message>
     <message>
         <location filename="../lib/qml/MainView.qml" line="20"/>
         <source>Hello from QML qsTr()</source>
         <translation>Xin chào từ QML qsTr()</translation>
+    </message>
+    <message>
+        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <source>Switch to English</source>
+        <translation>Chuyển sang tiếng Anh</translation>
+    </message>
+    <message>
+        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <source>Switch to Vietnamese</source>
+        <translation>Chuyển sang tiếng Việt</translation>
+    </message>
+    <message>
+        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <source>Initializing...</source>
+        <translation>Đang khởi tạo...</translation>
     </message>
 </context>
 </TS>

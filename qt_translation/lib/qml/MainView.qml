@@ -15,10 +15,15 @@ ApplicationWindow {
         anchors.centerIn: parent
         spacing: 10
 
-        Label { text: backend.cxxTrExample() } // tr()
-        Label { text: backend.cxxIdExample() } // qtTrId()
+        Label { text: backend.cxxTrExample() }
+        Label { text: backend.cxxIdExample() }
         Label { text: qsTr("Hello from QML qsTr()") }
         //% "Hello from QML qsTrId()"
         Label { text: qsTrId("app.qml_hello_id") }
+
+        Button {
+            text: langManager === null ? qsTr("Initializing...") : langManager.language === "vi" ? qsTr("Switch to English") : qsTr("Switch to Vietnamese")
+            onClicked: langManager.toggleLanguage()
+        }
     }
 }

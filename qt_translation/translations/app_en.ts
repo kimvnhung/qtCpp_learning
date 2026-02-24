@@ -34,5 +34,20 @@
         <source>Hello from QML qsTr()</source>
         <translation>Hello from QML qsTr()</translation>
     </message>
+    <message>
+        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <source>Switch to English</source>
+        <translation>Switch to English</translation>
+    </message>
+    <message>
+        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <source>Switch to Vietnamese</source>
+        <translation>Switch to Vietnamese</translation>
+    </message>
+    <message>
+        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <source>Initializing...</source>
+        <translation>Initializing...</translation>
+    </message>
 </context>
 </TS>

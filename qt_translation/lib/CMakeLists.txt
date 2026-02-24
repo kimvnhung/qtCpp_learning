@@ -10,6 +10,8 @@ qt_add_qml_module(translationlib
     SOURCES
         backend.h
         backend.cpp
+        languagemanager.h
+        languagemanager.cpp
 
     QML_FILES
         qml/MainView.qml

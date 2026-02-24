@@ -11,12 +11,13 @@ qt_standard_project_setup(REQUIRES 6.5
     I18N_TRANSLATED_LANGUAGES en vi
 )
 
-add_subdirectory(lib)
-add_subdirectory(app)
-
 set(TS_DIR "${CMAKE_SOURCE_DIR}/translations")
-qt_add_translations(translationlib
+qt_add_translations(qt_translation_app
     TS_FILE_DIR ${TS_DIR}
     TS_FILE_BASE app
     QM_FILES_OUTPUT_VARIABLE qm_files
 )
+
+add_subdirectory(lib)
+add_subdirectory(app)
+
