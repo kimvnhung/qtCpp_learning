@@ -3,8 +3,10 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QLocale>
 #include <QQmlContext>
+#include <QDebug>
 
 #include "languagemanager.h"
+#include "backend.h"
 
 static QString selectedLanguage()
 {
@@ -39,6 +41,13 @@ int main(int argc, char *argv[])
 
     langManager.setMainUrl(mainUrl);
     langManager.setLanguage(lang);
+
+    {
+        Backend backend;
+        qInfo().noquote() << "[i18n] lang=" << langManager.language();
+        qInfo().noquote() << "[i18n] tr():" << backend.cxxTrExample();
+        qInfo().noquote() << "[i18n] qtTrId(app.cxx_hello_id):" << backend.cxxIdExample();
+    }
 
     engine.load(mainUrl);
     if (engine.rootObjects().isEmpty())

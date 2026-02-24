@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QObject>
-#include <QTranslator>
 #include <QUrl>
+
+class QTranslator;
 
 class QCoreApplication;
 class QQmlApplicationEngine;
@@ -32,7 +33,8 @@ private:
 
     QCoreApplication *m_app = nullptr;
     QQmlApplicationEngine *m_engine = nullptr;
-    QTranslator m_translator;
+    QTranslator *m_sourceTranslator = nullptr;
+    QTranslator *m_idTranslator = nullptr;
     QString m_language;
     QUrl m_mainUrl;
 };

@@ -2,6 +2,8 @@
 
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
+#include <QDir>
+#include <QTranslator>
 
 LanguageManager::LanguageManager(QCoreApplication *app, QObject *parent)
     : QObject(parent)
@@ -37,14 +39,50 @@ bool LanguageManager::loadAndInstall(const QString &language)
     if (!m_app)
         return false;
 
-    const QString qmPath = QStringLiteral("translations/app_%1.qm").arg(language);
+    const QString sourceQmFile = QStringLiteral("app_%1.qm").arg(language);
+    const QString idQmFile = QStringLiteral("app_%1_id.qm").arg(language);
+    const QString appDir = QCoreApplication::applicationDirPath();
+    const QString parentDir = QDir(appDir).absoluteFilePath(QStringLiteral(".."));
 
-    m_app->removeTranslator(&m_translator);
-    const bool loaded = m_translator.load(qmPath);
-    if (loaded)
-        m_app->installTranslator(&m_translator);
+    const QString sourceResourcePath = QStringLiteral(":/i18n/%1").arg(sourceQmFile);
+    const QString idResourcePath = QStringLiteral(":/i18n/%1").arg(idQmFile);
 
-    return loaded;
+    if (m_idTranslator) {
+        m_app->removeTranslator(m_idTranslator);
+        delete m_idTranslator;
+        m_idTranslator = nullptr;
+    }
+    if (m_sourceTranslator) {
+        m_app->removeTranslator(m_sourceTranslator);
+        delete m_sourceTranslator;
+        m_sourceTranslator = nullptr;
+    }
+
+    m_sourceTranslator = new QTranslator(this);
+    m_idTranslator = new QTranslator(this);
+
+    bool sourceLoaded = m_sourceTranslator->load(sourceQmFile, appDir);
+    if (!sourceLoaded)
+        sourceLoaded = m_sourceTranslator->load(sourceQmFile, parentDir);
+    if (!sourceLoaded)
+        sourceLoaded = m_sourceTranslator->load(sourceQmFile);
+    if (!sourceLoaded)
+        sourceLoaded = m_sourceTranslator->load(sourceResourcePath);
+
+    bool idLoaded = m_idTranslator->load(idQmFile, appDir);
+    if (!idLoaded)
+        idLoaded = m_idTranslator->load(idQmFile, parentDir);
+    if (!idLoaded)
+        idLoaded = m_idTranslator->load(idQmFile);
+    if (!idLoaded)
+        idLoaded = m_idTranslator->load(idResourcePath);
+
+    if (sourceLoaded)
+        m_app->installTranslator(m_sourceTranslator);
+    if (idLoaded)
+        m_app->installTranslator(m_idTranslator);
+
+    return sourceLoaded || idLoaded;
 }
 
 void LanguageManager::setLanguage(const QString &language)

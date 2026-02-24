@@ -4,7 +4,8 @@
 <context>
     <name></name>
     <message id="app.qml_hello_id">
-        <location filename="../lib/qml/MainView.qml" line="22"/>
+        <location filename="../lib/qml/MainView.qml" line="12"/>
+        <location filename="../lib/qml/MainView.qml" line="30"/>
         <source>Hello from QML qsTrId()</source>
         <translation>Hello from QML qsTrId()</translation>
     </message>
@@ -30,22 +31,22 @@
         <translation>Qt Translation Demo</translation>
     </message>
     <message>
-        <location filename="../lib/qml/MainView.qml" line="20"/>
+        <location filename="../lib/qml/MainView.qml" line="28"/>
         <source>Hello from QML qsTr()</source>
         <translation>Hello from QML qsTr()</translation>
     </message>
     <message>
-        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <location filename="../lib/qml/MainView.qml" line="33"/>
         <source>Switch to English</source>
         <translation>Switch to English</translation>
     </message>
     <message>
-        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <location filename="../lib/qml/MainView.qml" line="33"/>
         <source>Switch to Vietnamese</source>
         <translation>Switch to Vietnamese</translation>
     </message>
     <message>
-        <location filename="../lib/qml/MainView.qml" line="25"/>
+        <location filename="../lib/qml/MainView.qml" line="33"/>
         <source>Initializing...</source>
         <translation>Initializing...</translation>
     </message>
