@@ -98,23 +98,6 @@ Rectangle {
                     id: dropAreaB
                     anchors.fill: parent
                     keys: ["movable-point-c"]
-
-                    onEntered: function(drag){
-                        console.log("Entered drop area B with point id: ", drag.source.pointId)
-                    }
-
-                    onExited: {
-                        console.log("Exited drop area B with point id: ", drag.source.pointId)
-                    }
-
-                    onPositionChanged: function(drag){
-                        console.log("Position changed in drop area B with point id: ", drag.source.pointId)
-                    }
-
-                    onDropped: function(drop){
-                        console.log("Dropped point with id: ")
-                    }
-
                 }
             }
         }

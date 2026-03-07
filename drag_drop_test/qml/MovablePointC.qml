@@ -9,8 +9,10 @@ Item {
     property color pointColor: "#0ea5e9"
 
     Drag.active: dragHandler.active
-    Drag.keys: ["movable-point-c"]
+    Drag.hotSpot.x: width / 2
+    Drag.hotSpot.y: height / 2
     Drag.supportedActions: Qt.MoveAction
+    Drag.keys: [ "movable-point-c" ]
 
     Rectangle {
         anchors.fill: parent
@@ -25,22 +27,17 @@ Item {
         target: root
         onActiveChanged: {
             console.log("onActiveDragHandler: ",pointId, dragHandler.active)
-            if(!dragHandler.active)
+            if(dragHandler.active)
             {
-                console.log("Handle on finished drag: ", pointId)
-                if(root.x < 0 || root.x > root.parent.width || root.y < 0 || root.y > root.parent.height)
-                {
-                    console.log("Point ", pointId, " is out of bounds, resetting position")
-                }
+                console.log("Drag start with source: ", root.Drag.source,"taget: ", root.Drag.target)
             }
-        }
-    }
 
-    Drag.onDragFinished: function(dropAction) {
-        console.log("Drag finished for point id: ", pointId, " with drop action: ", dropAction)
-        if (dropAction === Qt.IgnoreAction) {
-            root.x = 0
-            root.y = 0
+            if(!dragHandler.active && root.Drag.target !== null){
+                console.log("Drag start with source: ", root.Drag.source,"taget: ", root.Drag.target)
+                root.parent = root.Drag.target
+                root.x = root.parent.width / 2 - root.width / 2
+                root.y = root.parent.height / 2 - root.height / 2
+            }
         }
     }
 }
