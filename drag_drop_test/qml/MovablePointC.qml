@@ -25,6 +25,16 @@ Item {
         target: root
         onActiveChanged: {
             console.log("onActiveDragHandler: ",pointId, dragHandler.active)
+            if(!dragHandler.active)
+            {
+                console.log("Handle on finished drag: ", pointId)
+                if(root.x < 0 || root.x > root.parent.width || root.y < 0 || root.y > root.parent.height)
+                {
+                    console.log("Point ", pointId, " is out of bounds, resetting position")
+                    root.x = 0
+                    root.y = 0
+                }
+            }
         }
     }
 }
