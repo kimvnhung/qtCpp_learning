@@ -7,7 +7,11 @@ Window {
     visible: true
     title: qsTr("Qt QML Drag and Drop Demo")
 
-    GraphCanvas {
+    // GraphCanvas {
+    //     anchors.fill: parent
+    // }
+
+    DragDropDemonstrator {
         anchors.fill: parent
     }
 }
