@@ -11,6 +11,18 @@ qt_standard_project_setup(REQUIRES 6.5
     I18N_TRANSLATED_LANGUAGES en vi
 )
 
+file(GLOB_RECURSE TRANSLATION_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/*.cpp"
+    "${CMAKE_SOURCE_DIR}/*.cxx"
+    "${CMAKE_SOURCE_DIR}/*.cc"
+    "${CMAKE_SOURCE_DIR}/*.h"
+    "${CMAKE_SOURCE_DIR}/*.hpp"
+    "${CMAKE_SOURCE_DIR}/*.qml"
+    "${CMAKE_SOURCE_DIR}/*.js"
+)
+
+list(FILTER TRANSLATION_SOURCES EXCLUDE REGEX "^${CMAKE_SOURCE_DIR}/build/")
+
 set(TS_DIR "${CMAKE_SOURCE_DIR}/translations")
 set(TS_FILES
     "${TS_DIR}/app_en.ts"
@@ -23,13 +35,7 @@ add_subdirectory(app)
 qt_add_translations(qt_translation_app
     TS_FILES ${TS_FILES}
     QM_FILES_OUTPUT_VARIABLE qm_files
-    SOURCES
-        ${CMAKE_SOURCE_DIR}/app/main.cpp
-        ${CMAKE_SOURCE_DIR}/lib/backend.h
-        ${CMAKE_SOURCE_DIR}/lib/backend.cpp
-        ${CMAKE_SOURCE_DIR}/lib/languagemanager.h
-        ${CMAKE_SOURCE_DIR}/lib/languagemanager.cpp
-        ${CMAKE_SOURCE_DIR}/lib/qml/MainView.qml
+    SOURCES ${TRANSLATION_SOURCES}
 )
 
 # Build ID-based qm files for qtTrId()/qsTrId() without breaking normal tr()/qsTr().
