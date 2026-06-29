@@ -10,8 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Quick Qml)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Quick Qml)
 
 # 3rdparty: glog fmt
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build static libraries.")
@@ -28,9 +28,32 @@ pkg_check_modules(AVUTIL REQUIRED libavutil)
 set(FFMPEG_INCLUDES ${AVFORMAT_INCLUDE_DIRS} ${AVCODEC_INCLUDE_DIRS} ${SWSCALE_INCLUDE_DIRS} ${AVUTIL_INCLUDE_DIRS})
 set(FFMPEG_LIBS ${AVFORMAT_LIBRARIES} ${AVCODEC_LIBRARIES} ${SWSCALE_LIBRARIES} ${AVUTIL_LIBRARIES})
 
-add_executable(${PROJECT_NAME}
-  main.cpp
-  defer.h
+file(GLOB_RECURSE SOURCES RELATIVE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "*.cpp"
+    "*.h"
+)
+list(FILTER SOURCES EXCLUDE REGEX "build")
+
+file(GLOB_RECURSE QML_FILES RELATIVE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "*.qml"
+)
+list(FILTER QML_FILES EXCLUDE REGEX "build")
+
+qt_add_executable(${PROJECT_NAME}
+    main.cpp
+)
+
+qt_add_qml_module(${PROJECT_NAME}
+    URI RtspClientFFmpegQOpenGL
+    VERSION 0.1
+    OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/RtspClientFFmpegQOpenGL"
+    RESOURCE_PREFIX /qt/qml
+    QML_FILES
+        ${QML_FILES}
+    SOURCES
+        ${SOURCES}
 )
 
 set(FMT_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/fmt/include")
@@ -45,9 +68,10 @@ target_link_libraries(${PROJECT_NAME}
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Quick
+        Qt${QT_VERSION_MAJOR}::Qml
     PUBLIC
         ${FFMPEG_LIBS}
-        ${OpenCV_LIBS}
         # glog::glog
         fmt::fmt
 )
