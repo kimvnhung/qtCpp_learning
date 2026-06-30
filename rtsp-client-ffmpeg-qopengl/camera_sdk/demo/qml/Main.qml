@@ -13,66 +13,61 @@ Window {
         anchors.fill: parent
         color: "#222"
 
-        Row {
-            anchors.fill: parent
+        Column {
+            id: contentColumn
+            anchors.margins: 8
             spacing: 8
 
-            Column {
-                anchors.fill: parent
-                anchors.margins: 8
+            Row {
                 spacing: 8
+                Button {
+                    text: "Start"
+                    onClicked: sdkBridge.start(input.text)
+                }
+                Button {
+                    text: "Stop"
+                    onClicked: sdkBridge.stop()
+                }
+                Button {
+                    text: "Reconnect"
+                    onClicked: sdkBridge.reconnect()
+                }
+                TextField {
+                    id: input
+                    text: "rtsp://172.25.222.203:8554/test2"
+                    width: 480
+                }
+            }
 
-                Row {
-                    spacing: 8
-                    Button {
-                        text: "Start"
-                        onClicked: sdkBridge.start(input.text)
+            Row {
+                spacing: 16
+                Column {
+                    Text {
+                        text: "FPS: " + sdkBridge.fps
                     }
-                    Button {
-                        text: "Stop"
-                        onClicked: sdkBridge.stop()
+                    Text {
+                        text: "Resolution: " + sdkBridge.width + " x " + sdkBridge.height
                     }
-                    Button {
-                        text: "Reconnect"
-                        onClicked: sdkBridge.reconnect()
-                    }
-                    TextField {
-                        id: input
-                        text: "rtsp://172.25.222.203:8554/test2"
-                        width: 480
+                    Text {
+                        text: "Codec: " + sdkBridge.codec
                     }
                 }
+            }
 
-                Row {
-                    spacing: 16
-                    Column {
-                        Text {
-                            text: "FPS: " + sdkBridge.fps
-                        }
-                        Text {
-                            text: "Resolution: " + sdkBridge.width + " x " + sdkBridge.height
-                        }
-                        Text {
-                            text: "Codec: " + sdkBridge.codec
-                        }
-                    }
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 8
+                VideoItem {
+                    id: video1
+                    objectName: "video1"
+                    width: contentColumn.width / 2 - 12
+                    height: contentColumn.height - 160
                 }
-
-                Row {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 8
-                    VideoItem {
-                        id: video1
-                        objectName: "video1"
-                        width: parent.width / 2 - 12
-                        height: parent.height - 160
-                    }
-                    VideoItem {
-                        id: video2
-                        objectName: "video2"
-                        width: parent.width / 2 - 12
-                        height: parent.height - 160
-                    }
+                VideoItem {
+                    id: video2
+                    objectName: "video2"
+                    width: contentColumn.width / 2 - 12
+                    height: contentColumn.height - 160
                 }
             }
         }
