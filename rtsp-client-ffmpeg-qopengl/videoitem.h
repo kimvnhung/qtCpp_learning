@@ -22,6 +22,7 @@ public:
 
 public slots:
     void pushFrame(const QImage &image);
+    void setFrame(const FramePtr frame);
 
 signals:
     void sourceChanged();
@@ -31,6 +32,7 @@ protected:
 
 private:
     QImage m_image;
+    FramePtr m_frame;
     QMutex m_mutex;
     QString m_source;
     QSGTexture *m_texture = nullptr;

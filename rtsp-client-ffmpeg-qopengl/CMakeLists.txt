@@ -54,6 +54,9 @@ qt_add_qml_module(${PROJECT_NAME}
         ${QML_FILES}
     SOURCES
         ${SOURCES}
+        RESOURCES yuv.frag
+        RESOURCES yuv.vert
+        SOURCES videoframe.h videoframe.cpp
 )
 
 set(FMT_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/fmt/include")
