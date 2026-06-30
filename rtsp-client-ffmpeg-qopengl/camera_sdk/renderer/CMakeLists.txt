@@ -20,7 +20,7 @@ target_include_directories(camera_renderer
 
 target_compile_features(camera_renderer PUBLIC cxx_std_20)
 
-# Find Qt6 Quick/Gui for QRhi-based renderer
+# Find Qt6 Quick/Gui for QSGGeometryNode-based renderer
 find_package(Qt6 COMPONENTS Quick Gui Core REQUIRED)
 
 target_link_libraries(camera_renderer PUBLIC camera_core Qt6::Quick Qt6::Gui Qt6::Core)
