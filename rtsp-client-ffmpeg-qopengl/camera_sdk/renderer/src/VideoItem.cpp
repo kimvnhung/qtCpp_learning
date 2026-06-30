@@ -10,7 +10,7 @@
 #include <QLoggingCategory>
 #include "../include/renderer/VideoMaterial.h"
 #if QT_VERSION >= QT_VERSION_CHECK(6,8,0)
-#include <QRhi>
+#include <QtGui/QRhi>
 #endif
 
 using namespace camera::core;

@@ -8,10 +8,10 @@
 #include <QGuiApplication>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,8,0)
-    #include <QRhi>
-    #include <QRhiTexture>
-    #include <QRhiSampler>
-    #include <QRhiResourceUpdateBatch>
+    #include <QtGui/QRhi>
+    #include <QtGui/QRhiTexture>
+    #include <QtGui/QRhiSampler>
+    #include <QtGui/QRhiResourceUpdateBatch>
 #endif
 
 using namespace camera::core;
@@ -25,18 +25,18 @@ namespace camera::renderer
 
     void VideoMaterial::init(void* rhiHandle)
     {
-        #if QT_VERSION >= QT_VERSION_CHECK(6,8,0)
+#if QT_VERSION >= QT_VERSION_CHECK(6,8,0)
 
         if (rhiHandle)
         {
             m_usingRhi = true;
-            m_rhi = reinterpret_cast<QRhi::QRhi *>(rhiHandle);
+            m_rhi = reinterpret_cast<QRhi *>(rhiHandle);
         }
 
-        #endif
+#endif
     }
 
-    bool VideoMaterial::uploadFrame(std::shared_ptr<camera::core::IFrame> frame, QRhi::QRhiResourceUpdateBatch* batch)
+    bool VideoMaterial::uploadFrame(std::shared_ptr<camera::core::IFrame> frame, QRhiResourceUpdateBatch* batch)
     {
         if (!frame) { return false; }
 

@@ -28,7 +28,7 @@ public:
 
     // Upload frame data. Called on render thread / scene-graph thread where QRhi is valid.
     // Returns true on success.
-    bool uploadFrame(std::shared_ptr<camera::core::IFrame> frame, QRhi::QRhiResourceUpdateBatch* batch);
+    bool uploadFrame(std::shared_ptr<camera::core::IFrame> frame, QRhiResourceUpdateBatch* batch);
 
     // Release GPU resources
     void releaseResources();
