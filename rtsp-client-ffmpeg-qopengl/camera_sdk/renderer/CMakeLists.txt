@@ -8,6 +8,11 @@ set(renderer_sources
     src/VideoMaterial.cpp
 )
 
+# Ensure headers with Q_OBJECT are scanned by automoc
+list(APPEND renderer_sources
+    include/renderer/VideoItem.h
+)
+
 # uploader implementations
 list(APPEND renderer_sources
     src/uploaders/QSGUploader.cpp

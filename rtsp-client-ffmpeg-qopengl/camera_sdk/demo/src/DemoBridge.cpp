@@ -1,9 +1,9 @@
 #include "DemoBridge.h"
 
-#include <camera_sdk/ffmpeg/include/ffmpeg/FFmpegDecoder.h>
-#include <camera_sdk/core/include/core/TripleBufferFrameQueue.h>
-#include <camera_sdk/core/include/core/IFrame.h>
-#include <camera_sdk/renderer/include/renderer/VideoItem.h>
+#include <ffmpeg/FFmpegDecoder.h>
+#include <core/TripleBufferFrameQueue.h>
+#include <core/IFrame.h>
+#include <renderer/VideoItem.h>
 
 #include <QDebug>
 #include <chrono>

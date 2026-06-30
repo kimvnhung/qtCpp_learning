@@ -3,128 +3,124 @@
 #include <core/IFrame.h>
 #include <QQuickWindow>
 #include <QGuiApplication>
+#include <QSGTexture>
 #include <QImage>
 
 using namespace camera::core;
 
-namespace camera::renderer {
-
-QSGUploader::QSGUploader() = default;
-QSGUploader::~QSGUploader() { release(); }
-
-bool QSGUploader::uploadFrame(std::shared_ptr<IFrame> frame, void* )
+namespace camera::renderer
 {
-    if (!frame) return false;
 
-    QQuickWindow* win = QGuiApplication::allWindows().isEmpty() ? nullptr : qobject_cast<QQuickWindow*>(QGuiApplication::allWindows().first());
-    if (!win) return false;
+    QSGUploader::QSGUploader() = default;
+    QSGUploader::~QSGUploader() { release(); }
 
-    auto fmt = frame->format();
-
-    // Y plane
+    bool QSGUploader::uploadFrame(std::shared_ptr<IFrame> frame, void*)
     {
-        auto span = frame->planeData(0);
-        if (!span.empty()) {
-            int stride = frame->stride(0);
-            QImage yimg(frame->width(), frame->height(), QImage::Format_Grayscale8);
-            for (int y = 0; y < frame->height(); ++y) {
-                const uint8_t* src = span.data() + size_t(y) * stride;
-                memcpy(yimg.scanLine(y), src, static_cast<size_t>(frame->width()));
-            }
-            if (m_qsgTextures[0]) {
-                m_qsgTextures[0]->setFiltering(QSGTexture::Linear);
-                m_qsgTextures[0]->updateTexture(yimg);
-            } else {
-                m_qsgTextures[0] = win->createTextureFromImage(yimg);
-            }
-        }
-    }
+        if (!frame) { return false; }
 
-    // U/V upsample as in prior fallback path
-    QImage uimg(frame->width(), frame->height(), QImage::Format_Grayscale8);
-    QImage vimg(frame->width(), frame->height(), QImage::Format_Grayscale8);
-    uimg.fill(128);
-    vimg.fill(128);
+        QQuickWindow* win = QGuiApplication::allWindows().isEmpty() ? nullptr : qobject_cast<QQuickWindow*>
+                            (QGuiApplication::allWindows().first());
 
-    if (fmt == camera::core::PixelFormat::YUV420P) {
-        auto uspan = frame->planeData(1);
-        auto vspan = frame->planeData(2);
-        int ustride = frame->stride(1);
-        int vstride = frame->stride(2);
-        int wh = (frame->width() + 1) / 2;
-        int hh = (frame->height() + 1) / 2;
-        for (int y = 0; y < hh; ++y) {
-            const uint8_t *usrc = uspan.data() + size_t(y) * ustride;
-            const uint8_t *vsrc = vspan.data() + size_t(y) * vstride;
-            for (int x = 0; x < wh; ++x) {
-                uint8_t U = usrc[x];
-                uint8_t V = vsrc[x];
-                int dstx = x * 2;
-                int dsty = y * 2;
-                for (int dy = 0; dy < 2; ++dy) {
-                    int yy = dsty + dy;
-                    if (yy >= frame->height()) continue;
-                    uint8_t *uline = reinterpret_cast<uint8_t *>(uimg.scanLine(yy));
-                    uint8_t *vline = reinterpret_cast<uint8_t *>(vimg.scanLine(yy));
-                    if (dstx < frame->width()) uline[dstx] = U;
-                    if (dstx < frame->width()) vline[dstx] = V;
-                    if (dstx + 1 < frame->width()) uline[dstx + 1] = U;
-                    if (dstx + 1 < frame->width()) vline[dstx + 1] = V;
+        if (!win) { return false; }
+
+        auto fmt = frame->format();
+
+        // Convert YUV (YUV420P or NV12) to RGB888 on CPU and upload as a single QSGTexture.
+        const int w = frame->width();
+        const int h = frame->height();
+        QImage rgb(w, h, QImage::Format_RGB888);
+
+        auto clamp = [](int v) {
+            if (v < 0) return 0;
+            if (v > 255) return 255;
+            return v;
+        };
+
+        if (fmt == camera::core::PixelFormat::YUV420P) {
+            auto yspan = frame->planeData(0);
+            auto uspan = frame->planeData(1);
+            auto vspan = frame->planeData(2);
+            int ystride = frame->stride(0);
+            int ustride = frame->stride(1);
+            int vstride = frame->stride(2);
+
+            for (int yy = 0; yy < h; ++yy) {
+                const uint8_t* yrow = yspan.data() + size_t(yy) * ystride;
+                uint8_t* prow = rgb.scanLine(yy);
+                int uv_y = yy / 2;
+                const uint8_t* urow = uspan.data() + size_t(uv_y) * ustride;
+                const uint8_t* vrow = vspan.data() + size_t(uv_y) * vstride;
+
+                for (int x = 0; x < w; ++x) {
+                    int uv_x = x / 2;
+                    int Y = int(yrow[x]);
+                    int U = int(urow[uv_x]);
+                    int V = int(vrow[uv_x]);
+                    int C = Y - 16;
+                    int D = U - 128;
+                    int E = V - 128;
+                    int R = clamp((298 * C + 409 * E + 128) >> 8);
+                    int G = clamp((298 * C - 100 * D - 208 * E + 128) >> 8);
+                    int B = clamp((298 * C + 516 * D + 128) >> 8);
+                    int idx = x * 3;
+                    prow[idx + 0] = static_cast<uint8_t>(R);
+                    prow[idx + 1] = static_cast<uint8_t>(G);
+                    prow[idx + 2] = static_cast<uint8_t>(B);
                 }
             }
-        }
-    } else if (fmt == camera::core::PixelFormat::NV12) {
-        auto uvspan = frame->planeData(1);
-        int uvstride = frame->stride(1);
-        int wh = (frame->width() + 1) / 2;
-        int hh = (frame->height() + 1) / 2;
-        for (int y = 0; y < hh; ++y) {
-            const uint8_t *src = uvspan.data() + size_t(y) * uvstride;
-            for (int x = 0; x < wh; ++x) {
-                uint8_t U = src[x * 2 + 0];
-                uint8_t V = src[x * 2 + 1];
-                int dstx = x * 2;
-                int dsty = y * 2;
-                for (int dy = 0; dy < 2; ++dy) {
-                    int yy = dsty + dy;
-                    if (yy >= frame->height()) continue;
-                    uint8_t *uline = reinterpret_cast<uint8_t *>(uimg.scanLine(yy));
-                    uint8_t *vline = reinterpret_cast<uint8_t *>(vimg.scanLine(yy));
-                    if (dstx < frame->width()) uline[dstx] = U;
-                    if (dstx < frame->width()) vline[dstx] = V;
-                    if (dstx + 1 < frame->width()) uline[dstx + 1] = U;
-                    if (dstx + 1 < frame->width()) vline[dstx + 1] = V;
+        } else if (fmt == camera::core::PixelFormat::NV12) {
+            auto yspan = frame->planeData(0);
+            auto uvspan = frame->planeData(1);
+            int ystride = frame->stride(0);
+            int uvstride = frame->stride(1);
+
+            for (int yy = 0; yy < h; ++yy) {
+                const uint8_t* yrow = yspan.data() + size_t(yy) * ystride;
+                uint8_t* prow = rgb.scanLine(yy);
+                int uv_y = yy / 2;
+                const uint8_t* uvrow = uvspan.data() + size_t(uv_y) * uvstride;
+
+                for (int x = 0; x < w; ++x) {
+                    int uv_x = x / 2;
+                    int Y = int(yrow[x]);
+                    int U = int(uvrow[uv_x * 2 + 0]);
+                    int V = int(uvrow[uv_x * 2 + 1]);
+                    int C = Y - 16;
+                    int D = U - 128;
+                    int E = V - 128;
+                    int R = clamp((298 * C + 409 * E + 128) >> 8);
+                    int G = clamp((298 * C - 100 * D - 208 * E + 128) >> 8);
+                    int B = clamp((298 * C + 516 * D + 128) >> 8);
+                    int idx = x * 3;
+                    prow[idx + 0] = static_cast<uint8_t>(R);
+                    prow[idx + 1] = static_cast<uint8_t>(G);
+                    prow[idx + 2] = static_cast<uint8_t>(B);
                 }
             }
+        } else {
+            // unsupported formats: bail
+            return false;
         }
+
+        // Replace existing textures with a single RGB texture
+        for (int i = 1; i < 3; ++i) { if (m_qsgTextures[i]) { delete m_qsgTextures[i]; m_qsgTextures[i] = nullptr; } }
+        if (m_qsgTextures[0]) { delete m_qsgTextures[0]; m_qsgTextures[0] = nullptr; }
+        m_qsgTextures[0] = win->createTextureFromImage(rgb);
+        if (m_qsgTextures[0]) m_qsgTextures[0]->setFiltering(QSGTexture::Linear);
+
+        return true;
     }
 
-    if (m_qsgTextures[1]) {
-        m_qsgTextures[1]->setFiltering(QSGTexture::Linear);
-        m_qsgTextures[1]->updateTexture(uimg);
-    } else {
-        m_qsgTextures[1] = win->createTextureFromImage(uimg);
+    void QSGUploader::release()
+    {
+        for (auto &t : m_qsgTextures) { if (t) { delete t; t = nullptr; } }
     }
 
-    if (m_qsgTextures[2]) {
-        m_qsgTextures[2]->setFiltering(QSGTexture::Linear);
-        m_qsgTextures[2]->updateTexture(vimg);
-    } else {
-        m_qsgTextures[2] = win->createTextureFromImage(vimg);
+    QSGTexture *QSGUploader::qsgTexture(int plane) const
+    {
+        if (plane < 0 || plane >= 3) { return nullptr; }
+
+        return m_qsgTextures[plane];
     }
-
-    return true;
-}
-
-void QSGUploader::release()
-{
-    for (auto &t : m_qsgTextures) { if (t) { delete t; t = nullptr; } }
-}
-
-QSGTexture* QSGUploader::qsgTexture(int plane) const
-{
-    if (plane < 0 || plane >= 3) return nullptr;
-    return m_qsgTextures[plane];
-}
 
 } // namespace camera::renderer

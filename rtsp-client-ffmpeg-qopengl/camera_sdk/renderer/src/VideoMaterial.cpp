@@ -43,7 +43,7 @@ namespace camera::renderer
         }
     }
 
-    QSG::Texture *VideoMaterial::qsgTexture(int plane) const
+    QSGTexture *VideoMaterial::qsgTexture(int plane) const
     {
         // If the uploader is a QSGUploader, return its textures; otherwise null
         auto qsg = dynamic_cast<QSGUploader*>(m_uploader.get());

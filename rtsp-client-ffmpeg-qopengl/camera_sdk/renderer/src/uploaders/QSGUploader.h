@@ -3,20 +3,22 @@
 #include <memory>
 #include <array>
 
+#include <renderer/ITextureUploader.h>
+
 class QSGTexture;
 
 namespace camera::core { class IFrame; }
 
 namespace camera::renderer {
 
-class QSGUploader {
+class QSGUploader : public ITextureUploader {
 public:
     QSGUploader();
-    ~QSGUploader();
+    ~QSGUploader() override;
 
-    void init(void* rhiHandle) { Q_UNUSED(rhiHandle); }
-    bool uploadFrame(std::shared_ptr<camera::core::IFrame> frame, void* batch /*unused*/);
-    void release();
+    void init(void* rhiHandle) override { (void)rhiHandle; }
+    bool uploadFrame(std::shared_ptr<camera::core::IFrame> frame, void* batch /*unused*/) override;
+    void release() override;
 
     QSGTexture* qsgTexture(int plane) const;
 

@@ -2,10 +2,12 @@
 #pragma once
 
 #include <memory>
-#include <chrono>
 #include <core/IDecoder.h>
 
 namespace camera::ffmpeg {
+
+class FFmpegDecoderImpl;
+
 
 class FFmpegDecoder : public camera::core::IDecoder {
 public:
@@ -14,6 +16,9 @@ public:
 
     bool start(const camera::core::DecoderConfig& cfg, std::shared_ptr<camera::core::IFrameQueue> outQueue) override;
     void stop() noexcept override;
+
+private:
+    std::unique_ptr<FFmpegDecoderImpl> impl;
 };
 
 } // namespace camera::ffmpeg

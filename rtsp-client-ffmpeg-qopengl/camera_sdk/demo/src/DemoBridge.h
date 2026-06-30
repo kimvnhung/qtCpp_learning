@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 #include <atomic>
+#include <thread>
+#include <mutex>
 
 namespace camera::ffmpeg { class FFmpegDecoder; }
 namespace camera::core { class TripleBufferFrameQueue; class IFrame; }

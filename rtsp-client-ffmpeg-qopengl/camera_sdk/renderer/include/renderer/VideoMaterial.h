@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace QSG { class Texture; }
+class QSGTexture;
 
 namespace camera::core { class IFrame; }
 
@@ -22,7 +22,7 @@ public:
     void releaseResources();
 
     // If using QSG fallback, expose the QSG texture for a plane
-    QSG::Texture* qsgTexture(int plane) const;
+    QSGTexture* qsgTexture(int plane) const;
 
 private:
     std::unique_ptr<ITextureUploader> m_uploader;
