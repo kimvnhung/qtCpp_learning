@@ -1,0 +1,7 @@
+[requires]
+fmt/10.1.1
+spdlog/1.12.0
+
+[generators]
+cmake
+cmake_find_package
