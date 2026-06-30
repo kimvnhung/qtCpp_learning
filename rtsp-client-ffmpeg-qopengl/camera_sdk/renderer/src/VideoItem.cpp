@@ -9,8 +9,10 @@
 #include <QOpenGLContext>
 #include <QLoggingCategory>
 #include "../include/renderer/VideoMaterial.h"
+#if 0
 #if QT_VERSION >= QT_VERSION_CHECK(6,8,0)
 #include <QtGui/QRhi>
+#endif
 #endif
 
 using namespace camera::core;
@@ -146,30 +148,10 @@ public:
             return;
         }
 
-        // If QRhi is available on the window, schedule upload on the render thread
-        if (m_window && m_window->rhi()) {
-            // Capture a shared_ptr to keep frame alive until render-thread upload executes
-            auto frameForUpload = m_frame;
-            QQuickWindow* win = m_window;
-            // beforeRendering callback is invoked on the scene-graph / render thread
-            win->beforeRendering([this, frameForUpload, win]() {
-#if QT_VERSION >= QT_VERSION_CHECK(6,8,0)
-                QRhi* rhi = win->rhi();
-                if (rhi && m_videoMaterial) {
-                    auto batch = rhi->nextResourceUpdateBatch();
-                    m_videoMaterial->uploadFrame(frameForUpload, batch);
-                }
-#endif
-            }, Qt::DirectConnection);
-            // For QRhi path we don't set QSGTexture pointers here. A QRhi-backed
-            // QSGMaterial or custom QSGRenderNode should be used to bind the
-            // QRhi textures during the scene-graph rendering pass.
-        } else {
-            // Fallback: perform immediate upload on GUI thread using QSG textures
-            m_videoMaterial->uploadFrame(m_frame, nullptr);
-            for (int i = 0; i < 3; ++i) {
-                m_material->textures[i] = reinterpret_cast<QSGTexture*>(m_videoMaterial->qsgTexture(i));
-            }
+        // Perform upload on GUI thread using QSG textures
+        m_videoMaterial->uploadFrame(m_frame, nullptr);
+        for (int i = 0; i < 3; ++i) {
+            m_material->textures[i] = reinterpret_cast<QSGTexture*>(m_videoMaterial->qsgTexture(i));
         }
         markDirty(DirtyMaterial);
     }

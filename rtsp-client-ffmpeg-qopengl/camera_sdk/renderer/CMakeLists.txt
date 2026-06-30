@@ -8,6 +8,11 @@ set(renderer_sources
     src/VideoMaterial.cpp
 )
 
+# uploader implementations
+list(APPEND renderer_sources
+    src/uploaders/QSGUploader.cpp
+)
+
 if(CAMERA_RENDERER_SHARED)
     add_library(camera_renderer SHARED ${renderer_sources})
 else()
