@@ -3,14 +3,12 @@
 
 #include <memory>
 #include <array>
-#include <cstdint>
 #include <QSize>
 
-namespace QRhi {
-    class QRhiTexture;
-    class QRhiSampler;
-    class QRhiResourceUpdateBatch;
-}
+class QRhi;
+class QRhiTexture;
+class QRhiSampler;
+class QRhiResourceUpdateBatch;
 
 class QSGTexture;
 
@@ -40,8 +38,9 @@ public:
 
 private:
     // QRhi textures (Y, U, V or Y, UV)
-    std::array<QRhi::QRhiTexture*, 3> m_rhiTextures{nullptr, nullptr, nullptr};
-    QRhi::QRhiSampler* m_rhiSampler = nullptr;
+    std::array<QRhiTexture*, 3> m_rhiTextures{nullptr, nullptr, nullptr};
+    QRhiSampler* m_rhiSampler = nullptr;
+    QRhi* m_rhi = nullptr;
 
     // Fallback QSG textures
     std::array<QSG::Texture*, 3> m_qsgTextures{nullptr, nullptr, nullptr};

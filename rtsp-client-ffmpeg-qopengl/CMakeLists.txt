@@ -33,7 +33,9 @@ file(GLOB_RECURSE SOURCES RELATIVE
     "*.cpp"
     "*.h"
 )
+# Exclude build artifacts and SDK sources to avoid duplicate compilation
 list(FILTER SOURCES EXCLUDE REGEX "build")
+list(FILTER SOURCES EXCLUDE REGEX "^camera_sdk/" )
 
 file(GLOB_RECURSE QML_FILES RELATIVE
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -56,11 +58,17 @@ qt_add_qml_module(${PROJECT_NAME}
         ${SOURCES}
 )
 
+# Build SDK subproject and link against its libraries
+add_subdirectory(camera_sdk)
+
+
 set(FMT_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/fmt/include")
 # set(GLOG_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/glog/src")
 
 # Include the include directory
 target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDES} ${FMT_INCLUDES})
+# Include SDK headers for demo bridge
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/camera_sdk ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Link against the DLL (assuming Windows)
 target_link_libraries(${PROJECT_NAME}
@@ -74,6 +82,9 @@ target_link_libraries(${PROJECT_NAME}
         ${FFMPEG_LIBS}
         # glog::glog
         fmt::fmt
+        camera_core
+        camera_ffmpeg
+        camera_renderer
 )
 
 include(GNUInstallDirs)

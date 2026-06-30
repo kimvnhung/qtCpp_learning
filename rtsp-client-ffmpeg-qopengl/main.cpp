@@ -4,16 +4,20 @@
 #include <QFile>
 #include <QImage>
 
-#include "videoitem.h"
-#include "ffmpegdecoder.h"
+#include "sdkbridge.h"
+#include <camera_sdk/renderer/include/renderer/VideoItem.h>
 
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<VideoItem>("Rtsp", 1, 0, "VideoItem");
+    qmlRegisterType<camera::renderer::VideoItem>("Rtsp", 1, 0, "VideoItem");
 
     QQmlApplicationEngine engine;
+    // Create SDK demo bridge and expose to QML
+    SdkDemoBridge *bridge = new SdkDemoBridge(&app);
+    engine.rootContext()->setContextProperty("sdkBridge", bridge);
+
     engine.loadFromModule("RtspClientFFmpegQOpenGL", "Main");
 
     if (engine.rootObjects().isEmpty())
@@ -22,23 +26,18 @@ int main(int argc, char **argv)
     }
 
     QObject *root = engine.rootObjects().first();
-    QObject *videoObj = root->findChild<QObject *>("video");
-
-    FFmpegDecoder *decoder = new FFmpegDecoder(&app);
-
-    if (videoObj)
-    {
-        VideoItem *videoItem = qobject_cast<VideoItem *>(videoObj);
-
-        if (videoItem)
-        {
-            QObject::connect(decoder, &FFmpegDecoder::frameReady, videoItem, &VideoItem::pushFrame, Qt::QueuedConnection);
-        }
+    // Register VideoItem instances with the bridge so frames are forwarded
+    QList<camera::renderer::VideoItem*> items = root->findChildren<camera::renderer::VideoItem*>();
+    for (auto* vi : items) {
+        bridge->addVideoItem(vi);
     }
 
-    // start decoding from argv[1] or a default RTSP URL
+    // start decoding using SDK decoder with default URL
     QString urlStr = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QStringLiteral("rtsp://172.25.222.203:8554/test2");
-    decoder->start(urlStr);
+    bridge->start(urlStr);
+
+    // Connect decoder info change to QML via context property (infoChanged signal is exposed)
+    // QML can use the bound properties: decoder.fps, decoder.width, decoder.height, decoder.codec
 
     return app.exec();
 }

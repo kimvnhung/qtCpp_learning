@@ -7,9 +7,8 @@ Window {
     visible: true
     width: 1280
     height: 720
-    title: "RTSP Demo"
+    title: "Camera SDK Demo"
 
-    // bridge exposed from C++ as 'sdkBridge'
     property alias bridge: sdkBridge
 
     Rectangle {

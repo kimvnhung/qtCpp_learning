@@ -1,0 +1,99 @@
+#include "sdkbridge.h"
+
+#include <camera_sdk/ffmpeg/include/ffmpeg/FFmpegDecoder.h>
+#include <camera_sdk/core/include/core/TripleBufferFrameQueue.h>
+#include <camera_sdk/core/include/core/IFrame.h>
+#include <camera_sdk/renderer/include/renderer/VideoItem.h>
+
+#include <QDebug>
+#include <chrono>
+
+
+using namespace camera::ffmpeg;
+using namespace camera::core;
+using namespace camera::renderer;
+
+SdkDemoBridge::SdkDemoBridge(QObject* parent)
+    : QObject(parent)
+    , m_decoder(std::make_unique<FFmpegDecoder>())
+    , m_queue(std::make_shared<TripleBufferFrameQueue>())
+{
+}
+
+SdkDemoBridge::~SdkDemoBridge()
+{
+    stop();
+}
+
+void SdkDemoBridge::start(const QString& url)
+{
+    if (m_running.load()) return;
+    m_url = url;
+    m_running.store(true);
+    // start SDK decoder with the shared queue
+    camera::core::DecoderConfig cfg{};
+    m_decoder->start(cfg, m_queue);
+
+    m_thread = std::thread([this]() { pumpLoop(); });
+}
+
+void SdkDemoBridge::stop()
+{
+    if (!m_running.load()) return;
+    m_running.store(false);
+    if (m_thread.joinable()) m_thread.join();
+    if (m_decoder) m_decoder->stop();
+}
+
+void SdkDemoBridge::reconnect()
+{
+    stop();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (!m_url.isEmpty()) start(m_url);
+}
+
+void SdkDemoBridge::addVideoItem(QObject* item)
+{
+    if (!item) return;
+    std::lock_guard<std::mutex> lk(m_mutex);
+    m_items.push_back(item);
+}
+
+void SdkDemoBridge::pumpLoop()
+{
+    using clock = std::chrono::steady_clock;
+    auto lastTime = clock::now();
+    int frameCount = 0;
+    while (m_running.load()) {
+        auto opt = m_queue->latestFrame();
+        if (opt) {
+            auto frame = *opt;
+            // update size/codec info from first frame
+            if (frame) {
+                m_width = frame->width();
+                m_height = frame->height();
+                // codec unknown here; leave as empty or set by decoder if available
+            }
+
+            std::lock_guard<std::mutex> lk(m_mutex);
+            for (QObject* obj : m_items) {
+                auto vi = qobject_cast<VideoItem*>(obj);
+                if (vi) {
+                    std::shared_ptr<IFrame> f = frame;
+                    QMetaObject::invokeMethod(vi, [vi, f]() { vi->present(f); }, Qt::QueuedConnection);
+                }
+            }
+
+            frameCount++;
+            auto now = clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTime).count();
+            if (elapsed >= 1000) {
+                m_fps = frameCount * 1000 / static_cast<int>(elapsed);
+                emit infoChanged();
+                frameCount = 0;
+                lastTime = now;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
