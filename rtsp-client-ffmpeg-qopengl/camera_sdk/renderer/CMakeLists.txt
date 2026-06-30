@@ -5,6 +5,7 @@ option(CAMERA_RENDERER_SHARED "Build renderer as shared library" ${CAMERA_BUILD_
 
 set(renderer_sources
     src/VideoItem.cpp
+    src/VideoMaterial.cpp
 )
 
 if(CAMERA_RENDERER_SHARED)

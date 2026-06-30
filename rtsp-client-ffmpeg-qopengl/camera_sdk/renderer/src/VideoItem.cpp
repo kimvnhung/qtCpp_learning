@@ -8,6 +8,7 @@
 #include <QSGTexture>
 #include <QOpenGLContext>
 #include <QLoggingCategory>
+#include "../include/renderer/VideoMaterial.h"
 
 using namespace camera::core;
 
@@ -113,11 +114,15 @@ public:
         // Initialize material
         m_material = new YUVMaterial();
         setMaterial(m_material);
+        m_videoMaterial = new VideoMaterial();
+        m_videoMaterial->init(window ? reinterpret_cast<void*>(window->rhi()) : nullptr);
         setFlag(OwnsGeometry, true);
         setFlag(OwnsMaterial, true);
     }
 
-    ~VideoNode() override = default;
+    ~VideoNode() override {
+        if (m_videoMaterial) delete m_videoMaterial;
+    }
 
     void updateGeometry(const QSizeF& size) {
         if (size.isEmpty()) return;
@@ -133,7 +138,14 @@ public:
 
     void setFrame(std::shared_ptr<IFrame> frame) {
         m_frame = std::move(frame);
-        // TODO: upload plane data to textures here on render thread
+        if (m_videoMaterial && m_frame) {
+            // Upload frame (fallback path will create QSG textures).
+            m_videoMaterial->uploadFrame(m_frame, nullptr);
+            // Hook textures into material for shader sampling
+            for (int i = 0; i < 3; ++i) {
+                m_material->textures[i] = reinterpret_cast<QSGTexture*>(m_videoMaterial->qsgTexture(i));
+            }
+        }
         markDirty(DirtyMaterial);
     }
 
@@ -143,6 +155,7 @@ private:
     QQuickWindow* m_window;
     std::shared_ptr<IFrame> m_frame;
     YUVMaterial* m_material;
+    VideoMaterial* m_videoMaterial = nullptr;
 };
 
 struct VideoItem::Impl {
