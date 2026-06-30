@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <chrono>
-#include "../core/include/core/IDecoder.h"
+#include <core/IDecoder.h>
 
 namespace camera::ffmpeg {
 

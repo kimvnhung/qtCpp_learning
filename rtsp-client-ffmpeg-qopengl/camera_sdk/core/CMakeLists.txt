@@ -5,6 +5,8 @@ option(CAMERA_CORE_SHARED "Build camera_core as shared library" ${CAMERA_BUILD_S
 
 set(core_sources
     src/VideoFrame.cpp
+    src/VideoBuffer.cpp
+    src/MemoryPool.cpp
 )
 
 if(CAMERA_CORE_SHARED)
