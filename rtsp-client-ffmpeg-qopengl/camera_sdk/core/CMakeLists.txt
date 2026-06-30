@@ -7,6 +7,7 @@ set(core_sources
     src/VideoFrame.cpp
     src/VideoBuffer.cpp
     src/MemoryPool.cpp
+    src/TripleBufferFrameQueue.cpp
 )
 
 if(CAMERA_CORE_SHARED)
