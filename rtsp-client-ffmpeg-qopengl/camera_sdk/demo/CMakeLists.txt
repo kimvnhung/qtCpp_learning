@@ -42,7 +42,7 @@ target_link_libraries(camera_demo
         Qt6::Qml
         camera_core
         camera_ffmpeg
-        camera_renderer
+        camera_consumer
         ${FFMPEG_LIBS}
 )
 

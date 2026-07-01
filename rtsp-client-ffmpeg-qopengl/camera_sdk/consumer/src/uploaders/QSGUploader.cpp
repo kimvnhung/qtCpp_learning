@@ -1,4 +1,4 @@
-#include "QSGUploader.h"
+#include "consumer/uploaders/QSGUploader.h"
 
 #include <core/IFrame.h>
 #include <QQuickWindow>
@@ -8,7 +8,7 @@
 
 using namespace camera::core;
 
-namespace camera::renderer
+namespace camera::consumer
 {
 
     QSGUploader::QSGUploader() = default;

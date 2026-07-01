@@ -3,13 +3,13 @@
 #include <memory>
 #include <array>
 
-#include <renderer/ITextureUploader.h>
+#include "consumer/ITextureUploader.h"
 
 class QSGTexture;
 
 namespace camera::core { class IFrame; }
 
-namespace camera::renderer {
+namespace camera::consumer {
 
 class QSGUploader : public ITextureUploader {
 public:

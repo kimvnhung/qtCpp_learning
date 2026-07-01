@@ -20,7 +20,7 @@ set(CAMERA_INSTALL_CMAKEDIR "lib/cmake/camera" CACHE PATH "Installation director
 
 add_subdirectory(core)
 add_subdirectory(ffmpeg)
-add_subdirectory(renderer)
+add_subdirectory(consumer)
 if(CAMERA_BUILD_TESTS)
 	add_subdirectory(demo)
 endif()

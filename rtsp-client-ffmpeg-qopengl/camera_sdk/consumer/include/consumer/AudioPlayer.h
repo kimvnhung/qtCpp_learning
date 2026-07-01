@@ -10,7 +10,7 @@
 #include <QSharedPointer>
 #include <core/IAudioFrameQueue.h>
 
-namespace camera::renderer {
+namespace camera::consumer {
 
 class AudioPlayer : public QObject
 {

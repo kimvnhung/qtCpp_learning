@@ -1,11 +1,11 @@
 // AudioPlayer.cpp - QAudioOutput-based audio player
-#include "renderer/AudioPlayer.h"
+#include "consumer/AudioPlayer.h"
 #include <QAudioFormat>
 #include <QAudioDevice>
 #include <QIODevice>
 #include <QDebug>
 
-namespace camera::renderer
+namespace camera::consumer
 {
 
     class AudioPlayer::AudioIODevice : public QIODevice

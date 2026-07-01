@@ -7,7 +7,7 @@
 
 namespace camera::core { class IFrame; class IFrameQueue; }
 
-namespace camera::renderer {
+namespace camera::consumer {
 
 class VideoItem : public QQuickItem {
     Q_OBJECT

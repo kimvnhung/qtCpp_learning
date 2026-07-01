@@ -1,4 +1,4 @@
-#include "renderer/VideoMaterial.h"
+#include "consumer/VideoMaterial.h"
 #include <core/IFrame.h>
 #include <QQuickWindow>
 #include <QImage>
@@ -7,12 +7,12 @@
 #include <QDebug>
 #include <QGuiApplication>
 
-#include "uploaders/QSGUploader.h"
-#include "../include/renderer/ITextureUploader.h"
+#include "consumer/uploaders/QSGUploader.h"
+#include "consumer/ITextureUploader.h"
 
 using namespace camera::core;
 
-namespace camera::renderer
+namespace camera::consumer
 {
 
     VideoMaterial::VideoMaterial()
@@ -31,13 +31,15 @@ namespace camera::renderer
 
     bool VideoMaterial::uploadFrame(std::shared_ptr<camera::core::IFrame> frame, void* batch)
     {
-        if (!m_uploader) return false;
+        if (!m_uploader) { return false; }
+
         return m_uploader->uploadFrame(frame, batch);
     }
 
     void VideoMaterial::releaseResources()
     {
-        if (m_uploader) {
+        if (m_uploader)
+        {
             m_uploader->release();
             m_uploader.reset();
         }
@@ -46,8 +48,10 @@ namespace camera::renderer
     QSGTexture *VideoMaterial::qsgTexture(int plane) const
     {
         // If the uploader is a QSGUploader, return its textures; otherwise null
-        auto qsg = dynamic_cast<QSGUploader*>(m_uploader.get());
-        if (!qsg) return nullptr;
+        auto qsg = dynamic_cast<QSGUploader *>(m_uploader.get());
+
+        if (!qsg) { return nullptr; }
+
         return qsg->qsgTexture(plane);
     }
 

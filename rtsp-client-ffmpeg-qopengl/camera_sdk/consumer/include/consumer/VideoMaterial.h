@@ -7,7 +7,7 @@ class QSGTexture;
 
 namespace camera::core { class IFrame; }
 
-namespace camera::renderer {
+namespace camera::consumer {
 
 class ITextureUploader;
 
