@@ -6,6 +6,7 @@ set(core_sources
     src/VideoBuffer.cpp
     src/MemoryPool.cpp
     src/TripleBufferFrameQueue.cpp
+    src/BlockingAudioFrameQueue.cpp
 )
 
 add_library(camera_core SHARED ${core_sources})

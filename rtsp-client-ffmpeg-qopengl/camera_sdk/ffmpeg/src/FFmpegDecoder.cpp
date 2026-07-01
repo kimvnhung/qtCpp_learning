@@ -12,6 +12,8 @@ extern "C"
 #include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
 #include <libavutil/error.h>
+#include <libavutil/samplefmt.h>
+#include <libavutil/channel_layout.h>
 }
 
 #include <thread>
@@ -145,10 +147,68 @@ namespace camera::ffmpeg
         return buffer;
     }
 
+    core::AudioBufferPtr FrameConverter::convertAudio(AVFrame* frame)
+    {
+        if (!frame) return nullptr;
+
+        int channels = frame->channels;
+        int sampleRate = frame->sample_rate;
+        int nbSamples = frame->nb_samples;
+
+        AVSampleFormat avfmt = static_cast<AVSampleFormat>(frame->format);
+        int bytesPerSample = av_get_bytes_per_sample(avfmt);
+
+        if (bytesPerSample <= 0) return nullptr;
+
+        int bufferSize = av_samples_get_buffer_size(nullptr, channels, nbSamples, avfmt, 1);
+
+        if (bufferSize <= 0) return nullptr;
+
+        // Map to our SampleFormat
+        core::SampleFormat fmt = core::SampleFormat::UNKNOWN;
+
+        if (avfmt == AV_SAMPLE_FMT_S16 || avfmt == AV_SAMPLE_FMT_S16P) fmt = core::SampleFormat::S16;
+        else if (avfmt == AV_SAMPLE_FMT_FLT || avfmt == AV_SAMPLE_FMT_FLTP) fmt = core::SampleFormat::FLT;
+
+        auto buf = core::AudioBuffer::create(static_cast<size_t>(bufferSize), sampleRate, channels, nbSamples, fmt);
+
+        // Prepare src pointers
+        const uint8_t* srcPtr[AV_NUM_DATA_POINTERS] = {0};
+
+        for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) srcPtr[i] = frame->data[i];
+
+        // Destination pointer(s) - single interleaved buffer
+        uint8_t* dst = buf->data();
+        uint8_t* dstPtr[1] = { dst };
+
+        // av_samples_copy will handle planar->interleaved copying when dst layout is interleaved
+        int ret = av_samples_copy(dstPtr, srcPtr, 0, 0, nbSamples, channels, avfmt);
+
+        if (ret < 0)
+        {
+            return nullptr;
+        }
+
+        return buf;
+    }
+
 
     DecoderWorker::DecoderWorker(AVCodecContext* ctx, AVStream* stream, PacketQueue* q,
                                  std::shared_ptr<core::IFrameQueue> out)
         : codec(ctx), inStream(stream), pktQueue(q), outQueue(std::move(out)), running(true) {}
+
+    AudioDecoderWorker::AudioDecoderWorker(AVCodecContext* ctx, AVStream* stream, PacketQueue* q,
+                                           std::shared_ptr<core::IAudioFrameQueue> out)
+        : codec(ctx), inStream(stream), pktQueue(q), outQueue(std::move(out)), running(true) {}
+
+    AudioDecoderWorker::~AudioDecoderWorker()
+    {
+        if (codec)
+        {
+            avcodec_free_context(&codec);
+            codec = nullptr;
+        }
+    }
 
     void DecoderWorker::operator()()
     {
@@ -217,6 +277,65 @@ namespace camera::ffmpeg
 
         av_frame_free(&frame);
     }
+
+    void AudioDecoderWorker::operator()()
+    {
+        AVFrame* frame = av_frame_alloc();
+
+        while (running)
+        {
+            AVPacket* pkt = pktQueue->pop(std::chrono::milliseconds(200));
+
+            if (!pkt)
+            {
+                continue;
+            }
+
+            int ret = avcodec_send_packet(codec, pkt);
+
+            if (ret < 0)
+            {
+                av_packet_free(&pkt);
+                continue;
+            }
+
+            av_packet_free(&pkt);
+
+            while (ret >= 0)
+            {
+                ret = avcodec_receive_frame(codec, frame);
+
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) { break; }
+
+                if (ret < 0) { break; }
+
+                // Convert to AudioBuffer
+                auto buffer = FrameConverter::convertAudio(frame);
+
+                camera::core::AudioFrameMetadata meta;
+
+                if (frame->pts != AV_NOPTS_VALUE)
+                {
+                    meta.pts = FrameConverter::avts_to_timestamp(frame->pts, inStream->time_base);
+                }
+
+                if (frame->pkt_duration > 0)
+                    meta.duration = std::chrono::microseconds(av_rescale_q(frame->pkt_duration, inStream->time_base, AVRational{1, 1000000}));
+
+                if (buffer && outQueue)
+                {
+                    auto afr = camera::core::AudioFrame::create(buffer, meta);
+                    outQueue->push(afr);
+                }
+
+                av_frame_unref(frame);
+            }
+        }
+
+        av_frame_free(&frame);
+    }
+
+    void AudioDecoderWorker::stop() noexcept { running = false; }
 
     void DecoderWorker::stop() noexcept { running = false; }
 
@@ -361,6 +480,46 @@ namespace camera::ffmpeg
             decoderWorker = std::make_unique<DecoderWorker>(codec_ctx, vs, pktQueue.get(), outQueue);
             decoderThread = std::thread(std::ref(*decoderWorker));
 
+                // if audio queue provided in cfg, find audio stream and start audio decoding
+                if (cfg.audioQueue)
+                {
+                    int audioIndex = -1;
+
+                    for (unsigned int i = 0; i < formatCtx->nb_streams; ++i)
+                    {
+                        if (formatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+                        {
+                            audioIndex = static_cast<int>(i);
+                            break;
+                        }
+                    }
+
+                    if (audioIndex != -1)
+                    {
+                        AVStream* as = formatCtx->streams[audioIndex];
+                        AVCodecContext* audio_ctx = avcodec_alloc_context3(nullptr);
+
+                        const AVCodec* adec = avcodec_find_decoder(as->codecpar->codec_id);
+
+                        if (adec && audio_ctx)
+                        {
+                            if (avcodec_parameters_to_context(audio_ctx, as->codecpar) >= 0 && avcodec_open2(audio_ctx, adec, nullptr) >= 0)
+                            {
+                                audioPktQueue = std::make_unique<PacketQueue>();
+                                audioReader = std::make_unique<PacketReader>(formatCtx, audioPktQueue.get(), audioIndex);
+                                audioReader->start();
+
+                                audioDecoderWorker = std::make_unique<AudioDecoderWorker>(audio_ctx, as, audioPktQueue.get(), cfg.audioQueue);
+                                audioDecoderThread = std::thread(std::ref(*audioDecoderWorker));
+                            }
+                            else
+                            {
+                                avcodec_free_context(&audio_ctx);
+                            }
+                        }
+                    }
+                }
+
             return true;
         }
 
@@ -385,6 +544,28 @@ namespace camera::ffmpeg
                 if (decoderThread.joinable()) { decoderThread.join(); }
 
                 decoderWorker.reset();
+            }
+
+            // stop audio path if present
+            if (audioReader)
+            {
+                audioReader->stop();
+                audioReader.reset();
+            }
+
+            if (audioPktQueue)
+            {
+                audioPktQueue->stop();
+                audioPktQueue->flush();
+            }
+
+            if (audioDecoderWorker)
+            {
+                audioDecoderWorker->stop();
+
+                if (audioDecoderThread.joinable()) { audioDecoderThread.join(); }
+
+                audioDecoderWorker.reset();
             }
 
             if (formatCtx)
@@ -413,6 +594,11 @@ namespace camera::ffmpeg
         std::shared_ptr<core::IFrameQueue> outQueue;
         AVFormatContext *formatCtx = nullptr;
         int streamIndex = -1;
+        // audio path
+        std::unique_ptr<PacketQueue> audioPktQueue;
+        std::unique_ptr<PacketReader> audioReader;
+        std::unique_ptr<AudioDecoderWorker> audioDecoderWorker;
+        std::thread audioDecoderThread;
     };
 
 // FFmpegDecoder public wrapper

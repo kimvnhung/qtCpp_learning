@@ -2,6 +2,8 @@
 
 #include <ffmpeg/FFmpegDecoder.h>
 #include <core/TripleBufferFrameQueue.h>
+#include <core/BlockingAudioFrameQueue.h>
+#include <renderer/AudioPlayer.h>
 #include <core/IFrame.h>
 #include <renderer/VideoItem.h>
 
@@ -17,6 +19,8 @@ DemoBridge::DemoBridge(QObject* parent)
     , m_decoder(std::make_unique<FFmpegDecoder>())
     , m_queue(std::make_shared<TripleBufferFrameQueue>())
 {
+    m_audioQueue = std::make_shared<camera::core::BlockingAudioFrameQueue>();
+    m_audioPlayer = std::make_unique<camera::renderer::AudioPlayer>();
 }
 
 DemoBridge::~DemoBridge()
@@ -32,7 +36,9 @@ void DemoBridge::start(const QString& url)
     m_running.store(true);
     DecoderConfig cfg{};
     cfg.url = url.toStdString();
+    cfg.audioQueue = m_audioQueue;
     m_decoder->start(cfg, m_queue);
+    m_audioPlayer->start(m_audioQueue);
     m_thread = std::thread([this]() { pumpLoop(); });
 }
 

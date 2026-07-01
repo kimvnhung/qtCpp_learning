@@ -8,8 +8,8 @@
 #include <mutex>
 
 namespace camera::ffmpeg { class FFmpegDecoder; }
-namespace camera::core { class TripleBufferFrameQueue; class IFrame; }
-namespace camera::renderer { class VideoItem; }
+namespace camera::core { class TripleBufferFrameQueue; class IFrame; class BlockingAudioFrameQueue; }
+namespace camera::renderer { class VideoItem; class AudioPlayer; }
 
 class DemoBridge : public QObject {
     Q_OBJECT
@@ -40,6 +40,8 @@ private:
 
     std::unique_ptr<camera::ffmpeg::FFmpegDecoder> m_decoder;
     std::shared_ptr<camera::core::TripleBufferFrameQueue> m_queue;
+    std::shared_ptr<camera::core::BlockingAudioFrameQueue> m_audioQueue;
+    std::unique_ptr<camera::renderer::AudioPlayer> m_audioPlayer;
     std::vector<QObject*> m_items;
     std::atomic<bool> m_running{false};
     std::thread m_thread;

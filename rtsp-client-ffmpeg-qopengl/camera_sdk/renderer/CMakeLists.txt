@@ -6,6 +6,7 @@ option(CAMERA_RENDERER_SHARED "Build renderer as shared library" ${CAMERA_BUILD_
 set(renderer_sources
     src/VideoItem.cpp
     src/VideoMaterial.cpp
+    src/AudioPlayer.cpp
 )
 
 # Ensure headers with Q_OBJECT are scanned by automoc
@@ -33,8 +34,9 @@ target_compile_features(camera_renderer PUBLIC cxx_std_20)
 
 # Find Qt6 Quick/Gui for QSGGeometryNode-based renderer
 find_package(Qt6 COMPONENTS Quick Gui Core REQUIRED)
+find_package(Qt6 COMPONENTS Multimedia REQUIRED)
 
-target_link_libraries(camera_renderer PUBLIC camera_core Qt6::Quick Qt6::Gui Qt6::Core)
+target_link_libraries(camera_renderer PUBLIC camera_core Qt6::Quick Qt6::Gui Qt6::Core Qt6::Multimedia)
 
 set_target_properties(camera_renderer PROPERTIES
     AUTOMOC ON

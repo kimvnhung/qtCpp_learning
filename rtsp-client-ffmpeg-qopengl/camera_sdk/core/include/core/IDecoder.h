@@ -4,6 +4,7 @@
 #pragma once
 
 #include "IFrameQueue.h"
+#include "IAudioFrameQueue.h"
 #include <string>
 #include <memory>
 
@@ -12,6 +13,7 @@ namespace camera::core {
 struct DecoderConfig {
     std::string url; // input URL (rtsp, file...)
     int maxThreads = 1; // decoder threads, subject to implementation
+    std::shared_ptr<IAudioFrameQueue> audioQueue; // optional audio output queue
 };
 
 class IDecoder {

@@ -1,0 +1,120 @@
+// AudioPlayer.cpp - QAudioOutput-based audio player
+#include "renderer/AudioPlayer.h"
+#include <QAudioFormat>
+#include <QAudioDeviceInfo>
+#include <QIODevice>
+#include <QDebug>
+
+namespace camera::renderer {
+
+class AudioPlayer::AudioIODevice : public QIODevice
+{
+public:
+    AudioIODevice(std::shared_ptr<camera::core::IAudioFrameQueue> q, QObject* parent = nullptr)
+        : QIODevice(parent), m_queue(std::move(q))
+    {}
+
+    bool openMode(QIODevice::OpenMode mode)
+    {
+        return open(mode);
+    }
+
+    qint64 readData(char* data, qint64 maxlen) override
+    {
+        if (!m_queue) return 0;
+
+        qint64 written = 0;
+
+        while (written < maxlen)
+        {
+            auto opt = m_queue->pop();
+
+            if (!opt.has_value())
+            {
+                // fill remaining with silence
+                memset(data + written, 0, static_cast<size_t>(maxlen - written));
+                written = maxlen;
+                break;
+            }
+
+            auto frame = *opt;
+
+            if (!frame) continue;
+
+            auto buf = frame->buffer();
+
+            if (!buf) continue;
+
+            size_t toCopy = std::min<size_t>(buf->size(), static_cast<size_t>(maxlen - written));
+            memcpy(data + written, buf->data(), toCopy);
+            written += static_cast<qint64>(toCopy);
+
+            // If buffer larger than remaining, we drop the tail for now
+        }
+
+        return written;
+    }
+
+    qint64 writeData(const char* /*data*/, qint64 /*len*/) override { return 0; }
+
+private:
+    std::shared_ptr<camera::core::IAudioFrameQueue> m_queue;
+};
+
+AudioPlayer::AudioPlayer(QObject* parent)
+    : QObject(parent)
+    , m_output(nullptr)
+    , m_io(nullptr)
+{
+}
+
+AudioPlayer::~AudioPlayer()
+{
+    stop();
+}
+
+void AudioPlayer::start(std::shared_ptr<camera::core::IAudioFrameQueue> queue)
+{
+    if (m_output) return; // already started
+
+    m_queue = std::move(queue);
+
+    // default format: 48kHz, stereo, 16-bit little endian
+    QAudioFormat format;
+    format.setSampleRate(48000);
+    format.setChannelCount(2);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::SignedInt);
+
+    QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
+
+    if (!info.isFormatSupported(format))
+    {
+        qWarning() << "Requested audio format not supported, using nearest";
+        format = info.nearestFormat(format);
+    }
+
+    m_output = new QAudioOutput(format, this);
+    m_io = new AudioIODevice(m_queue, this);
+    m_io->open(QIODevice::ReadOnly);
+    m_output->start(m_io);
+}
+
+void AudioPlayer::stop() noexcept
+{
+    if (m_output)
+    {
+        m_output->stop();
+        delete m_io; m_io = nullptr;
+        delete m_output; m_output = nullptr;
+    }
+}
+
+void AudioPlayer::setVolume(qreal v)
+{
+    if (m_output) m_output->setVolume(v);
+}
+
+} // namespace camera::renderer

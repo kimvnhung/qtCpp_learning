@@ -10,6 +10,7 @@ int main(int argc, char **argv)
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<camera::renderer::VideoItem>("CameraDemo", 1, 0, "VideoItem");
+    qmlRegisterType<camera::renderer::AudioPlayer>("CameraDemo", 1, 0, "AudioPlayer");
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/CameraDemo");

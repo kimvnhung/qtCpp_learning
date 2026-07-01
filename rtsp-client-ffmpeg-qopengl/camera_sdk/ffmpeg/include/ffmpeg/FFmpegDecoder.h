@@ -6,6 +6,7 @@
 #include <memory>
 #include <core/IDecoder.h>
 #include <core/VideoBuffer.h>
+#include <core/AudioBuffer.h>
 
 
 class AVPacket;
@@ -71,6 +72,7 @@ namespace camera::ffmpeg
     public:
         static core::IFrame::Timestamp avts_to_timestamp(int64_t ts, AVRational tb);
         static core::VideoBufferPtr convert(AVFrame* frame);
+        static core::AudioBufferPtr convertAudio(AVFrame* frame);
     };
 
     // DecoderWorker: takes packets, feeds codec, emits frames
@@ -86,6 +88,23 @@ namespace camera::ffmpeg
         AVStream *inStream;
         PacketQueue *pktQueue;
         std::shared_ptr<core::IFrameQueue> outQueue;
+        std::atomic<bool> running;
+    };
+
+    // Audio decoder worker
+    class AudioDecoderWorker
+    {
+    public:
+        AudioDecoderWorker(AVCodecContext* ctx, AVStream* stream, PacketQueue* q, std::shared_ptr<core::IAudioFrameQueue> out);
+        ~AudioDecoderWorker();
+        void operator()();
+        void stop() noexcept ;
+
+    private:
+        AVCodecContext *codec;
+        AVStream *inStream;
+        PacketQueue *pktQueue;
+        std::shared_ptr<core::IAudioFrameQueue> outQueue;
         std::atomic<bool> running;
     };
 
