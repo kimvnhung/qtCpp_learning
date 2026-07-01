@@ -1,120 +1,99 @@
 // AudioPlayer.cpp - QAudioOutput-based audio player
 #include "renderer/AudioPlayer.h"
 #include <QAudioFormat>
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
 #include <QIODevice>
 #include <QDebug>
 
-namespace camera::renderer {
-
-class AudioPlayer::AudioIODevice : public QIODevice
+namespace camera::renderer
 {
-public:
-    AudioIODevice(std::shared_ptr<camera::core::IAudioFrameQueue> q, QObject* parent = nullptr)
-        : QIODevice(parent), m_queue(std::move(q))
-    {}
 
-    bool openMode(QIODevice::OpenMode mode)
+    class AudioPlayer::AudioIODevice : public QIODevice
     {
-        return open(mode);
-    }
+    public:
+        AudioIODevice(std::shared_ptr<camera::core::IAudioFrameQueue> q, QObject* parent = nullptr)
+            : QIODevice(parent), m_queue(std::move(q))
+        {}
 
-    qint64 readData(char* data, qint64 maxlen) override
-    {
-        if (!m_queue) return 0;
-
-        qint64 written = 0;
-
-        while (written < maxlen)
+        bool openMode(QIODevice::OpenMode mode)
         {
-            auto opt = m_queue->pop();
-
-            if (!opt.has_value())
-            {
-                // fill remaining with silence
-                memset(data + written, 0, static_cast<size_t>(maxlen - written));
-                written = maxlen;
-                break;
-            }
-
-            auto frame = *opt;
-
-            if (!frame) continue;
-
-            auto buf = frame->buffer();
-
-            if (!buf) continue;
-
-            size_t toCopy = std::min<size_t>(buf->size(), static_cast<size_t>(maxlen - written));
-            memcpy(data + written, buf->data(), toCopy);
-            written += static_cast<qint64>(toCopy);
-
-            // If buffer larger than remaining, we drop the tail for now
+            return open(mode);
         }
 
-        return written;
-    }
+        qint64 readData(char* data, qint64 maxlen) override
+        {
+            if (!m_queue) { return 0; }
 
-    qint64 writeData(const char* /*data*/, qint64 /*len*/) override { return 0; }
+            qint64 written = 0;
 
-private:
-    std::shared_ptr<camera::core::IAudioFrameQueue> m_queue;
-};
+            while (written < maxlen)
+            {
+                auto opt = m_queue->pop();
 
-AudioPlayer::AudioPlayer(QObject* parent)
-    : QObject(parent)
-    , m_output(nullptr)
-    , m_io(nullptr)
-{
-}
+                if (!opt.has_value())
+                {
+                    // fill remaining with silence
+                    memset(data + written, 0, static_cast<size_t>(maxlen - written));
+                    written = maxlen;
+                    break;
+                }
 
-AudioPlayer::~AudioPlayer()
-{
-    stop();
-}
+                auto frame = *opt;
 
-void AudioPlayer::start(std::shared_ptr<camera::core::IAudioFrameQueue> queue)
-{
-    if (m_output) return; // already started
+                if (!frame) { continue; }
 
-    m_queue = std::move(queue);
+                auto buf = frame->buffer();
 
-    // default format: 48kHz, stereo, 16-bit little endian
-    QAudioFormat format;
-    format.setSampleRate(48000);
-    format.setChannelCount(2);
-    format.setSampleSize(16);
-    format.setCodec("audio/pcm");
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleType(QAudioFormat::SignedInt);
+                if (!buf) { continue; }
 
-    QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
+                size_t toCopy = std::min<size_t>(buf->size(), static_cast<size_t>(maxlen - written));
+                memcpy(data + written, buf->data(), toCopy);
+                written += static_cast<qint64>(toCopy);
 
-    if (!info.isFormatSupported(format))
+                // If buffer larger than remaining, we drop the tail for now
+            }
+
+            return written;
+        }
+
+        qint64 writeData(const char* /*data*/, qint64 /*len*/) override { return 0; }
+
+    private:
+        std::shared_ptr<camera::core::IAudioFrameQueue> m_queue;
+    };
+
+    AudioPlayer::AudioPlayer(QObject* parent)
+        : QObject(parent)
+        , m_io(nullptr)
+        , m_devices(new QMediaDevices(this))
     {
-        qWarning() << "Requested audio format not supported, using nearest";
-        format = info.nearestFormat(format);
     }
 
-    m_output = new QAudioOutput(format, this);
-    m_io = new AudioIODevice(m_queue, this);
-    m_io->open(QIODevice::ReadOnly);
-    m_output->start(m_io);
-}
-
-void AudioPlayer::stop() noexcept
-{
-    if (m_output)
+    AudioPlayer::~AudioPlayer()
     {
-        m_output->stop();
-        delete m_io; m_io = nullptr;
-        delete m_output; m_output = nullptr;
+        stop();
     }
-}
 
-void AudioPlayer::setVolume(qreal v)
-{
-    if (m_output) m_output->setVolume(v);
-}
+    void AudioPlayer::start(std::shared_ptr<camera::core::IAudioFrameQueue> queue)
+    {
+        m_queue = std::move(queue);
+
+        QAudioDevice info = m_devices->defaultAudioOutput();
+
+        m_sink.reset(new QAudioSink(info, info.preferredFormat(), this));
+        m_io = new AudioIODevice(m_queue, this);
+        m_io->open(QIODevice::ReadOnly);
+        m_sink->start(m_io);
+    }
+
+    void AudioPlayer::stop() noexcept
+    {
+
+    }
+
+    void AudioPlayer::setVolume(qreal v)
+    {
+
+    }
 
 } // namespace camera::renderer

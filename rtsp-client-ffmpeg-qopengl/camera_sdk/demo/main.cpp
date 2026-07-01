@@ -3,14 +3,16 @@
 #include <QQmlContext>
 
 #include "DemoBridge.h"
+#include "MediaPlayer.h"
 #include <renderer/VideoItem.h>
+#include <renderer/AudioPlayer.h>
 
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<camera::renderer::VideoItem>("CameraDemo", 1, 0, "VideoItem");
-    qmlRegisterType<camera::renderer::AudioPlayer>("CameraDemo", 1, 0, "AudioPlayer");
+    qmlRegisterType<MediaPlayer>("CameraDemo", 1, 0, "MediaPlayer");
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/CameraDemo");

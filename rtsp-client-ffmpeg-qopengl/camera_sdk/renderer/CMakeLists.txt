@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 project(camera_renderer LANGUAGES CXX)
 
-option(CAMERA_RENDERER_SHARED "Build renderer as shared library" ${CAMERA_BUILD_SHARED})
-
 set(renderer_sources
     src/VideoItem.cpp
     src/VideoMaterial.cpp
@@ -12,6 +10,7 @@ set(renderer_sources
 # Ensure headers with Q_OBJECT are scanned by automoc
 list(APPEND renderer_sources
     include/renderer/VideoItem.h
+    include/renderer/AudioPlayer.h
 )
 
 # uploader implementations
@@ -19,11 +18,7 @@ list(APPEND renderer_sources
     src/uploaders/QSGUploader.cpp
 )
 
-if(CAMERA_RENDERER_SHARED)
-    add_library(camera_renderer SHARED ${renderer_sources})
-else()
-    add_library(camera_renderer STATIC ${renderer_sources})
-endif()
+add_library(camera_renderer ${renderer_sources})
 
 target_include_directories(camera_renderer
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -36,7 +31,14 @@ target_compile_features(camera_renderer PUBLIC cxx_std_20)
 find_package(Qt6 COMPONENTS Quick Gui Core REQUIRED)
 find_package(Qt6 COMPONENTS Multimedia REQUIRED)
 
-target_link_libraries(camera_renderer PUBLIC camera_core Qt6::Quick Qt6::Gui Qt6::Core Qt6::Multimedia)
+target_link_libraries(camera_renderer
+    PUBLIC
+        camera_core
+        Qt6::Quick
+        Qt6::Gui
+        Qt6::Core
+        Qt6::Multimedia
+)
 
 set_target_properties(camera_renderer PROPERTIES
     AUTOMOC ON

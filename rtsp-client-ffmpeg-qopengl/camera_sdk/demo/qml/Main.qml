@@ -18,24 +18,42 @@ Window {
             anchors.margins: 8
             spacing: 8
 
+            MediaPlayer {
+                id: player
+            }
+
             Row {
                 spacing: 8
                 Button {
                     text: "Start"
-                    onClicked: sdkBridge.start(input.text)
+                    onClicked: player.start(input.text)
                 }
                 Button {
                     text: "Stop"
-                    onClicked: sdkBridge.stop()
+                    onClicked: player.stop()
                 }
                 Button {
                     text: "Reconnect"
-                    onClicked: sdkBridge.reconnect()
+                    onClicked: {
+                        player.stop();
+                        player.start(input.text);
+                    }
                 }
                 TextField {
                     id: input
                     text: "rtsp://172.25.222.203:8554/test2"
                     width: 480
+                }
+                Slider {
+                    id: vol
+                    from: 0.0
+                    to: 1.0
+                    value: 1.0
+                    width: 200
+                    onValueChanged: player.setVolume(value)
+                }
+                Text {
+                    text: qsTr("Volume: ") + Math.round(vol.value * 100) + "%"
                 }
             }
 
@@ -43,13 +61,13 @@ Window {
                 spacing: 16
                 Column {
                     Text {
-                        text: "FPS: " + sdkBridge.fps
+                        text: "FPS: " + player.fps
                     }
                     Text {
-                        text: "Resolution: " + sdkBridge.width + " x " + sdkBridge.height
+                        text: "Resolution: " + player.width + " x " + player.height
                     }
                     Text {
-                        text: "Codec: " + sdkBridge.codec
+                        text: "URL: " + player.url
                     }
                 }
             }
@@ -68,6 +86,11 @@ Window {
                     objectName: "video2"
                     width: contentColumn.width / 2 - 12
                     height: contentColumn.height - 160
+                }
+                Component.onCompleted: {
+                    // attach video items to the MediaPlayer
+                    player.addVideoItem(video1);
+                    player.addVideoItem(video2);
                 }
             }
         }
