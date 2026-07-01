@@ -30,3 +30,4 @@ set(FFMPEG_LIBS ${AVFORMAT_LIBRARIES} ${AVCODEC_LIBRARIES} ${SWSCALE_LIBRARIES} 
 
 # Build SDK subproject and link against its libraries
 add_subdirectory(camera_sdk)
+add_subdirectory(algorithms)
