@@ -1,10 +1,14 @@
 #ifndef VIDEOCONSUMER_H
 #define VIDEOCONSUMER_H
 
-class VideoConsumer
+#include <QString>
+#include "iconsumer.h"
+
+class VideoConsumer: public IConsumer
 {
-public:
-    VideoConsumer();
+    // IConsumer interface
+protected:
+    void renderFrame() override;
 };
 
 #endif // VIDEOCONSUMER_H

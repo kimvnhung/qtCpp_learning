@@ -12,6 +12,7 @@ public:
         AUDIO
     };
     IFrame(int id, FrameType type, int64_t pts);
+    virtual ~IFrame() = default;
 
     int id() const;
     void setId(int newId);
@@ -47,11 +48,13 @@ class AudioFrame : public IFrame
 {
 public:
     AudioFrame(int id, int64_t pts, int sampleRate, int channels);
+
     int sampleRate() const;
     void setSampleRate(int newSampleRate);
 
     int channels() const;
     void setChannels(int newChannels);
+
 private:
     int m_sampleRate{0};
     int m_channels{0};

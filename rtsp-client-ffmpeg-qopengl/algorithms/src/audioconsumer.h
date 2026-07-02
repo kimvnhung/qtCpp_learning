@@ -1,10 +1,13 @@
 #ifndef AUDIOCONSUMER_H
 #define AUDIOCONSUMER_H
 
-class AudioConsumer
+#include "iconsumer.h"
+
+
+class AudioConsumer: public IConsumer
 {
-public:
-    AudioConsumer();
+protected:
+    void renderFrame() override ;
 };
 
 #endif // AUDIOCONSUMER_H
