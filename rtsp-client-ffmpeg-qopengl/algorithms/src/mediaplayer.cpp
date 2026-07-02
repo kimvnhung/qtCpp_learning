@@ -1,11 +1,21 @@
 #include "mediaplayer.h"
 
+#include "videoconsumer.h"
+#include "audioconsumer.h"
+#include "ffmpegdecoder.h"
+
 #include "log.h"
+#include "videosynchronizer.h"
+#include "audiosynchronizer.h"
 
 MediaPlayer::MediaPlayer()
-    : audioOutput(new AudioConsumer())
+    : audioOutput(std::make_shared<AudioConsumer>())
+    , playbackClock(new PlaybackClock())
+    , videoBuffer(std::make_shared<VideoFrameQueue>())
+    , audioBuffer(std::make_shared<AudioFrameQueue>())
+    , videoSynchronizer(new  VideoSynchronizer(playbackClock, videoBuffer))
+    , audioSynchronizer(new AudioSynchronizer(audioOutput, playbackClock, audioBuffer))
     , decoder(nullptr)
-    , state(State::Stopped)
 {
     audioOutput->setName("AudioConsumer");
     audioOutput->start();
@@ -23,8 +33,7 @@ MediaPlayer::~MediaPlayer()
     {
         audioOutput->stop();
         audioOutput->wait();
-        delete audioOutput;
-        audioOutput = nullptr;
+        audioOutput.reset();
     }
 }
 
@@ -37,24 +46,25 @@ bool MediaPlayer::open(const char* url)
 void MediaPlayer::play()
 {
     LOGD();
-    state = State::Playing;
+    playbackClock->play();
 }
 \
 void MediaPlayer::pause()
 {
     LOGD();
-    state = State::Paused;
+    playbackClock->pause();
 }
 
 void MediaPlayer::stop()
 {
     LOGD();
-    state = State::Stopped;
+    playbackClock->reset();
 }
 
 void MediaPlayer::seek(double position)
 {
     LOGD() << "Seeking to position: " << position;
+    playbackClock->seek(position);
 }
 
 void MediaPlayer::addVideoOutput(VideoConsumer* output)
@@ -62,10 +72,15 @@ void MediaPlayer::addVideoOutput(VideoConsumer* output)
     if (output)
     {
         videoOutputs.push_back(output);
+
+        if (videoSynchronizer)
+        {
+            videoSynchronizer->registerConsumer(output);
+        }
     }
 }
 
 bool MediaPlayer::isPlaying() const
 {
-    return state == State::Playing;
+    return playbackClock->isPlaying();
 }

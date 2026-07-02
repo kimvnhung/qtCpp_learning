@@ -1,23 +1,21 @@
 #ifndef MEDIAPLAYER_H
 #define MEDIAPLAYER_H
 
-#include "playbackclock.h"
-#include "ffmpegdecoder.h"
-#include "videoconsumer.h"
-#include "audioconsumer.h"
-
+#include <memory>
 #include <vector>
+
+class VideoConsumer;
+class AudioConsumer;
+class PlaybackClock;
+class FFmpegDecoder;
+class VideoSynchronizer;
+class AudioSynchronizer;
+class VideoFrameQueue;
+class AudioFrameQueue;
 
 class MediaPlayer
 {
 public:
-    enum class State
-    {
-        Stopped,
-        Playing,
-        Paused
-    };
-
     MediaPlayer();
     ~MediaPlayer();
 
@@ -32,12 +30,16 @@ public:
     bool isPlaying() const;
 
 private:
-    State state;
-    PlaybackClock playbackClock;
+    PlaybackClock *playbackClock;
+    std::shared_ptr<VideoFrameQueue> videoBuffer;
+    std::shared_ptr<AudioFrameQueue> audioBuffer;
     FFmpegDecoder *decoder;
 
     std::vector<VideoConsumer *> videoOutputs;
-    AudioConsumer *audioOutput;
+    std::shared_ptr<AudioConsumer> audioOutput;
+
+    VideoSynchronizer *videoSynchronizer;
+    AudioSynchronizer *audioSynchronizer;
 };
 
 #endif // MEDIAPLAYER_H
