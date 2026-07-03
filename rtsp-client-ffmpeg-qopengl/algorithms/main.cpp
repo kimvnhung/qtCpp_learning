@@ -1,4 +1,5 @@
-#include <QCoreApplication>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
 #include <QTimer>
 
 #include "mediaplayer.h"
@@ -7,36 +8,16 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
-    LOGD() << "Qt Console Application";
-    MediaPlayer player;
-    player.open("file_stream");
-    LOGD() << "Playing video...";
-    VideoConsumer consumer1;
-    consumer1.setName("VC1");
-    consumer1.start();
-    VideoConsumer consumer2;
-    consumer2.setName("VC2");
-    consumer2.start();
-    player.addVideoOutput(&consumer1);
-    player.addVideoOutput(&consumer2);
+    QQmlApplicationEngine engine;
+    engine.addImportPath("qrc:/Algorithms");
 
-    player.play();
-    QTimer::singleShot(5000, &app, [&player]()
-    {
-        LOGD() << "Pausing video...";
-        player.pause();
-    });
-    QTimer::singleShot(8000, &app, [&player]()
-    {
-        LOGD() << "Resuming video...";
-        player.play();
-    });
-    QTimer::singleShot(60000, &app, [&player]()
-    {
-        LOGD() << "Stopping video...";
-        player.stop();
-    });
+    engine.loadFromModule("Algorithms", "Main");
+
+    if (engine.rootObjects().isEmpty()) { return -1; }
+
+    QObject *root = engine.rootObjects().first();
+
     return app.exec();
 }

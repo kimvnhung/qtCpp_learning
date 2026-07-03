@@ -3,19 +3,19 @@
 
 #include "isynchronizer.h"
 
-#include "videoconsumer.h"
 #include "playbackclock.h"
 #include "iframequeue.h"
 
+class IFrameConsumer;
 class VideoSynchronizer: public ISynchronizer
 {
 public:
     VideoSynchronizer(PlaybackClock* clock,
                       std::shared_ptr<VideoFrameQueue> videoQueue);
 
-    void registerConsumer(VideoConsumer* consumer);
+    void registerConsumer(IFrameConsumer* consumer);
 private:
-    std::vector<VideoConsumer *> consumers;
+    std::vector<IFrameConsumer *> consumers;
     std::shared_ptr<VideoFrameQueue> videoQueue;
     PlaybackClock *playbackClock{nullptr};
     bool is_running{false};

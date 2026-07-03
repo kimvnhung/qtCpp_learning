@@ -2,24 +2,41 @@
 
 #include "log.h"
 
-void AudioConsumer::renderFrame()
+void AudioConsumer::consume(IFrame *frame)
 {
-    auto frame = this->frame();
-
-    if (frame)
+    if (!frame)
     {
-        auto audioFrame = std::dynamic_pointer_cast<AudioFrame>(frame);
-
-        if (audioFrame)
-        {
-            LOGD() << "AudioConsumer(" << name() << "): Rendering AudioFrame - ID:" << audioFrame->id()
-                   << "PTS:" << audioFrame->getPts()
-                   << "SampleRate:" << audioFrame->sampleRate()
-                   << "Channels:" << audioFrame->channels();
-        }
-        else
-        {
-            LOGW() << "AudioConsumer: Received frame is not an AudioFrame.";
-        }
+        LOGW() << "AudioConsumer: Received null frame.";
+        return;
     }
+
+    currentFrame = dynamic_cast<AudioFrame *>(frame);
+
+    if (!currentFrame)
+    {
+        LOGW() << "AudioConsumer: Frame is not an AudioFrame.";
+        return;
+    }
+
+    emit frameChanged();
+}
+
+int AudioConsumer::id() const
+{
+    return currentFrame ? currentFrame->id() : -1;
+}
+
+qint64 AudioConsumer::pts() const
+{
+    return currentFrame ? currentFrame->getPts() : -1;
+}
+
+int AudioConsumer::sampleRate() const
+{
+    return currentFrame ? currentFrame->sampleRate() : 0;
+}
+
+int AudioConsumer::channels() const
+{
+    return currentFrame ? currentFrame->channels() : 0;
 }

@@ -1,14 +1,30 @@
 #ifndef VIDEOCONSUMER_H
 #define VIDEOCONSUMER_H
 
-#include <QString>
-#include "iconsumer.h"
+#include <QQmlEngine>
+#include "iframeconsumer.h"
 
-class VideoConsumer: public IConsumer
+class VideoConsumer: public IFrameConsumer
 {
-    // IConsumer interface
-protected:
-    void renderFrame() override;
+    Q_OBJECT
+    QML_ELEMENT
+    Q_PROPERTY(int id READ id NOTIFY frameChanged)
+    Q_PROPERTY(qint64 pts READ pts NOTIFY frameChanged)
+    Q_PROPERTY(int width READ width NOTIFY frameChanged)
+    Q_PROPERTY(int height READ height NOTIFY frameChanged)
+    // IFrameConsumer interface
+public:
+    void consume(IFrame *frame) override;
+
+    int id() const;
+    qint64 pts() const;
+    int width() const;
+    int height() const;
+signals:
+    void frameChanged();
+private:
+
+    VideoFrame *currentFrame = nullptr;
 };
 
 #endif // VIDEOCONSUMER_H

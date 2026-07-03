@@ -31,7 +31,7 @@ namespace ffmpeg
         ProduceMode getMode() const;
 
         bool nextFrame(StreamIndex index, std::shared_ptr<IFrame> &frame);
-
+        int getDuration() const;
     private:
         ProduceMode mode;
         PlaybackClock *streamClock{nullptr};

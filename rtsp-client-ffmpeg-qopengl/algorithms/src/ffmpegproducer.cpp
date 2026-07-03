@@ -49,25 +49,28 @@ namespace ffmpeg
 
         bool nextVideoFrame(VideoFrame& frame)
         {
-            if (m_videoFrameCount * m_videoFrameIntervalMs >= m_durationMs)
+            if (videoCount() * m_videoFrameIntervalMs >= m_durationMs)
             {
                 return false; // No more video frames to generate
             }
 
-            frame = VideoFrame(nextId(), m_videoFrameCount++ * m_videoFrameIntervalMs, 1920, 1080);
+            frame = VideoFrame(nextId(), nextVideoCount() * m_videoFrameIntervalMs, 1920, 1080);
             return true;
         }
 
         bool nextAudioFrame(AudioFrame& frame)
         {
-            if (m_audioFrameCount * m_audioFrameIntervalMs >= m_durationMs)
+            if (audioCount() * m_audioFrameIntervalMs >= m_durationMs)
             {
                 return false; // No more audio frames to generate
             }
 
-            frame = AudioFrame(nextId(), m_audioFrameCount++ * m_audioFrameIntervalMs, 48000, 2);
+            frame = AudioFrame(nextId(), nextAudioCount() * m_audioFrameIntervalMs, 48000, 2);
             return true;
         }
+
+        int getVideoFps() const { return m_videoFps; }
+        int getDurationMs() const { return m_durationMs; }
     private:
         int m_videoFps;
         int m_audioFps;
@@ -75,8 +78,33 @@ namespace ffmpeg
         int m_audioFrameIntervalMs;
         int64_t m_durationMs;
 
+        std::mutex m_videoMutex;
         int m_videoFrameCount;
+
+        int videoCount()
+        {
+            std::lock_guard<std::mutex> lock(m_videoMutex);
+            return m_videoFrameCount;
+        }
+        int nextVideoCount()
+        {
+            std::lock_guard<std::mutex> lock(m_videoMutex);
+            return m_videoFrameCount++;
+        }
+
+        std::mutex m_audioMutex;
         int m_audioFrameCount;
+        int audioCount()
+        {
+            std::lock_guard<std::mutex> lock(m_audioMutex);
+            return m_audioFrameCount;
+        }
+        int nextAudioCount()
+        {
+            std::lock_guard<std::mutex> lock(m_audioMutex);
+            return m_audioFrameCount++;
+        }
+
 
         std::mutex m_mutex; // To protect access to m_idCounter
         int m_idCounter;
@@ -127,6 +155,16 @@ namespace ffmpeg
     ProduceMode FFmpegProducer::getMode() const
     {
         return mode;
+    }
+
+    int FFmpegProducer::getDuration() const
+    {
+        if (frameGenerator)
+        {
+            return frameGenerator->getDurationMs();
+        }
+
+        return 0;
     }
 
     bool FFmpegProducer::nextFrame(StreamIndex index, std::shared_ptr<IFrame> &frame)

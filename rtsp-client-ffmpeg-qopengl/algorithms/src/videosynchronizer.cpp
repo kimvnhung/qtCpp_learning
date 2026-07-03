@@ -1,6 +1,7 @@
 #include "videosynchronizer.h"
 
 #include "log.h"
+#include "videoconsumer.h"
 
 #include <QThreadPool>
 
@@ -16,16 +17,18 @@ void VideoSynchronizer::consumeFrame(VideoFrame* frame)
 {
     for (auto consumer : consumers)
     {
-        if (consumer)
+        auto videoConsumer = dynamic_cast<VideoConsumer *>(consumer);
+
+        if (videoConsumer)
         {
-            consumer->setFrame(std::make_shared<VideoFrame>(*frame));
+            videoConsumer->consume(frame);
         }
     }
 }
 
-void VideoSynchronizer::registerConsumer(VideoConsumer* consumer)
+void VideoSynchronizer::registerConsumer(IFrameConsumer * consumer)
 {
-    LOGD() << "Registering VideoConsumer: " << consumer->name();
+    LOGD() << "Registering VideoConsumer: ";
     consumers.push_back(consumer);
 }
 

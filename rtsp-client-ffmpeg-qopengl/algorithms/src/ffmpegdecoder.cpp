@@ -7,6 +7,7 @@ void FFmpegDecoder::start(ffmpeg::FFmpegProducer& producer,
                           std::shared_ptr<VideoFrameQueue> videoQueue,
                           std::shared_ptr<AudioFrameQueue> audioQueue)
 {
+    LOGD() << "Starting FFmpegDecoder with producer: " << &producer;
     this->producer = std::make_shared<ffmpeg::FFmpegProducer>(producer);
     this->videoQueue = videoQueue;
     this->audioQueue = audioQueue;
@@ -23,6 +24,16 @@ void FFmpegDecoder::stop()
     m_running = false;
     threadPool.clear();
     threadPool.waitForDone();
+}
+
+int FFmpegDecoder::duration() const
+{
+    if (producer)
+    {
+        return producer->getDuration();
+    }
+
+    return 0;
 }
 
 void FFmpegDecoder::decode(ffmpeg::StreamIndex index)

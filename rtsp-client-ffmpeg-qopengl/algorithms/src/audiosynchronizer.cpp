@@ -39,7 +39,7 @@ void AudioSynchronizer::processNext()
 
             if (abs(delay) <= 5)
             {
-                audioConsumer->setFrame(frame.value());
+                audioConsumer->consume(frame->get());
                 isConsumed = true;
             }
             else if (delay < 0)

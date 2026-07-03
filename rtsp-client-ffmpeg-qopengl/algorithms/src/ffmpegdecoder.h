@@ -15,6 +15,8 @@ public:
                std::shared_ptr<AudioFrameQueue> audioQueue);
 
     void stop();
+
+    int duration() const;
 private:
     std::shared_ptr<VideoFrameQueue> videoQueue;
     std::shared_ptr<AudioFrameQueue> audioQueue;

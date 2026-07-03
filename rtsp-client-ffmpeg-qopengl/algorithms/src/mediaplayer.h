@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QQmlEngine>
 
 #include <memory>
 #include <vector>
@@ -15,30 +16,47 @@ class VideoSynchronizer;
 class AudioSynchronizer;
 class VideoFrameQueue;
 class AudioFrameQueue;
+class IFrameConsumer;
 class MediaPlayer : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    Q_PROPERTY(bool playing READ isPlaying NOTIFY playingChanged)
+    Q_PROPERTY(int fps READ fps NOTIFY fpsChanged)
+    Q_PROPERTY(AudioConsumer* audioOutput READ getAudioOutput CONSTANT)
+    Q_PROPERTY(int currentTime READ currentTime NOTIFY currentTimeChanged)
+    Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
+
 public:
     MediaPlayer();
     ~MediaPlayer();
 
-    bool open(const char* url);
-    void play();
-    void pause();
-    void stop();
-    void seek(double position);
+    int fps() const;
+    int currentTime() const;
+    int duration() const;
+    AudioConsumer *getAudioOutput() const;
 
-    void addVideoOutput(VideoConsumer* output);
+    Q_INVOKABLE bool open(QString url);
+    Q_INVOKABLE void play();
+    Q_INVOKABLE void pause();
+    Q_INVOKABLE void stop();
+    Q_INVOKABLE void seek(double position);
+
+    Q_INVOKABLE void addVideoOutput(IFrameConsumer* output);
 
     bool isPlaying() const;
-
+signals:
+    void playingChanged();
+    void fpsChanged();
+    void currentTimeChanged();
+    void durationChanged();
 private:
     PlaybackClock *playbackClock;
     std::shared_ptr<VideoFrameQueue> videoBuffer;
     std::shared_ptr<AudioFrameQueue> audioBuffer;
     FFmpegDecoder *decoder;
 
-    std::vector<VideoConsumer *> videoOutputs;
+    std::vector<IFrameConsumer *> videoOutputs;
     std::shared_ptr<AudioConsumer> audioOutput;
 
     VideoSynchronizer *videoSynchronizer;
@@ -46,6 +64,8 @@ private:
 
     QTimer *scanTimer{nullptr};
     void scan();
+private:
+    int m_fps{0};
 };
 
 #endif // MEDIAPLAYER_H

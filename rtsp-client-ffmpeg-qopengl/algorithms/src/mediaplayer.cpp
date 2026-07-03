@@ -22,8 +22,6 @@ MediaPlayer::MediaPlayer()
     , decoder(nullptr)
     , scanTimer(new QTimer(this))
 {
-    audioOutput->setName("AudioConsumer");
-    audioOutput->start();
 
     scanTimer->setInterval(RENDER_LATENCY_MS);
     connect(scanTimer, &QTimer::timeout, this, &MediaPlayer::scan);
@@ -41,15 +39,11 @@ MediaPlayer::~MediaPlayer()
 
     if (audioOutput)
     {
-        audioOutput->stop();
-        audioOutput->wait();
         audioOutput.reset();
     }
-
-
 }
 
-bool MediaPlayer::open(const char* url)
+bool MediaPlayer::open(QString url)
 {
     LOGD();
 
@@ -75,19 +69,42 @@ bool MediaPlayer::open(const char* url)
     }
 
     decoder->start(producer, videoBuffer, audioBuffer);
+    emit durationChanged();
     return true;
+}
+
+int MediaPlayer::fps() const
+{
+    return m_fps;
+}
+
+int MediaPlayer::currentTime() const
+{
+    LOGD() << "Current playback time: " << playbackClock->currentTime();
+    return playbackClock->currentTime();
+}
+
+int MediaPlayer::duration() const
+{
+    return decoder ? decoder->duration() : 0;
+}
+
+AudioConsumer *MediaPlayer::getAudioOutput() const
+{
+    return audioOutput.get();
 }
 
 void MediaPlayer::play()
 {
     LOGD();
 
-    if (scanTimer)
+    if (scanTimer && !scanTimer->isActive())
     {
         scanTimer->start();
     }
 
     playbackClock->play();
+    emit playingChanged();
 }
 \
 void MediaPlayer::pause()
@@ -100,6 +117,7 @@ void MediaPlayer::pause()
     }
 
     playbackClock->pause();
+    emit playingChanged();
 }
 
 void MediaPlayer::stop()
@@ -112,6 +130,21 @@ void MediaPlayer::stop()
     }
 
     playbackClock->reset();
+
+    if (audioOutput)
+    {
+        audioOutput->consume(std::make_shared<AudioFrame>().get());
+    }
+
+    for (auto output : videoOutputs)
+    {
+        if (output)
+        {
+            output->consume(std::make_shared<VideoFrame>().get());
+        }
+    }
+
+    emit playingChanged();
 }
 
 void MediaPlayer::seek(double position)
@@ -120,7 +153,7 @@ void MediaPlayer::seek(double position)
     playbackClock->seek(position);
 }
 
-void MediaPlayer::addVideoOutput(VideoConsumer* output)
+void MediaPlayer::addVideoOutput(IFrameConsumer * output)
 {
     if (output)
     {
@@ -155,4 +188,6 @@ void MediaPlayer::scan()
             audioSynchronizer->processNext();
         });
     }
+
+    emit currentTimeChanged();
 }
