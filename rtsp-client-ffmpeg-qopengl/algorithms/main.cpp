@@ -11,12 +11,14 @@ int main(int argc, char *argv[])
 
     LOGD() << "Qt Console Application";
     MediaPlayer player;
-    player.open("test.mp4");
+    player.open("file_stream");
     LOGD() << "Playing video...";
     VideoConsumer consumer1;
     consumer1.setName("VC1");
+    consumer1.start();
     VideoConsumer consumer2;
     consumer2.setName("VC2");
+    consumer2.start();
     player.addVideoOutput(&consumer1);
     player.addVideoOutput(&consumer2);
 

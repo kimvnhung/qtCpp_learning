@@ -1,6 +1,9 @@
 #ifndef MEDIAPLAYER_H
 #define MEDIAPLAYER_H
 
+#include <QObject>
+#include <QTimer>
+
 #include <memory>
 #include <vector>
 
@@ -12,9 +15,9 @@ class VideoSynchronizer;
 class AudioSynchronizer;
 class VideoFrameQueue;
 class AudioFrameQueue;
-
-class MediaPlayer
+class MediaPlayer : public QObject
 {
+    Q_OBJECT
 public:
     MediaPlayer();
     ~MediaPlayer();
@@ -40,6 +43,9 @@ private:
 
     VideoSynchronizer *videoSynchronizer;
     AudioSynchronizer *audioSynchronizer;
+
+    QTimer *scanTimer{nullptr};
+    void scan();
 };
 
 #endif // MEDIAPLAYER_H

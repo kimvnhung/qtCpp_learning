@@ -11,6 +11,7 @@ public:
         VIDEO,
         AUDIO
     };
+    IFrame();
     IFrame(int id, FrameType type, int64_t pts);
     virtual ~IFrame() = default;
 
@@ -32,7 +33,10 @@ private:
 class VideoFrame : public IFrame
 {
 public:
+    VideoFrame() = default;
+    VideoFrame(const VideoFrame* frame);
     VideoFrame(int id, int64_t pts, int width, int height);
+
     int width() const;
     void setWidth(int newWidth);
 
@@ -47,6 +51,8 @@ private:
 class AudioFrame : public IFrame
 {
 public:
+    AudioFrame() = default;
+    AudioFrame(const AudioFrame* frame);
     AudioFrame(int id, int64_t pts, int sampleRate, int channels);
 
     int sampleRate() const;

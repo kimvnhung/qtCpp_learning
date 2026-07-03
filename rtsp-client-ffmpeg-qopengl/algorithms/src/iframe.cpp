@@ -1,5 +1,10 @@
 #include "iframe.h"
 
+IFrame::IFrame()
+    : m_id(-1), m_type(VIDEO), pts(-1)
+{
+}
+
 IFrame::IFrame(int id, FrameType type, int64_t pts)
     : m_id(id), m_type(type), pts(pts)
 {
@@ -40,6 +45,11 @@ VideoFrame::VideoFrame(int id, int64_t pts, int width, int height)
 {
 }
 
+VideoFrame::VideoFrame(const VideoFrame* frame)
+    : IFrame(frame->id(), IFrame::VIDEO, frame->getPts()), m_width(frame->width()), m_height(frame->height())
+{
+}
+
 int VideoFrame::width() const
 {
     return m_width;
@@ -62,6 +72,11 @@ void VideoFrame::setHeight(int newHeight)
 
 AudioFrame::AudioFrame(int id, int64_t pts, int sampleRate, int channels)
     : IFrame(id, IFrame::AUDIO, pts), m_sampleRate(sampleRate), m_channels(channels)
+{
+}
+
+AudioFrame::AudioFrame(const AudioFrame* frame)
+    : IFrame(frame->id(), IFrame::AUDIO, frame->getPts()), m_sampleRate(frame->sampleRate()), m_channels(frame->channels())
 {
 }
 
