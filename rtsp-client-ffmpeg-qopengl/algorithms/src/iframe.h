@@ -12,11 +12,11 @@ public:
         AUDIO
     };
     IFrame();
-    IFrame(int id, FrameType type, int64_t pts);
+    IFrame(int64_t id, FrameType type, int64_t pts);
     virtual ~IFrame() = default;
 
-    int id() const;
-    void setId(int newId);
+    int64_t id() const;
+    void setId(int64_t newId);
 
     FrameType type() const;
     void setType(FrameType newType);
@@ -25,7 +25,7 @@ public:
     void setPts(int64_t newPts);
 
 private:
-    int m_id{-1};
+    int64_t m_id{-1};
     FrameType m_type{VIDEO};
     int64_t pts = {-1};
 };
@@ -35,7 +35,7 @@ class VideoFrame : public IFrame
 public:
     VideoFrame() = default;
     VideoFrame(const VideoFrame* frame);
-    VideoFrame(int id, int64_t pts, int width, int height);
+    VideoFrame(int64_t id, int64_t pts, int width, int height);
 
     int width() const;
     void setWidth(int newWidth);
@@ -53,7 +53,7 @@ class AudioFrame : public IFrame
 public:
     AudioFrame() = default;
     AudioFrame(const AudioFrame* frame);
-    AudioFrame(int id, int64_t pts, int sampleRate, int channels);
+    AudioFrame(int64_t id, int64_t pts, int sampleRate, int channels);
 
     int sampleRate() const;
     void setSampleRate(int newSampleRate);

@@ -19,6 +19,7 @@ file(GLOB_RECURSE ALGORITHM_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 
 file(GLOB_RECURSE QML_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     *.qml
+    *.js
 )
 
 qt_add_executable(algorithms
@@ -34,7 +35,6 @@ qt_add_qml_module(algorithms
         ${QML_FILES}
     SOURCES
         ${ALGORITHM_SOURCES}
-        QML_FILES src/ControlPlayback.qml
 )
 
 target_link_libraries(algorithms

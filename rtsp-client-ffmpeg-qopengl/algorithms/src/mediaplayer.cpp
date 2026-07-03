@@ -9,8 +9,8 @@
 #include "audiosynchronizer.h"
 
 #define RENDER_LATENCY_MS 100
-#define VIDEO_BUFFER_SIZE 30
-#define AUDIO_BUFFER_SIZE 50
+#define VIDEO_BUFFER_SIZE 1024
+#define AUDIO_BUFFER_SIZE 1024
 
 MediaPlayer::MediaPlayer()
     : audioOutput(std::make_shared<AudioConsumer>())
@@ -80,7 +80,6 @@ int MediaPlayer::fps() const
 
 int MediaPlayer::currentTime() const
 {
-    LOGD() << "Current playback time: " << playbackClock->currentTime();
     return playbackClock->currentTime();
 }
 

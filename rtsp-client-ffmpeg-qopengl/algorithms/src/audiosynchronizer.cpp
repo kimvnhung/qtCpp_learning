@@ -3,16 +3,37 @@
 #include "log.h"
 
 AudioSynchronizer::AudioSynchronizer(std::shared_ptr<AudioConsumer> consumer, PlaybackClock* clock,
-                                     std::shared_ptr<AudioFrameQueue> audioQueue)
+                                     std::shared_ptr<AudioFrameQueue> audioQueue, int64_t latency)
     : audioConsumer(consumer)
     , audioQueue(audioQueue)
     , playbackClock(std::move(clock))
+    , latency(latency)
 {
 
 }
 
+bool AudioSynchronizer::isProcessing()
+{
+    QMutexLocker locker(&mutex);
+    return is_processing;
+}
+
+void AudioSynchronizer::setProcessing(bool newState)
+{
+    QMutexLocker locker(&mutex);
+    is_processing = newState;
+}
+
 void AudioSynchronizer::processNext()
 {
+    if (isProcessing())
+    {
+        LOGD() << "AudioSynchronizer: Already processing. Skipping this cycle.";
+        return;
+    }
+
+    setProcessing(true);
+
     if (!playbackClock)
     {
         LOGW() << "AudioSynchronizer: Playback clock is null.";
@@ -25,49 +46,45 @@ void AudioSynchronizer::processNext()
         return;
     }
 
-    auto frame = audioQueue->peek();
     bool isConsumed = false;
 
-    if (frame)
+    while (!isConsumed)
     {
-        int64_t pts = frame->get()->getPts();
+        auto frame = audioQueue->peek(); // Peek at the next frame without removing it
 
-        if (pts >= 0)
+        if (!frame)
         {
-            int64_t currentPts = playbackClock->currentTime();
-            int64_t delay = pts - currentPts;
+            LOGD() << "AudioSynchronizer: No more audio frames to process.";
+            break;
+        }
 
-            if (abs(delay) <= 5)
-            {
-                audioConsumer->consume(frame->get());
-                isConsumed = true;
-            }
-            else if (delay < 0)
-            {
-                // Skip frames if they are too late
-                LOGW() << "AudioSynchronizer: Frame with PTS: " << pts
-                       << " is behind current PTS: " << currentPts
-                       << ". Skipping frame.";
-                isConsumed = true;
-            }
-            else
-            {
-                LOGD() << "AudioSynchronizer: Frame with PTS: " << pts
-                       << " is ahead of current PTS: " << currentPts
-                       << ". Waiting for synchronization.";
-            }
+        int64_t pts = frame->get()->getPts();
+        int64_t currentTime = playbackClock->currentTime();
+
+        if (pts <= currentTime - latency)
+        {
+            // Skip this frame as it's too late to display it
+            LOGD() << "AudioSynchronizer: Skipping audio frame with PTS " << pts << " as it's too late.";
+            audioQueue->pop(); // Remove the frame from the queue
+            continue;
+        }
+        else if (pts > currentTime + latency)
+        {
+            // The frame is too early to be played, wait for the next cycle
+            LOGD() << "AudioSynchronizer: Audio frame with PTS " << pts << " is too early. Waiting.";
+            break;
+        }
+        else
+        {
+            // The frame is within the acceptable latency range, consume it
+            LOGD() << "AudioSynchronizer: Consuming audio frame with PTS " << pts << ".";
+            audioConsumer->consume(frame->get());
+            audioQueue->pop(); // Remove the frame from the queue after consuming
+            isConsumed = true;
         }
     }
-    else
-    {
-        LOGW() << "AudioSynchronizer: No audio frame available to process.";
-    }
 
-    if (isConsumed)
-    {
-        auto temp = audioQueue->pop();
-        temp.reset();
-    }
+    setProcessing(false);
 }
 
 void AudioSynchronizer::onPause()

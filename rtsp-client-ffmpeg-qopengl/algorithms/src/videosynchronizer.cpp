@@ -6,9 +6,10 @@
 #include <QThreadPool>
 
 VideoSynchronizer::VideoSynchronizer(PlaybackClock* clock,
-                                     std::shared_ptr<VideoFrameQueue> videoQueue)
+                                     std::shared_ptr<VideoFrameQueue> videoQueue, int64_t latency)
     : videoQueue(videoQueue)
     , playbackClock(clock)
+    , latency(latency)
 {
 
 }
@@ -47,8 +48,28 @@ void VideoSynchronizer::onSeek(double seconds)
     LOGD() << "VideoSynchronizer: Seeking to " << seconds << " seconds.";
 }
 
+bool VideoSynchronizer::isProcessing()
+{
+    QMutexLocker locker(&mutex);
+    return is_processing;
+}
+
+void VideoSynchronizer::setProcessing(bool newState)
+{
+    QMutexLocker locker(&mutex);
+    is_processing = newState;
+}
+
 void VideoSynchronizer::processNext()
 {
+    if (isProcessing())
+    {
+        LOGD() << "VideoSynchronizer: Already processing. Skipping this cycle.";
+        return;
+    }
+
+    setProcessing(true);
+
     if (!playbackClock)
     {
         LOGW() << "VideoSynchronizer: Playback clock is null.";
@@ -61,48 +82,43 @@ void VideoSynchronizer::processNext()
         return;
     }
 
-    auto frame = videoQueue->peek();
     bool isConsumed = false;
 
-    if (frame)
+    while (!isConsumed)
     {
-        int64_t pts = frame->get()->getPts();
+        auto frame = videoQueue->peek();
 
-        if (pts >= 0)
+        if (!frame)
         {
-            int64_t currentPts = playbackClock->currentTime();
-            int64_t delay = pts - currentPts;
+            LOGD() << "VideoSynchronizer: No more frames to process.";
+            break;
+        }
 
-            if (abs(delay) <= 5)
-            {
-                consumeFrame(frame->get());
-                isConsumed = true;
-            }
-            else if (delay < 0)
-            {
-                // Skip frames if they are too late
-                LOGW() << "VideoSynchronizer: Skipping frame with PTS: " << pts
-                       << " (Current PTS: " << currentPts << ")";
-                isConsumed = true;
-            }
-            else
-            {
-                LOGD() << "VideoSynchronizer: Frame with PTS: " << pts
-                       << " is ahead of current PTS: " << currentPts
-                       << ". Waiting for synchronization.";
-            }
+        int64_t pts = frame->get()->getPts();
+        int64_t currentTime = playbackClock->currentTime();
+
+        if (pts <= currentTime - latency)
+        {
+            // Skip this frame as it's too late to display it
+            LOGD() << "VideoSynchronizer: Frame PTS " << pts << " is too late. Skipping.";
+            videoQueue->pop();
+            continue;
+        }
+        else if (pts > currentTime + latency)
+        {
+            // Frame is too early, wait for the right time
+            LOGD() << "VideoSynchronizer: Frame PTS " << pts << " is too early. Waiting.";
+            break;
+        }
+        else
+        {
+            // Frame is within the acceptable range, consume it
+            LOGD() << "VideoSynchronizer: Consuming frame with PTS " << pts;
+            consumeFrame(frame->get());
+            videoQueue->pop();
+            isConsumed = true;
         }
     }
-    else
-    {
-        LOGW() << "VideoSynchronizer: No frame available in the queue.";
-        QThread::msleep(10);
-        isConsumed = true; // Indicate that we processed (or attempted to process) a frame, even if none was available
-    }
 
-    if (isConsumed)
-    {
-        auto deletable = videoQueue->pop(); // Remove the frame from the queue after processing or skipping
-        deletable.reset(); // Ensure the frame is deleted to free memory
-    }
+    setProcessing(false);
 }

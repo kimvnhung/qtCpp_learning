@@ -9,9 +9,8 @@
 #include <thread>
 
 // configurable macros
-#define FFMPEGPRODUCER_VIDEO_FPS 25
-#define FFMPEGPRODUCER_VIDEO_FRAME_MS (1000 / FFMPEGPRODUCER_VIDEO_FPS)
-#define FFMPEGPRODUCER_AUDIO_FRAME_MS 23
+#define FFMPEGPRODUCER_VIDEO_FPS 1
+#define FFMPEGPRODUCER_AUDIO_FPS 0.5
 
 namespace ffmpeg
 {
@@ -69,37 +68,37 @@ namespace ffmpeg
             return true;
         }
 
-        int getVideoFps() const { return m_videoFps; }
+        double getVideoFps() const { return m_videoFps; }
         int getDurationMs() const { return m_durationMs; }
     private:
-        int m_videoFps;
-        int m_audioFps;
+        double m_videoFps;
+        double m_audioFps;
         int m_videoFrameIntervalMs;
         int m_audioFrameIntervalMs;
         int64_t m_durationMs;
 
         std::mutex m_videoMutex;
-        int m_videoFrameCount;
+        int64_t m_videoFrameCount;
 
-        int videoCount()
+        int64_t videoCount()
         {
             std::lock_guard<std::mutex> lock(m_videoMutex);
             return m_videoFrameCount;
         }
-        int nextVideoCount()
+        int64_t nextVideoCount()
         {
             std::lock_guard<std::mutex> lock(m_videoMutex);
             return m_videoFrameCount++;
         }
 
         std::mutex m_audioMutex;
-        int m_audioFrameCount;
-        int audioCount()
+        int64_t m_audioFrameCount;
+        int64_t audioCount()
         {
             std::lock_guard<std::mutex> lock(m_audioMutex);
             return m_audioFrameCount;
         }
-        int nextAudioCount()
+        int64_t nextAudioCount()
         {
             std::lock_guard<std::mutex> lock(m_audioMutex);
             return m_audioFrameCount++;
@@ -107,8 +106,8 @@ namespace ffmpeg
 
 
         std::mutex m_mutex; // To protect access to m_idCounter
-        int m_idCounter;
-        int nextId()
+        int64_t m_idCounter;
+        int64_t nextId()
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             return m_idCounter++;
@@ -117,7 +116,7 @@ namespace ffmpeg
 
     FFmpegProducer::FFmpegProducer(ProduceMode mode)
         : mode(mode)
-        , frameGenerator(new FrameGenerator(FFMPEGPRODUCER_VIDEO_FPS, 1000 / FFMPEGPRODUCER_AUDIO_FRAME_MS,
+        , frameGenerator(new FrameGenerator(FFMPEGPRODUCER_VIDEO_FPS, FFMPEGPRODUCER_AUDIO_FPS,
                                             20 * 60000)) // Example: 20 minutes duration
     {
         if (mode == LIVE_STREAM)

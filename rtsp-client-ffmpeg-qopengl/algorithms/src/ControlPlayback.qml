@@ -1,6 +1,7 @@
 import QtQuick 2.15
 
 import Algorithms 1.0
+import "Math.js" as CMath
 
 Item {
     id: root
@@ -18,19 +19,6 @@ Item {
     signal stopRequested
     signal seekRequested(int secondsDelta)
     signal seekTo(int seconds)
-
-    function formatDuration(ms) {
-        const hours = Math.floor(ms / 3600000);
-        ms %= 3600000;
-
-        const minutes = Math.floor(ms / 60000);
-        ms %= 60000;
-
-        const seconds = Math.floor(ms / 1000);
-        const millis = ms % 1000;
-
-        return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0') + ":" + String(millis).padStart(3, '0');
-    }
 
     Row {
         anchors.centerIn: parent
@@ -130,7 +118,7 @@ Item {
 
             Text {
                 id: timeText
-                text: formatDuration(root.currentTime) + " / " + (root.duration > 0 ? formatDuration(root.duration) : "--:--")
+                text: CMath.formatDuration(root.currentTime) + " / " + (root.duration > 0 ? CMath.formatDuration(root.duration) : "--:--")
                 font.pixelSize: 14
                 color: "#333"
             }

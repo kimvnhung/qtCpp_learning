@@ -5,17 +5,17 @@ IFrame::IFrame()
 {
 }
 
-IFrame::IFrame(int id, FrameType type, int64_t pts)
+IFrame::IFrame(int64_t id, FrameType type, int64_t pts)
     : m_id(id), m_type(type), pts(pts)
 {
 }
 
-int IFrame::id() const
+int64_t IFrame::id() const
 {
     return m_id;
 }
 
-void IFrame::setId(int newId)
+void IFrame::setId(int64_t newId)
 {
     m_id = newId;
 }
@@ -40,7 +40,7 @@ void IFrame::setPts(int64_t newPts)
     pts = newPts;
 }
 
-VideoFrame::VideoFrame(int id, int64_t pts, int width, int height)
+VideoFrame::VideoFrame(int64_t id, int64_t pts, int width, int height)
     : IFrame(id, IFrame::VIDEO, pts), m_width(width), m_height(height)
 {
 }
@@ -70,7 +70,7 @@ void VideoFrame::setHeight(int newHeight)
     m_height = newHeight;
 }
 
-AudioFrame::AudioFrame(int id, int64_t pts, int sampleRate, int channels)
+AudioFrame::AudioFrame(int64_t id, int64_t pts, int sampleRate, int channels)
     : IFrame(id, IFrame::AUDIO, pts), m_sampleRate(sampleRate), m_channels(channels)
 {
 }

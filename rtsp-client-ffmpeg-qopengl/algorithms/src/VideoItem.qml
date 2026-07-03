@@ -1,6 +1,7 @@
 import QtQuick 2.15
 
 import Algorithms 1.0
+import "Math.js" as CMath
 
 Rectangle {
     id: videoItem
@@ -26,7 +27,7 @@ Rectangle {
             top: parent.top
             right: parent.right
         }
-        text: "PTS: " + (consumer ? consumer.pts : "No PTS")
+        text: "PTS: " + CMath.formatDuration(consumer ? consumer.pts : 0)
     }
 
     Text {
