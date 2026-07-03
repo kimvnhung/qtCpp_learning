@@ -145,6 +145,7 @@ void MediaPlayer::stop()
     }
 
     emit playingChanged();
+    emit currentTimeChanged();
 }
 
 void MediaPlayer::seek(double position)

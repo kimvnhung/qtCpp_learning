@@ -14,7 +14,7 @@ Item {
     property int stepSeconds: 10   // seek step in seconds
 
     // Signals for external wiring
-    signal playPauseToggled(bool playing)
+    signal playPauseToggled
     signal stopRequested
     signal seekRequested(int secondsDelta)
     signal seekTo(int seconds)
@@ -53,7 +53,6 @@ Item {
                 anchors.fill: parent
                 onClicked: {
                     var delta = -root.stepSeconds;
-                    root.currentTime = Math.max(0, root.currentTime + delta);
                     root.seekRequested(delta);
                 }
             }
@@ -75,8 +74,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    root.playing = !root.playing;
-                    root.playPauseToggled(root.playing);
+                    root.playPauseToggled();
                 }
             }
         }
@@ -97,8 +95,6 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    root.currentTime = 0;
-                    root.playing = false;
                     root.stopRequested();
                 }
             }
@@ -161,7 +157,6 @@ Item {
                         if (root.duration > 0) {
                             var pos = mouse.x / parent.width;
                             var t = Math.round(pos * root.duration);
-                            root.currentTime = t;
                             root.seekTo(t);
                         }
                     }
